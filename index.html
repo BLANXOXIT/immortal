@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immortal | Secure Dashboard</title>
+    <title>Immortal | Cheating Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- Your existing CSS styles (unchanged) --- */
+        /* --- Your existing CSS styles (unchanged from previous version) --- */
         :root {
             --primary: #0fefa0;
             --primary-dim: #0b331a;
@@ -23,23 +23,15 @@
             --danger: #ef4444;
             --sidebar-width: 240px;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-dark);
             color: var(--text);
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
             display: flex;
             overflow-x: hidden;
         }
-
-        /* Sidebar */
         .sidebar {
             width: var(--sidebar-width);
             min-height: 100vh;
@@ -53,12 +45,10 @@
             bottom: 0;
             z-index: 100;
         }
-
         .logo-area {
             padding: 24px 20px;
             border-bottom: 1px solid var(--border);
         }
-
         .logo-title {
             display: flex;
             align-items: center;
@@ -68,7 +58,6 @@
             color: var(--primary);
             letter-spacing: 1px;
         }
-
         .logo-icon {
             width: 28px;
             height: 28px;
@@ -76,12 +65,10 @@
             align-items: center;
             justify-content: center;
         }
-
         .logo-icon svg {
             width: 100%;
             height: 100%;
         }
-
         .nav-list {
             list-style: none;
             padding: 16px 0;
@@ -89,7 +76,6 @@
             display: flex;
             flex-direction: column;
         }
-
         .nav-item {
             display: flex;
             align-items: center;
@@ -102,55 +88,45 @@
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
         }
-
         .nav-item:hover {
             color: var(--text);
             background: rgba(255, 255, 255, 0.02);
         }
-
         .nav-item.active {
             color: var(--text);
             background: linear-gradient(90deg, rgba(15, 239, 160, 0.1) 0%, transparent 100%);
             border-left-color: var(--primary);
         }
-
         .nav-item i {
             width: 20px;
             font-size: 14px;
         }
-
         .nav-item.logout {
             margin-top: auto;
             color: var(--danger);
         }
-
         .nav-item.logout:hover {
             color: var(--danger);
             background: rgba(239, 68, 68, 0.1);
         }
-
-        /* Main Content */
         .main-content {
             flex: 1;
             margin-left: var(--sidebar-width);
             padding: 30px 40px;
             min-height: 100vh;
         }
-
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
         }
-
         .header h1 {
             font-size: 24px;
             font-weight: 800;
             letter-spacing: 2px;
             text-transform: uppercase;
         }
-
         .access-badge {
             font-size: 11px;
             font-weight: 700;
@@ -163,19 +139,14 @@
             align-items: center;
             gap: 8px;
         }
-
         .access-badge i {
             color: var(--primary);
         }
-
-        /* Dashboard Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
         }
-
-        /* Glass Card */
         .glass-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -183,27 +154,22 @@
             padding: 24px;
             backdrop-filter: blur(10px);
         }
-
         .card-header {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 20px;
         }
-
         .card-header i {
             color: var(--primary);
             font-size: 16px;
         }
-
         .card-header h3 {
             font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1.5px;
         }
-
-        /* Status Logs / Terminal */
         .news-area {
             background: #000;
             border: 1px solid var(--border);
@@ -214,23 +180,18 @@
             font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
         }
-
         .log-item {
             margin-bottom: 8px;
             line-height: 1.5;
             color: var(--text-dim);
         }
-
         .log-item .time {
             color: var(--primary);
             margin-right: 8px;
         }
-
-        /* Form Styles */
         .form-group {
             margin-bottom: 20px;
         }
-
         .form-group label {
             display: block;
             font-size: 11px;
@@ -240,7 +201,6 @@
             color: var(--text-dim);
             margin-bottom: 10px;
         }
-
         .form-group input {
             width: 100%;
             padding: 14px 16px;
@@ -253,21 +213,13 @@
             outline: none;
             transition: all 0.2s ease;
         }
-
-        .form-group input::placeholder {
-            color: var(--text-dim);
-        }
-
         .form-group input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
-
-        /* Button */
         .btn-row {
             margin-bottom: 24px;
         }
-
         .btn {
             width: 100%;
             padding: 16px 24px;
@@ -285,18 +237,15 @@
             justify-content: center;
             gap: 10px;
         }
-
         .btn-auth {
             background: var(--primary);
             color: #000;
         }
-
         .btn-auth:hover {
             background: #3dffc0;
             transform: translateY(-1px);
             box-shadow: 0 4px 20px var(--primary-glow);
         }
-
         .btn-auth:disabled {
             background: var(--text-dim);
             color: var(--bg-dark);
@@ -304,27 +253,24 @@
             transform: none;
             box-shadow: none;
         }
-
         .btn-download {
             background: linear-gradient(135deg, var(--primary), #0b7a52);
             color: #000;
             text-decoration: none;
             margin-top: 16px;
+            display: inline-block;
+            text-align: center;
         }
-
         .btn-download:hover {
             background: linear-gradient(135deg, #3dffc0, #0f9a68);
             transform: translateY(-1px);
-            box-shadow: 0 4px 20px var(--primary-glow);
         }
-
         .status-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-top: 20px;
         }
-
         .stat-card {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border);
@@ -334,7 +280,6 @@
             flex-direction: column;
             gap: 6px;
         }
-
         .stat-card .lbl {
             font-size: 10px;
             font-weight: 600;
@@ -342,17 +287,14 @@
             letter-spacing: 0.5px;
             color: var(--text-dim);
         }
-
         .stat-card .val {
             font-size: 13px;
             font-weight: 700;
             color: var(--primary);
         }
-
         .stat-card .val.white {
             color: #fff;
         }
-
         .license-info {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border);
@@ -361,11 +303,9 @@
             margin-top: 16px;
             display: none;
         }
-
         .license-info.active {
             display: block;
         }
-
         .license-info h4 {
             color: var(--primary);
             font-size: 12px;
@@ -374,32 +314,22 @@
             letter-spacing: 1px;
             margin-bottom: 12px;
         }
-
         .license-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
             margin-bottom: 16px;
         }
-
-        .license-detail {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
         .license-detail .label {
             font-size: 10px;
             color: var(--text-dim);
             text-transform: uppercase;
         }
-
         .license-detail .value {
             font-size: 12px;
             color: var(--text);
             font-weight: 500;
         }
-
         .hwid-status {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid var(--danger);
@@ -408,11 +338,9 @@
             margin-top: 16px;
             display: none;
         }
-
         .hwid-status.active {
             display: block;
         }
-
         .hwid-status h4 {
             color: var(--danger);
             font-size: 12px;
@@ -421,41 +349,23 @@
             letter-spacing: 1px;
             margin-bottom: 8px;
         }
-
         ::-webkit-scrollbar {
             width: 6px;
         }
-
         ::-webkit-scrollbar-track {
             background: transparent;
         }
-
         ::-webkit-scrollbar-thumb {
             background: var(--border-light);
             border-radius: 3px;
         }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-dim);
-        }
-
         @media (max-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
+            .dashboard-grid { grid-template-columns: 1fr; }
         }
-
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .main-content {
-                margin-left: 0;
-                padding: 20px;
-            }
-            .header h1 {
-                font-size: 18px;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; padding: 20px; }
+            .header h1 { font-size: 18px; }
         }
     </style>
 </head>
@@ -474,111 +384,55 @@
             </div>
         </div>
         <ul class="nav-list">
-            <li class="nav-item active">
-                <i class="fas fa-terminal"></i>
-                Dashboard
-            </li>
-            <li class="nav-item">
-                <i class="fas fa-sliders-h"></i>
-                Settings
-            </li>
-            <li class="nav-item">
-                <i class="fas fa-sync-alt"></i>
-                HWID Reset
-            </li>
-            <li class="nav-item logout">
-                <i class="fas fa-power-off"></i>
-                Logout
-            </li>
+            <li class="nav-item active"><i class="fas fa-terminal"></i> Dashboard</li>
+            <li class="nav-item"><i class="fas fa-sliders-h"></i> Settings</li>
+            <li class="nav-item"><i class="fas fa-sync-alt"></i> HWID Reset</li>
+            <li class="nav-item logout"><i class="fas fa-power-off"></i> Logout</li>
         </ul>
     </div>
 
     <div class="main-content">
         <div class="header">
             <h1>Terminal Dashboard</h1>
-            <div class="access-badge">
-                <i class="fas fa-user-shield"></i>
-                ACCESS LEVEL: <span id="accessLevel">0</span>
-            </div>
+            <div class="access-badge"><i class="fas fa-user-shield"></i> ACCESS LEVEL: <span id="accessLevel">0</span></div>
         </div>
 
         <div class="dashboard-grid">
             <div class="glass-card">
-                <div class="card-header">
-                    <i class="fas fa-list-ul"></i>
-                    <h3>Status Logs</h3>
-                </div>
+                <div class="card-header"><i class="fas fa-list-ul"></i><h3>Status Logs</h3></div>
                 <div class="news-area" id="logScreen">
                     <div class="log-item"><span class="time">[System]</span> Panel ready. Waiting for application...</div>
                 </div>
             </div>
 
             <div class="glass-card">
-                <div class="card-header">
-                    <i class="fas fa-fingerprint"></i>
-                    <h3>Identity Verification</h3>
-                </div>
-
+                <div class="card-header"><i class="fas fa-fingerprint"></i><h3>Identity Verification</h3></div>
                 <div class="form-group">
                     <label>License Key</label>
-                    <input type="text" id="licenseKey" placeholder="BOOSTER-XXXXXX">
+                    <input type="text" id="licenseKey" placeholder="EXAMPLE-XXXXXX">
                 </div>
-
                 <div class="btn-row">
-                    <button class="btn btn-auth" id="verifyBtn" onclick="verifyLicense()">
-                        <i class="fas fa-shield-alt"></i>
-                        Verify License
-                    </button>
+                    <button class="btn btn-auth" id="verifyBtn" onclick="verifyLicense()"><i class="fas fa-shield-alt"></i> Verify License</button>
                 </div>
-
                 <div class="license-info" id="licenseInfo">
                     <h4>License Information</h4>
                     <div class="license-details">
-                        <div class="license-detail">
-                            <span class="label">Type</span>
-                            <span class="value" id="licenseType">-</span>
-                        </div>
-                        <div class="license-detail">
-                            <span class="label">Access Level</span>
-                            <span class="value" id="licenseAccessLevel">-</span>
-                        </div>
-                        <div class="license-detail">
-                            <span class="label">Status</span>
-                            <span class="value" id="licenseStatus">-</span>
-                        </div>
-                        <div class="license-detail">
-                            <span class="label">Created</span>
-                            <span class="value" id="licenseCreated">-</span>
-                        </div>
+                        <div class="license-detail"><span class="label">Type</span><span class="value" id="licenseType">-</span></div>
+                        <div class="license-detail"><span class="label">Access Level</span><span class="value" id="licenseAccessLevel">-</span></div>
+                        <div class="license-detail"><span class="label">Status</span><span class="value" id="licenseStatus">-</span></div>
+                        <div class="license-detail"><span class="label">Created</span><span class="value" id="licenseCreated">-</span></div>
                     </div>
-                    <a href="#" id="downloadBtn" class="btn btn-download" target="_blank">
-                        <i class="fas fa-download"></i>
-                        Download Application
-                    </a>
+                    <a href="#" id="downloadBtn" class="btn btn-download" target="_blank"><i class="fas fa-download"></i> Download Application</a>
                 </div>
-
                 <div class="hwid-status" id="hwidStatus">
                     <h4>⚠️ HWID Locked</h4>
                     <p>This license is locked to another machine. Please request HWID reset to continue.</p>
                 </div>
-
                 <div class="status-grid">
-                    <div class="stat-card">
-                        <span class="lbl">Server Status</span>
-                        <span class="val">ONLINE</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="lbl">Connection</span>
-                        <span class="val" id="linkStatus">LISTENING</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="lbl">Client Version</span>
-                        <span class="val white">3.1.2</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="lbl">Security Status</span>
-                        <span class="val">UNDETECTED</span>
-                    </div>
+                    <div class="stat-card"><span class="lbl">Server Status</span><span class="val">ONLINE</span></div>
+                    <div class="stat-card"><span class="lbl">Connection</span><span class="val" id="linkStatus">LISTENING</span></div>
+                    <div class="stat-card"><span class="lbl">Client Version</span><span class="val white">3.1.2</span></div>
+                    <div class="stat-card"><span class="lbl">Security Status</span><span class="val">UNDETECTED</span></div>
                 </div>
             </div>
         </div>
@@ -588,64 +442,29 @@
         // ============================================================
         // CONFIGURATION
         // ============================================================
-        // API Endpoint for license validation
         const API_URL = 'https://immortal1234.pythonanywhere.com/validate';
-        
-        // Local license type mapping (key prefix -> license details)
+        // License types mapped by key prefix
         const LICENSE_TYPES = {
-            'BOOSTER': {
-                name: 'BOOSTER',
-                access_level: 3,
-                download_link: 'https://files.catbox.moe/n8gudh.rar',
-                description: 'Premium access with all features'
-            },
-            'CUSTOMER': {
-                name: 'CUSTOMER',
-                access_level: 2,
-                download_link: 'https://example.com/customer-download',
-                description: 'Standard customer access'
-            },
-            'ADMIN': {
-                name: 'ADMIN',
-                access_level: 1,
-                download_link: 'https://example.com/admin-download',
-                description: 'Administrator access'
-            },
-            'PREMIUM': {
-                name: 'PREMIUM',
-                access_level: 4,
-                download_link: 'https://example.com/premium-download',
-                description: 'Premium unlimited access'
-            },
-            'IMMORTAL': {
-                name: 'IMMORTAL',
-                access_level: 5,
-                download_link: 'https://files.catbox.moe/n8gudh.rar',
-                description: 'Elite access'
-            }
+            'BOOSTER':   { name: 'BOOSTER',   level: 3, link: 'https://files.catbox.moe/n8gudh.rar' },
+            'CUSTOMER':  { name: 'CUSTOMER',  level: 2, link: 'https://example.com/customer-download' },
+            'ADMIN':     { name: 'ADMIN',     level: 1, link: 'https://example.com/admin-download' },
+            'PREMIUM':   { name: 'PREMIUM',   level: 4, link: 'https://example.com/premium-download' },
+            'IMMORTAL':  { name: 'IMMORTAL',  level: 5, link: 'https://files.catbox.moe/n8gudh.rar' }
         };
+        const DEFAULT_LICENSE = { name: 'STANDARD', level: 2, link: '#' };
 
-        // DOM Elements
+        // DOM elements
         const logScreen = document.getElementById('logScreen');
         const verifyBtn = document.getElementById('verifyBtn');
         const licenseInfo = document.getElementById('licenseInfo');
         const hwidStatus = document.getElementById('hwidStatus');
-        const resetBtn = document.getElementById('resetBtn'); // Note: reset button not fully implemented in UI
         const linkStatus = document.getElementById('linkStatus');
         const accessLevelSpan = document.getElementById('accessLevel');
 
         let currentLicense = null;
         let currentUserHWID = generateHWID();
 
-        // ============================================================
-        // HELPER FUNCTIONS
-        // ============================================================
-
-        /**
-         * Adds a log entry to the terminal window.
-         * @param {string} type - The log type (e.g., System, Auth, Error).
-         * @param {string} message - The log message.
-         */
+        // Helper: add log entry
         function addLog(type, message) {
             const logItem = document.createElement('div');
             logItem.className = 'log-item';
@@ -654,187 +473,105 @@
             logScreen.scrollTop = logScreen.scrollHeight;
         }
 
-        /**
-         * Generates or retrieves a persistent HWID for the browser session.
-         * @returns {string} The user's HWID.
-         */
+        // Helper: generate or retrieve HWID
         function generateHWID() {
-            if (!localStorage.getItem('userHWID')) {
-                const hwid = 'HWID-' + Math.random().toString(36).substr(2, 9).toUpperCase() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            let hwid = localStorage.getItem('userHWID');
+            if (!hwid) {
+                hwid = 'HWID-' + Math.random().toString(36).substr(2, 9).toUpperCase() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
                 localStorage.setItem('userHWID', hwid);
-                return hwid;
             }
-            return localStorage.getItem('userHWID');
+            return hwid;
         }
 
-        /**
-         * Extracts the license type prefix from a license key.
-         * @param {string} licenseKey - The full license key.
-         * @returns {string|null} The prefix (e.g., 'BOOSTER') or null if not found.
-         */
-        function getLicensePrefix(licenseKey) {
-            const parts = licenseKey.split('-');
-            if (parts.length > 0) {
-                return parts[0].toUpperCase();
-            }
-            return null;
+        // Get license type from key prefix
+        function getLicenseTypeFromKey(licenseKey) {
+            const prefix = licenseKey.split('-')[0]?.toUpperCase();
+            return LICENSE_TYPES[prefix] || DEFAULT_LICENSE;
         }
 
-        // ============================================================
-        // CORE FUNCTIONALITY: LICENSE VERIFICATION
-        // ============================================================
+        // Update UI with license info
+        function updateUI(licenseInfo) {
+            document.getElementById('licenseType').textContent = licenseInfo.name;
+            document.getElementById('licenseAccessLevel').textContent = licenseInfo.level;
+            document.getElementById('licenseStatus').textContent = 'Active';
+            document.getElementById('licenseCreated').textContent = new Date().toLocaleDateString();
+            accessLevelSpan.textContent = licenseInfo.level;
+            document.getElementById('downloadBtn').href = licenseInfo.link;
+            document.querySelector('.header h1').textContent = `${licenseInfo.name} Dashboard`;
+            licenseInfo.classList.add('active');
+            hwidStatus.classList.remove('active');
+        }
 
-        /**
-         * Verifies the license key with the backend API and updates the UI.
-         */
+        // Main verification function
         async function verifyLicense() {
             const licenseKey = document.getElementById('licenseKey').value.trim();
-            const hwid = currentUserHWID;
-
             if (!licenseKey) {
                 addLog('Error', 'Please enter a license key.');
                 return;
             }
 
-            // Update UI to loading state
             verifyBtn.disabled = true;
             verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
             linkStatus.textContent = 'CONNECTING';
             addLog('System', 'Contacting authentication server...');
 
             try {
-                // Build the request URL
-                const url = `${API_URL}?key=${encodeURIComponent(licenseKey)}&hwid=${encodeURIComponent(hwid)}&auto_update=true`;
-                addLog('Auth', `Requesting validation for key: ${licenseKey.substring(0, 12)}...`);
-
+                const url = `${API_URL}?key=${encodeURIComponent(licenseKey)}&hwid=${encodeURIComponent(currentUserHWID)}&auto_update=true`;
+                addLog('Auth', `Requesting validation for ${licenseKey.substring(0,12)}...`);
                 const response = await fetch(url);
                 const data = await response.json();
-
                 addLog('Auth', `Server response: ${JSON.stringify(data)}`);
 
-                // --- Handle API Response (including 'first_use' flag) ---
                 if (data.valid === true) {
-                    // Determine if the license was just activated
-                    let statusMessage = 'License verified successfully!';
-                    if (data.first_use === true) {
-                        statusMessage = 'License activated and locked to this PC!';
-                    }
-
-                    // Get license type from the key prefix
-                    const prefix = getLicensePrefix(licenseKey);
-                    const licenseTypeInfo = LICENSE_TYPES[prefix];
-
-                    if (!licenseTypeInfo) {
-                        // If the prefix is unknown, use a generic type
-                        addLog('Warning', `Unknown license prefix (${prefix}). Using default license.`);
-                        currentLicense = {
-                            license_key: licenseKey,
-                            license_type: 'CUSTOMER',
-                            access_level: 2,
-                            status: 'Active',
-                            created_at: new Date().toISOString()
-                        };
-                    } else {
-                        currentLicense = {
-                            license_key: licenseKey,
-                            license_type: licenseTypeInfo.name,
-                            access_level: licenseTypeInfo.access_level,
-                            status: 'Active',
-                            created_at: new Date().toISOString()
-                        };
-                    }
-
-                    // Update UI with license information
-                    updateLicenseUI(currentLicense);
+                    // License is valid – determine type from key prefix
+                    const licenseType = getLicenseTypeFromKey(licenseKey);
+                    currentLicense = {
+                        key: licenseKey,
+                        name: licenseType.name,
+                        level: licenseType.level
+                    };
+                    updateUI(licenseType);
                     linkStatus.textContent = 'CONNECTED';
-                    addLog('Success', statusMessage);
-                    addLog('Info', `Access Level: ${currentLicense.access_level}`);
-                    addLog('Info', `HWID: ${hwid}`);
-                    addLog('Security', 'License is now locked to this HWID.');
-
-                    // Show the license info panel and hide any HWID lock panel
-                    licenseInfo.classList.add('active');
-                    hwidStatus.classList.remove('active');
-
+                    const msg = data.first_use ? 'License activated and locked to this PC!' : 'License verified successfully!';
+                    addLog('Success', msg);
+                    addLog('Info', `Access Level: ${licenseType.level}`);
+                    addLog('Info', `HWID: ${currentUserHWID}`);
                 } else if (data.hwid_locked === true || (data.message && data.message.includes('HWID'))) {
-                    // License exists but is locked to a different HWID
                     addLog('Error', 'License is HWID locked to another machine!');
                     linkStatus.textContent = 'HWID LOCKED';
                     licenseInfo.classList.remove('active');
                     hwidStatus.classList.add('active');
-                    currentLicense = { license_key: licenseKey };
-                    addLog('Info', 'Please request an HWID reset if this is your first time using this license.');
-
                 } else {
-                    // General error from the API
-                    const errorMsg = data.message || 'License verification failed';
-                    addLog('Error', errorMsg);
+                    addLog('Error', data.message || 'License verification failed');
                     linkStatus.textContent = 'LISTENING';
                     licenseInfo.classList.remove('active');
                     hwidStatus.classList.remove('active');
                 }
-
-            } catch (error) {
-                addLog('Error', `Verification failed: ${error.message}`);
+            } catch (err) {
+                addLog('Error', `Verification failed: ${err.message}`);
                 linkStatus.textContent = 'ERROR';
-                console.error('Fetch error:', error);
+                console.error(err);
             } finally {
-                // Reset button state
                 verifyBtn.disabled = false;
                 verifyBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify License';
             }
         }
 
-        /**
-         * Updates the dashboard UI with the validated license information.
-         * @param {object} license - The license object containing details.
-         */
-        function updateLicenseUI(license) {
-            document.getElementById('licenseType').textContent = license.license_type;
-            document.getElementById('licenseAccessLevel').textContent = license.access_level;
-            document.getElementById('licenseStatus').textContent = license.status;
-            document.getElementById('licenseCreated').textContent = license.created_at ? new Date(license.created_at).toLocaleDateString() : 'Just now';
-            accessLevelSpan.textContent = license.access_level;
-
-            const downloadBtn = document.getElementById('downloadBtn');
-            const prefix = getLicensePrefix(license.license_key);
-            const licenseTypeInfo = LICENSE_TYPES[prefix];
-            if (licenseTypeInfo && licenseTypeInfo.download_link) {
-                downloadBtn.href = licenseTypeInfo.download_link;
-            } else {
-                downloadBtn.href = '#';
-            }
-
-            // Update header title
-            document.querySelector('.header h1').textContent = `${license.license_type} Dashboard`;
-        }
-
-        // ============================================================
-        // UI EVENT HANDLERS
-        // ============================================================
-
-        /**
-         * Placeholder for HWID reset request. In a real implementation,
-         * this would call an admin endpoint or notify support.
-         */
-        window.requestHWIDReset = async function() {
-            if (!currentLicense || !currentLicense.license_key) {
+        // HWID reset placeholder
+        window.requestHWIDReset = function() {
+            if (!currentLicense || !currentLicense.key) {
                 addLog('Error', 'No license to reset HWID for');
                 return;
             }
-            addLog('System', 'HWID reset requested.');
-            addLog('Info', 'Please contact support to reset HWID.');
-            // Optional: Notify backend admin
+            addLog('System', 'HWID reset requested. Please contact support.');
         };
 
-        // Enter key support for license input field
-        document.getElementById('licenseKey').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                verifyLicense();
-            }
+        // Enter key support
+        document.getElementById('licenseKey').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyLicense();
         });
 
-        // Initial log messages (simulate startup)
+        // Startup logs
         setTimeout(() => addLog('System', 'Security protocols initialized.'), 1000);
         setTimeout(() => addLog('Network', 'WebSocket connection established.'), 2000);
         setTimeout(() => addLog('System', 'Awaiting user authentication...'), 3000);
