@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* --- Your existing CSS styles (unchanged) --- */
         :root {
             --primary: #0fefa0;
             --primary-dim: #0b331a;
@@ -584,27 +585,67 @@
     </div>
 
     <script>
-        // PythonAnywhere API endpoint
+        // ============================================================
+        // CONFIGURATION
+        // ============================================================
+        // API Endpoint for license validation
         const API_URL = 'https://immortal1234.pythonanywhere.com/validate';
-
+        
+        // Local license type mapping (key prefix -> license details)
         const LICENSE_TYPES = {
-            'BOOSTER': { 'name': 'BOOSTER', 'access_level': 3, 'download_link': 'https://files.catbox.moe/n8gudh.rar' },
-            'CUSTOMER': { 'name': 'CUSTOMER', 'access_level': 2, 'download_link': 'https://example.com/customer-download' },
-            'ADMIN': { 'name': 'ADMIN', 'access_level': 1, 'download_link': 'https://example.com/admin-download' },
-            'PREMIUM': { 'name': 'PREMIUM', 'access_level': 4, 'download_link': 'https://example.com/premium-download' }
+            'BOOSTER': {
+                name: 'BOOSTER',
+                access_level: 3,
+                download_link: 'https://files.catbox.moe/n8gudh.rar',
+                description: 'Premium access with all features'
+            },
+            'CUSTOMER': {
+                name: 'CUSTOMER',
+                access_level: 2,
+                download_link: 'https://example.com/customer-download',
+                description: 'Standard customer access'
+            },
+            'ADMIN': {
+                name: 'ADMIN',
+                access_level: 1,
+                download_link: 'https://example.com/admin-download',
+                description: 'Administrator access'
+            },
+            'PREMIUM': {
+                name: 'PREMIUM',
+                access_level: 4,
+                download_link: 'https://example.com/premium-download',
+                description: 'Premium unlimited access'
+            },
+            'IMMORTAL': {
+                name: 'IMMORTAL',
+                access_level: 5,
+                download_link: 'https://files.catbox.moe/n8gudh.rar',
+                description: 'Elite access'
+            }
         };
 
+        // DOM Elements
         const logScreen = document.getElementById('logScreen');
         const verifyBtn = document.getElementById('verifyBtn');
         const licenseInfo = document.getElementById('licenseInfo');
         const hwidStatus = document.getElementById('hwidStatus');
-        const resetBtn = document.getElementById('resetBtn');
+        const resetBtn = document.getElementById('resetBtn'); // Note: reset button not fully implemented in UI
         const linkStatus = document.getElementById('linkStatus');
         const accessLevelSpan = document.getElementById('accessLevel');
 
         let currentLicense = null;
         let currentUserHWID = generateHWID();
 
+        // ============================================================
+        // HELPER FUNCTIONS
+        // ============================================================
+
+        /**
+         * Adds a log entry to the terminal window.
+         * @param {string} type - The log type (e.g., System, Auth, Error).
+         * @param {string} message - The log message.
+         */
         function addLog(type, message) {
             const logItem = document.createElement('div');
             logItem.className = 'log-item';
@@ -613,6 +654,10 @@
             logScreen.scrollTop = logScreen.scrollHeight;
         }
 
+        /**
+         * Generates or retrieves a persistent HWID for the browser session.
+         * @returns {string} The user's HWID.
+         */
         function generateHWID() {
             if (!localStorage.getItem('userHWID')) {
                 const hwid = 'HWID-' + Math.random().toString(36).substr(2, 9).toUpperCase() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -622,113 +667,174 @@
             return localStorage.getItem('userHWID');
         }
 
-        function parseLicenseType(licenseKey) {
+        /**
+         * Extracts the license type prefix from a license key.
+         * @param {string} licenseKey - The full license key.
+         * @returns {string|null} The prefix (e.g., 'BOOSTER') or null if not found.
+         */
+        function getLicensePrefix(licenseKey) {
             const parts = licenseKey.split('-');
             if (parts.length > 0) {
-                const prefix = parts[0].toUpperCase();
-                if (LICENSE_TYPES[prefix]) return LICENSE_TYPES[prefix];
+                return parts[0].toUpperCase();
             }
             return null;
         }
 
+        // ============================================================
+        // CORE FUNCTIONALITY: LICENSE VERIFICATION
+        // ============================================================
+
+        /**
+         * Verifies the license key with the backend API and updates the UI.
+         */
         async function verifyLicense() {
             const licenseKey = document.getElementById('licenseKey').value.trim();
+            const hwid = currentUserHWID;
 
-            if (!licenseKey || licenseKey === 'EXAMPLE-XXXX-XXXX-XXXX') {
-                addLog('Error', 'Please enter a valid license key.');
+            if (!licenseKey) {
+                addLog('Error', 'Please enter a license key.');
                 return;
             }
 
+            // Update UI to loading state
             verifyBtn.disabled = true;
             verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
             linkStatus.textContent = 'CONNECTING';
             addLog('System', 'Contacting authentication server...');
 
             try {
-                // Build URL with parameters
-                const url = `${API_URL}?key=${encodeURIComponent(licenseKey)}&hwid=${encodeURIComponent(currentUserHWID)}`;
+                // Build the request URL
+                const url = `${API_URL}?key=${encodeURIComponent(licenseKey)}&hwid=${encodeURIComponent(hwid)}&auto_update=true`;
+                addLog('Auth', `Requesting validation for key: ${licenseKey.substring(0, 12)}...`);
+
                 const response = await fetch(url);
                 const data = await response.json();
 
                 addLog('Auth', `Server response: ${JSON.stringify(data)}`);
 
+                // --- Handle API Response (including 'first_use' flag) ---
                 if (data.valid === true) {
-                    // License is valid
-                    const licenseType = parseLicenseType(licenseKey);
-                    if (!licenseType) {
-                        addLog('Error', 'Unknown license type format');
-                        linkStatus.textContent = 'ERROR';
-                        return;
+                    // Determine if the license was just activated
+                    let statusMessage = 'License verified successfully!';
+                    if (data.first_use === true) {
+                        statusMessage = 'License activated and locked to this PC!';
                     }
 
-                    currentLicense = {
-                        license_key: licenseKey,
-                        license_type: licenseType.name,
-                        access_level: licenseType.access_level,
-                        status: 'active',
-                        created_at: new Date().toISOString()
-                    };
+                    // Get license type from the key prefix
+                    const prefix = getLicensePrefix(licenseKey);
+                    const licenseTypeInfo = LICENSE_TYPES[prefix];
 
+                    if (!licenseTypeInfo) {
+                        // If the prefix is unknown, use a generic type
+                        addLog('Warning', `Unknown license prefix (${prefix}). Using default license.`);
+                        currentLicense = {
+                            license_key: licenseKey,
+                            license_type: 'CUSTOMER',
+                            access_level: 2,
+                            status: 'Active',
+                            created_at: new Date().toISOString()
+                        };
+                    } else {
+                        currentLicense = {
+                            license_key: licenseKey,
+                            license_type: licenseTypeInfo.name,
+                            access_level: licenseTypeInfo.access_level,
+                            status: 'Active',
+                            created_at: new Date().toISOString()
+                        };
+                    }
+
+                    // Update UI with license information
+                    updateLicenseUI(currentLicense);
                     linkStatus.textContent = 'CONNECTED';
-                    accessLevelSpan.textContent = licenseType.access_level;
+                    addLog('Success', statusMessage);
+                    addLog('Info', `Access Level: ${currentLicense.access_level}`);
+                    addLog('Info', `HWID: ${hwid}`);
+                    addLog('Security', 'License is now locked to this HWID.');
 
-                    document.getElementById('licenseType').textContent = licenseType.name;
-                    document.getElementById('licenseAccessLevel').textContent = licenseType.access_level;
-                    document.getElementById('licenseStatus').textContent = 'Active';
-                    document.getElementById('licenseCreated').textContent = new Date().toLocaleDateString();
-
-                    const downloadBtn = document.getElementById('downloadBtn');
-                    downloadBtn.href = licenseType.download_link;
-
+                    // Show the license info panel and hide any HWID lock panel
                     licenseInfo.classList.add('active');
                     hwidStatus.classList.remove('active');
 
-                    document.querySelector('.header h1').textContent = `${licenseType.name} Dashboard`;
-
-                    addLog('Success', 'License verified successfully!');
-                    addLog('Info', `Access Level: ${licenseType.access_level}`);
-                    addLog('Info', `HWID: ${currentUserHWID}`);
-
                 } else if (data.hwid_locked === true || (data.message && data.message.includes('HWID'))) {
+                    // License exists but is locked to a different HWID
                     addLog('Error', 'License is HWID locked to another machine!');
                     linkStatus.textContent = 'HWID LOCKED';
                     licenseInfo.classList.remove('active');
                     hwidStatus.classList.add('active');
                     currentLicense = { license_key: licenseKey };
+                    addLog('Info', 'Please request an HWID reset if this is your first time using this license.');
+
                 } else {
-                    addLog('Error', data.message || 'License verification failed');
+                    // General error from the API
+                    const errorMsg = data.message || 'License verification failed';
+                    addLog('Error', errorMsg);
                     linkStatus.textContent = 'LISTENING';
                     licenseInfo.classList.remove('active');
                     hwidStatus.classList.remove('active');
                 }
+
             } catch (error) {
                 addLog('Error', `Verification failed: ${error.message}`);
                 linkStatus.textContent = 'ERROR';
                 console.error('Fetch error:', error);
             } finally {
+                // Reset button state
                 verifyBtn.disabled = false;
                 verifyBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify License';
             }
         }
 
-        // Reset button handler (optional - would call PythonAnywhere reset endpoint)
+        /**
+         * Updates the dashboard UI with the validated license information.
+         * @param {object} license - The license object containing details.
+         */
+        function updateLicenseUI(license) {
+            document.getElementById('licenseType').textContent = license.license_type;
+            document.getElementById('licenseAccessLevel').textContent = license.access_level;
+            document.getElementById('licenseStatus').textContent = license.status;
+            document.getElementById('licenseCreated').textContent = license.created_at ? new Date(license.created_at).toLocaleDateString() : 'Just now';
+            accessLevelSpan.textContent = license.access_level;
+
+            const downloadBtn = document.getElementById('downloadBtn');
+            const prefix = getLicensePrefix(license.license_key);
+            const licenseTypeInfo = LICENSE_TYPES[prefix];
+            if (licenseTypeInfo && licenseTypeInfo.download_link) {
+                downloadBtn.href = licenseTypeInfo.download_link;
+            } else {
+                downloadBtn.href = '#';
+            }
+
+            // Update header title
+            document.querySelector('.header h1').textContent = `${license.license_type} Dashboard`;
+        }
+
+        // ============================================================
+        // UI EVENT HANDLERS
+        // ============================================================
+
+        /**
+         * Placeholder for HWID reset request. In a real implementation,
+         * this would call an admin endpoint or notify support.
+         */
         window.requestHWIDReset = async function() {
             if (!currentLicense || !currentLicense.license_key) {
                 addLog('Error', 'No license to reset HWID for');
                 return;
             }
-            addLog('System', 'Requesting HWID reset...');
+            addLog('System', 'HWID reset requested.');
             addLog('Info', 'Please contact support to reset HWID.');
+            // Optional: Notify backend admin
         };
 
-        // Enter key support
+        // Enter key support for license input field
         document.getElementById('licenseKey').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 verifyLicense();
             }
         });
 
-        // Initial log messages
+        // Initial log messages (simulate startup)
         setTimeout(() => addLog('System', 'Security protocols initialized.'), 1000);
         setTimeout(() => addLog('Network', 'WebSocket connection established.'), 2000);
         setTimeout(() => addLog('System', 'Awaiting user authentication...'), 3000);
