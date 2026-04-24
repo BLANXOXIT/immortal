@@ -3,309 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immortal | Secure Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Immortal License System</title>
     <style>
-        /* --- Your existing CSS (unchanged, works perfectly) --- */
-        :root {
-            --primary: #0fefa0;
-            --primary-dim: #0b331a;
-            --primary-glow: rgba(15, 239, 160, 0.3);
-            --bg-dark: #0b0c0b;
-            --bg-card: rgba(15, 17, 15, 0.8);
-            --border: #1a1d1a;
-            --border-light: #2a2d2a;
-            --text: #e4e3e3;
-            --text-dim: #828484;
-            --danger: #ef4444;
-            --sidebar-width: 240px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: var(--bg-dark);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
+            background: #0b0c0b;
+            font-family: 'Courier New', monospace;
             display: flex;
-            overflow-x: hidden;
-        }
-        .sidebar {
-            width: var(--sidebar-width);
-            min-height: 100vh;
-            background: linear-gradient(180deg, rgba(15, 239, 160, 0.03) 0%, transparent 30%);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            z-index: 100;
-        }
-        .logo-area {
-            padding: 24px 20px;
-            border-bottom: 1px solid var(--border);
-        }
-        .logo-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: 1px;
-        }
-        .nav-list {
-            list-style: none;
-            padding: 16px 0;
-            flex: 1;
-        }
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 20px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-left: 3px solid transparent;
-        }
-        .nav-item:hover {
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.02);
-        }
-        .nav-item.active {
-            color: var(--text);
-            background: linear-gradient(90deg, rgba(15, 239, 160, 0.1) 0%, transparent 100%);
-            border-left-color: var(--primary);
-        }
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 30px 40px;
-            min-height: 100vh;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .access-badge {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-dim);
-            background: rgba(0, 0, 0, 0.4);
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-        .glass-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            backdrop-filter: blur(10px);
-        }
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .card-header i { color: var(--primary); font-size: 16px; }
-        .card-header h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
-        .news-area {
-            background: #000;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            height: 380px;
-            overflow-y: auto;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-        }
-        .log-item { margin-bottom: 8px; line-height: 1.5; color: var(--text-dim); }
-        .log-item .time { color: var(--primary); margin-right: 8px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label {
-            display: block;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-dim);
-            margin-bottom: 10px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 14px 16px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            outline: none;
-        }
-        .btn {
-            width: 100%;
-            padding: 16px 24px;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 10px;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #e4e3e3;
         }
-        .btn-auth {
-            background: var(--primary);
-            color: #000;
+        .container {
+            background: rgba(15, 17, 15, 0.9);
+            border: 1px solid #1a1d1a;
+            border-radius: 12px;
+            padding: 30px;
+            width: 500px;
+            box-shadow: 0 0 30px rgba(15,239,160,0.1);
         }
-        .btn-auth:hover {
-            background: #3dffc0;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 20px var(--primary-glow);
-        }
-        .btn-download {
-            background: linear-gradient(135deg, var(--primary), #0b7a52);
-            color: #000;
-            text-decoration: none;
-            margin-top: 16px;
-            display: inline-block;
+        h1 {
+            color: #0fefa0;
+            font-size: 24px;
+            margin-bottom: 20px;
             text-align: center;
         }
-        .status-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .stat-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border);
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #111118;
+            border: 1px solid #252535;
             border-radius: 8px;
-            padding: 16px;
+            color: white;
+            font-family: monospace;
+            margin-bottom: 10px;
         }
-        .stat-card .lbl { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
-        .stat-card .val { font-size: 13px; font-weight: 700; color: var(--primary); }
-        .license-info, .hwid-status {
-            margin-top: 16px;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.3);
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #0fefa0;
+            border: none;
             border-radius: 8px;
-            display: none;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
         }
-        .license-info.active, .hwid-status.active { display: block; }
-        .license-info h4, .hwid-status h4 { margin-bottom: 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .license-info h4 { color: var(--primary); }
-        .hwid-status h4 { color: var(--danger); }
-        .license-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
+        .log {
+            background: #000;
+            border: 1px solid #1a1d1a;
+            border-radius: 8px;
+            padding: 12px;
+            height: 250px;
+            overflow-y: auto;
+            font-size: 12px;
+            font-family: monospace;
+            margin-bottom: 10px;
         }
-        .license-detail .label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
-        .license-detail .value { font-size: 12px; color: var(--text); font-weight: 500; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
-        @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .main-content { margin-left: 0; padding: 20px; } }
+        .log div {
+            margin-bottom: 5px;
+        }
+        .success { color: #0fefa0; }
+        .error { color: #ef4444; }
+        .info { color: #828484; }
+        .status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-<div class="sidebar">
-    <div class="logo-area"><div class="logo-title"><div class="logo-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6V12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12V6L12 2Z" stroke="currentColor" stroke-width="2"/><path d="M12 8V12" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="15" r="1" fill="currentColor"/></svg></div>IMMORTAL AUTH</div></div>
-    <ul class="nav-list"><li class="nav-item active"><i class="fas fa-terminal"></i> Dashboard</li><li class="nav-item"><i class="fas fa-sliders-h"></i> Settings</li><li class="nav-item"><i class="fas fa-sync-alt"></i> HWID Reset</li><li class="nav-item logout"><i class="fas fa-power-off"></i> Logout</li></ul>
-</div>
-<div class="main-content">
-    <div class="header"><h1>Terminal Dashboard</h1><div class="access-badge"><i class="fas fa-user-shield"></i> ACCESS LEVEL: <span id="accessLevel">0</span></div></div>
-    <div class="dashboard-grid">
-        <div class="glass-card">
-            <div class="card-header"><i class="fas fa-list-ul"></i><h3>Status Logs</h3></div>
-            <div class="news-area" id="logScreen"><div class="log-item"><span class="time">[System]</span> Panel ready. Waiting for application...</div></div>
-        </div>
-        <div class="glass-card">
-            <div class="card-header"><i class="fas fa-fingerprint"></i><h3>Identity Verification</h3></div>
-            <div class="form-group"><label>License Key</label><input type="text" id="licenseKey" placeholder="IMMORTAL-XXXXX-XXXXX-XXXXX"></div>
-            <div class="btn-row"><button class="btn btn-auth" id="verifyBtn" onclick="verifyLicense()"><i class="fas fa-shield-alt"></i> Verify License</button></div>
-            <div class="license-info" id="licenseInfo">
-                <h4>License Information</h4>
-                <div class="license-details">
-                    <div class="license-detail"><span class="label">Type</span><span class="value" id="licenseType">-</span></div>
-                    <div class="license-detail"><span class="label">Access Level</span><span class="value" id="licenseAccessLevel">-</span></div>
-                    <div class="license-detail"><span class="label">Status</span><span class="value" id="licenseStatus">-</span></div>
-                    <div class="license-detail"><span class="label">Created</span><span class="value" id="licenseCreated">-</span></div>
-                </div>
-                <a href="#" id="downloadBtn" class="btn btn-download" target="_blank"><i class="fas fa-download"></i> Download Application</a>
-            </div>
-            <div class="hwid-status" id="hwidStatus"><h4>⚠️ HWID Locked</h4><p>This license is locked to another machine. Please request HWID reset to continue.</p></div>
-            <div class="status-grid">
-                <div class="stat-card"><div class="lbl">Server Status</div><div class="val">ONLINE</div></div>
-                <div class="stat-card"><div class="lbl">Connection</div><div class="val" id="linkStatus">LISTENING</div></div>
-                <div class="stat-card"><div class="lbl">Client Version</div><div class="val white">3.1.2</div></div>
-                <div class="stat-card"><div class="lbl">Security Status</div><div class="val">UNDETECTED</div></div>
-            </div>
-        </div>
+<div class="container">
+    <h1>🔐 IMMORTAL AUTH</h1>
+    <input type="text" id="licenseKey" placeholder="Enter your license key (e.g., IMMORTAL-XXXX-XXXX-XXXX)">
+    <button id="verifyBtn">VERIFY LICENSE</button>
+    <div class="log" id="logArea">
+        <div>[System] Waiting for license input...</div>
     </div>
+    <div class="status" id="statusMsg">Not verified</div>
 </div>
 
 <script>
-    // ========== CONFIGURATION ==========
     const API_URL = 'https://immortal1234.pythonanywhere.com/validate';
-    const LICENSE_TYPES = {
-        'BOOSTER':   { name: 'BOOSTER',   level: 3, link: 'https://files.catbox.moe/n8gudh.rar' },
-        'CUSTOMER':  { name: 'CUSTOMER',  level: 2, link: 'https://example.com/customer-download' },
-        'ADMIN':     { name: 'ADMIN',     level: 1, link: 'https://example.com/admin-download' },
-        'PREMIUM':   { name: 'PREMIUM',   level: 4, link: 'https://example.com/premium-download' },
-        'IMMORTAL':  { name: 'IMMORTAL',  level: 5, link: 'https://files.catbox.moe/n8gudh.rar' }
-    };
-    const DEFAULT_LICENSE = { name: 'STANDARD', level: 2, link: '#' };
 
-    // DOM elements
-    const logScreen = document.getElementById('logScreen');
-    const verifyBtn = document.getElementById('verifyBtn');
-    const licenseInfoDiv = document.getElementById('licenseInfo');
-    const hwidStatusDiv = document.getElementById('hwidStatus');
-    const linkStatusSpan = document.getElementById('linkStatus');
-    const accessLevelSpan = document.getElementById('accessLevel');
-
-    // Helper: add log
-    function addLog(type, msg) {
-        const div = document.createElement('div');
-        div.className = 'log-item';
-        div.innerHTML = `<span class="time">[${type}]</span> ${msg}`;
-        logScreen.appendChild(div);
-        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // Helper to add log lines
+    function addLog(message, type = 'info') {
+        const logDiv = document.getElementById('logArea');
+        const entry = document.createElement('div');
+        entry.className = type;
+        entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+        logDiv.appendChild(entry);
+        entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    // Generate/retrieve HWID
+    // Generate or retrieve HWID
     function getHWID() {
         let hwid = localStorage.getItem('userHWID');
         if (!hwid) {
@@ -314,89 +106,74 @@
         }
         return hwid;
     }
+
     const currentHWID = getHWID();
+    addLog(`HWID: ${currentHWID}`, 'info');
 
-    // Determine license type from key prefix
-    function getLicenseType(key) {
+    // License type mapping (based on key prefix)
+    const licenseTypes = {
+        'BOOSTER':   { name: 'BOOSTER',   level: 3, message: 'Premium access' },
+        'CUSTOMER':  { name: 'CUSTOMER',  level: 2, message: 'Standard access' },
+        'ADMIN':     { name: 'ADMIN',     level: 1, message: 'Administrator access' },
+        'PREMIUM':   { name: 'PREMIUM',   level: 4, message: 'Elite access' },
+        'IMMORTAL':  { name: 'IMMORTAL',  level: 5, message: 'God mode access' }
+    };
+    const defaultType = { name: 'STANDARD', level: 2, message: 'Standard access' };
+
+    function getLicenseTypeFromKey(key) {
         const prefix = key.split('-')[0]?.toUpperCase();
-        return LICENSE_TYPES[prefix] || DEFAULT_LICENSE;
+        return licenseTypes[prefix] || defaultType;
     }
 
-    // Update UI after successful verification
-    function showLicenseInfo(licenseType, key) {
-        document.getElementById('licenseType').textContent = licenseType.name;
-        document.getElementById('licenseAccessLevel').textContent = licenseType.level;
-        document.getElementById('licenseStatus').textContent = 'Active';
-        document.getElementById('licenseCreated').textContent = new Date().toLocaleDateString();
-        document.getElementById('downloadBtn').href = licenseType.link;
-        accessLevelSpan.textContent = licenseType.level;
-        document.querySelector('.header h1').textContent = `${licenseType.name} Dashboard`;
-        licenseInfoDiv.classList.add('active');
-        hwidStatusDiv.classList.remove('active');
-        linkStatusSpan.textContent = 'CONNECTED';
-        addLog('Success', `License ${key} verified – type ${licenseType.name}, level ${licenseType.level}`);
-    }
-
-    // Main verification function
     async function verifyLicense() {
         const licenseKey = document.getElementById('licenseKey').value.trim();
         if (!licenseKey) {
-            addLog('Error', 'Please enter a license key.');
+            addLog('Please enter a license key.', 'error');
             return;
         }
 
+        const verifyBtn = document.getElementById('verifyBtn');
         verifyBtn.disabled = true;
-        verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
-        linkStatusSpan.textContent = 'CONNECTING';
-        addLog('System', 'Contacting authentication server...');
+        verifyBtn.textContent = 'VERIFYING...';
+        addLog(`Checking license: ${licenseKey.substring(0,12)}...`, 'info');
 
         try {
             const url = `${API_URL}?key=${encodeURIComponent(licenseKey)}&hwid=${encodeURIComponent(currentHWID)}&auto_update=true`;
-            addLog('Auth', `Requesting validation for ${licenseKey.substring(0,12)}...`);
             const response = await fetch(url);
             const data = await response.json();
-            addLog('Auth', `Server response: ${JSON.stringify(data)}`);
+            addLog(`Server response: ${JSON.stringify(data)}`, 'info');
 
             if (data.valid === true) {
-                const licType = getLicenseType(licenseKey);
-                showLicenseInfo(licType, licenseKey);
-                if (data.first_use === true) {
-                    addLog('Info', 'License activated and locked to this HWID.');
-                } else {
-                    addLog('Info', 'License verified successfully.');
-                }
-                addLog('Info', `HWID: ${currentHWID}`);
+                const licenseInfo = getLicenseTypeFromKey(licenseKey);
+                const msg = data.first_use ? 'License activated and locked to this PC!' : 'License verified successfully!';
+                addLog(msg, 'success');
+                addLog(`License type: ${licenseInfo.name} (Level ${licenseInfo.level})`, 'success');
+                addLog(`HWID locked: ${currentHWID}`, 'success');
+                document.getElementById('statusMsg').innerHTML = `✅ ${msg} – ${licenseInfo.message}`;
+                document.getElementById('statusMsg').style.color = '#0fefa0';
             } else if (data.hwid_locked === true || (data.message && data.message.includes('HWID'))) {
-                addLog('Error', 'License is HWID locked to another machine!');
-                linkStatusSpan.textContent = 'HWID LOCKED';
-                licenseInfoDiv.classList.remove('active');
-                hwidStatusDiv.classList.add('active');
+                addLog('License is HWID locked to another machine!', 'error');
+                document.getElementById('statusMsg').innerHTML = '❌ HWID mismatch – request reset';
+                document.getElementById('statusMsg').style.color = '#ef4444';
             } else {
-                addLog('Error', data.message || 'License verification failed');
-                linkStatusSpan.textContent = 'LISTENING';
-                licenseInfoDiv.classList.remove('active');
-                hwidStatusDiv.classList.remove('active');
+                const errorMsg = data.message || 'License verification failed';
+                addLog(errorMsg, 'error');
+                document.getElementById('statusMsg').innerHTML = `❌ ${errorMsg}`;
+                document.getElementById('statusMsg').style.color = '#ef4444';
             }
         } catch (err) {
-            addLog('Error', `Verification failed: ${err.message}`);
-            linkStatusSpan.textContent = 'ERROR';
-            console.error(err);
+            addLog(`Network error: ${err.message}`, 'error');
+            document.getElementById('statusMsg').innerHTML = '❌ Connection error';
         } finally {
             verifyBtn.disabled = false;
-            verifyBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify License';
+            verifyBtn.textContent = 'VERIFY LICENSE';
         }
     }
 
-    // Enter key support
+    document.getElementById('verifyBtn').addEventListener('click', verifyLicense);
     document.getElementById('licenseKey').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') verifyLicense();
     });
-
-    // Initial logs
-    addLog('System', 'Security protocols initialized.');
-    setTimeout(() => addLog('Network', 'WebSocket connection established.'), 1000);
-    setTimeout(() => addLog('System', 'Awaiting user authentication...'), 2000);
-    setTimeout(() => addLog('Security', `Current HWID: ${currentHWID}`), 3000);
 </script>
 </body>
 </html>
