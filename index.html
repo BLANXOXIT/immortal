@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immortal | Secure Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0fefa0;
+            --primary-dim: #0b331a;
+            --primary-glow: rgba(15, 239, 160, 0.3);
+            --bg-dark: #0b0c0b;
+            --bg-card: rgba(15, 17, 15, 0.8);
+            --border: #1a1d1a;
+            --border-light: #2a2d2a;
+            --text: #e4e3e3;
+            --text-dim: #828484;
+            --danger: #ef4444;
+            --sidebar-width: 240px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: linear-gradient(180deg, rgba(15, 239, 160, 0.03) 0%, transparent 30%);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+        }
+
+        .logo-area {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 1px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 16px 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .nav-item.active {
+            color: var(--text);
+            background: linear-gradient(90deg, rgba(15, 239, 160, 0.1) 0%, transparent 100%);
+            border-left-color: var(--primary);
+        }
+
+        .nav-item i {
+            width: 20px;
+            font-size: 14px;
+        }
+
+        .nav-item.logout {
+            margin-top: auto;
+            color: var(--danger);
+        }
+
+        .nav-item.logout:hover {
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 30px 40px;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .access-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-dim);
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .access-badge i {
+            color: var(--primary);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card-header i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .card-header h3 {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* Status Logs / Terminal */
+        .news-area {
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            height: 380px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+
+        .log-item {
+            margin-bottom: 8px;
+            line-height: 1.5;
+            color: var(--text-dim);
+        }
+
+        .log-item .time {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        /* Button */
+        .btn-row {
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-auth {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .btn-auth:hover {
+            background: #3dffc0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px var(--primary-glow);
+        }
+
+        .btn-auth:disabled {
+            background: var(--text-dim);
+            color: var(--bg-dark);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, var(--primary), #0b7a52);
+            color: #000;
+            text-decoration: none;
+            margin-top: 16px;
+        }
+
+        .btn-download:hover {
+            background: linear-gradient(135deg, #3dffc0, #0f9a68);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px var(--primary-glow);
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stat-card .lbl {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+        }
+
+        .stat-card .val {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card .val.white {
+            color: #fff;
+        }
+
+        .license-info {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .license-info.active {
+            display: block;
+        }
+
+        .license-info h4 {
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .license-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .license-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .license-detail .label {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .license-detail .value {
+            font-size: 12px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .hwid-status {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .hwid-status.active {
+            display: block;
+        }
+
+        .hwid-status h4 {
+            color: var(--danger);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-light);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-dim);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-area">
+            <div class="logo-title">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L4 6V12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12V6L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 8V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="12" cy="15" r="1" fill="currentColor"/>
+                    </svg>
+                </div>
+                IMMORTAL AUTH
+            </div>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item active">
+                <i class="fas fa-terminal"></i>
+                Dashboard
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-sliders-h"></i>
+                Settings
+            </li>
+            <li class="nav-item">
+                <i class="fas fa-sync-alt"></i>
+                HWID Reset
+            </li>
+            <li class="nav-item logout">
+                <i class="fas fa-power-off"></i>
+                Logout
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Terminal Dashboard</h1>
+            <div class="access-badge">
+                <i class="fas fa-user-shield"></i>
+                ACCESS LEVEL: <span id="accessLevel">0</span>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="glass-card">
+                <div class="card-header">
+                    <i class="fas fa-list-ul"></i>
+                    <h3>Status Logs</h3>
+                </div>
+                <div class="news-area" id="logScreen">
+                    <div class="log-item"><span class="time">[System]</span> Panel ready. Waiting for application...</div>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-header">
+                    <i class="fas fa-fingerprint"></i>
+                    <h3>Identity Verification</h3>
+                </div>
+
+                <div class="form-group">
+                    <label>License Key</label>
+                    <input type="text" id="licenseKey" placeholder="BOOSTER-XXXXXX">
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-auth" id="verifyBtn" onclick="verifyLicense()">
+                        <i class="fas fa-shield-alt"></i>
+                        Verify License
+                    </button>
+                </div>
+
+                <div class="license-info" id="licenseInfo">
+                    <h4>License Information</h4>
+                    <div class="license-details">
+                        <div class="license-detail">
+                            <span class="label">Type</span>
+                            <span class="value" id="licenseType">-</span>
+                        </div>
+                        <div class="license-detail">
+                            <span class="label">Access Level</span>
+                            <span class="value" id="licenseAccessLevel">-</span>
+                        </div>
+                        <div class="license-detail">
+                            <span class="label">Status</span>
+                            <span class="value" id="licenseStatus">-</span>
+                        </div>
+                        <div class="license-detail">
+                            <span class="label">Created</span>
+                            <span class="value" id="licenseCreated">-</span>
+                        </div>
+                    </div>
+                    <a href="#" id="downloadBtn" class="btn btn-download" target="_blank">
+                        <i class="fas fa-download"></i>
+                        Download Application
+                    </a>
+                </div>
+
+                <div class="hwid-status" id="hwidStatus">
+                    <h4>⚠️ HWID Locked</h4>
+                    <p>This license is locked to another machine. Please request HWID reset to continue.</p>
+                </div>
+
+                <div class="status-grid">
+                    <div class="stat-card">
+                        <span class="lbl">Server Status</span>
+                        <span class="val">ONLINE</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="lbl">Connection</span>
+                        <span class="val" id="linkStatus">LISTENING</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="lbl">Client Version</span>
+                        <span class="val white">3.1.2</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="lbl">Security Status</span>
+                        <span class="val">UNDETECTED</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PythonAnywhere API endpoint
+        const API_URL = 'https://immortal1234.pythonanywhere.com/validate';
+
+        const LICENSE_TYPES = {
+            'BOOSTER': { 'name': 'BOOSTER', 'access_level': 3, 'download_link': 'https://files.catbox.moe/n8gudh.rar' },
+            'CUSTOMER': { 'name': 'CUSTOMER', 'access_level': 2, 'download_link': 'https://example.com/customer-download' },
+            'ADMIN': { 'name': 'ADMIN', 'access_level': 1, 'download_link': 'https://example.com/admin-download' },
+            'PREMIUM': { 'name': 'PREMIUM', 'access_level': 4, 'download_link': 'https://example.com/premium-download' }
+        };
+
+        const logScreen = document.getElementById('logScreen');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const licenseInfo = document.getElementById('licenseInfo');
+        const hwidStatus = document.getElementById('hwidStatus');
+        const resetBtn = document.getElementById('resetBtn');
+        const linkStatus = document.getElementById('linkStatus');
+        const accessLevelSpan = document.getElementById('accessLevel');
+
+        let currentLicense = null;
+        let currentUserHWID = generateHWID();
+
+        function addLog(type, message) {
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item';
+            logItem.innerHTML = `<span class="time">[${type}]</span> ${message}`;
+            logScreen.appendChild(logItem);
+            logScreen.scrollTop = logScreen.scrollHeight;
+        }
+
+        function generateHWID() {
+            if (!localStorage.getItem('userHWID')) {
+                const hwid = 'HWID-' + Math.random().toString(36).substr(2, 9).toUpperCase() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                localStorage.setItem('userHWID', hwid);
+                return hwid;
+            }
+            return localStorage.getItem('userHWID');
+        }
+
+        function parseLicenseType(licenseKey) {
+            const parts = licenseKey.split('-');
+            if (parts.length > 0) {
+                const prefix = parts[0].toUpperCase();
+                if (LICENSE_TYPES[prefix]) return LICENSE_TYPES[prefix];
+            }
+            return null;
+        }
+
+        async function verifyLicense() {
+            const licenseKey = document.getElementById('licenseKey').value.trim();
+
+            if (!licenseKey || licenseKey === 'EXAMPLE-XXXX-XXXX-XXXX') {
+                addLog('Error', 'Please enter a valid license key.');
+                return;
+            }
+
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            linkStatus.textContent = 'CONNECTING';
+            addLog('System', 'Contacting authentication server...');
+
+            try {
+                // Build URL with parameters
+                const url = `${API_URL}?key=${encodeURIComponent(licenseKey)}&hwid=${encodeURIComponent(currentUserHWID)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                addLog('Auth', `Server response: ${JSON.stringify(data)}`);
+
+                if (data.valid === true) {
+                    // License is valid
+                    const licenseType = parseLicenseType(licenseKey);
+                    if (!licenseType) {
+                        addLog('Error', 'Unknown license type format');
+                        linkStatus.textContent = 'ERROR';
+                        return;
+                    }
+
+                    currentLicense = {
+                        license_key: licenseKey,
+                        license_type: licenseType.name,
+                        access_level: licenseType.access_level,
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    };
+
+                    linkStatus.textContent = 'CONNECTED';
+                    accessLevelSpan.textContent = licenseType.access_level;
+
+                    document.getElementById('licenseType').textContent = licenseType.name;
+                    document.getElementById('licenseAccessLevel').textContent = licenseType.access_level;
+                    document.getElementById('licenseStatus').textContent = 'Active';
+                    document.getElementById('licenseCreated').textContent = new Date().toLocaleDateString();
+
+                    const downloadBtn = document.getElementById('downloadBtn');
+                    downloadBtn.href = licenseType.download_link;
+
+                    licenseInfo.classList.add('active');
+                    hwidStatus.classList.remove('active');
+
+                    document.querySelector('.header h1').textContent = `${licenseType.name} Dashboard`;
+
+                    addLog('Success', 'License verified successfully!');
+                    addLog('Info', `Access Level: ${licenseType.access_level}`);
+                    addLog('Info', `HWID: ${currentUserHWID}`);
+
+                } else if (data.hwid_locked === true || (data.message && data.message.includes('HWID'))) {
+                    addLog('Error', 'License is HWID locked to another machine!');
+                    linkStatus.textContent = 'HWID LOCKED';
+                    licenseInfo.classList.remove('active');
+                    hwidStatus.classList.add('active');
+                    currentLicense = { license_key: licenseKey };
+                } else {
+                    addLog('Error', data.message || 'License verification failed');
+                    linkStatus.textContent = 'LISTENING';
+                    licenseInfo.classList.remove('active');
+                    hwidStatus.classList.remove('active');
+                }
+            } catch (error) {
+                addLog('Error', `Verification failed: ${error.message}`);
+                linkStatus.textContent = 'ERROR';
+                console.error('Fetch error:', error);
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify License';
+            }
+        }
+
+        // Reset button handler (optional - would call PythonAnywhere reset endpoint)
+        window.requestHWIDReset = async function() {
+            if (!currentLicense || !currentLicense.license_key) {
+                addLog('Error', 'No license to reset HWID for');
+                return;
+            }
+            addLog('System', 'Requesting HWID reset...');
+            addLog('Info', 'Please contact support to reset HWID.');
+        };
+
+        // Enter key support
+        document.getElementById('licenseKey').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyLicense();
+            }
+        });
+
+        // Initial log messages
+        setTimeout(() => addLog('System', 'Security protocols initialized.'), 1000);
+        setTimeout(() => addLog('Network', 'WebSocket connection established.'), 2000);
+        setTimeout(() => addLog('System', 'Awaiting user authentication...'), 3000);
+        setTimeout(() => addLog('Security', `Current HWID: ${currentUserHWID}`), 5000);
+    </script>
+</body>
+</html>
