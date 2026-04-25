@@ -1,2228 +1,843 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TLine Key System</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #1a1a24;
-    --border: #252535;
-    --accent: #7c3aed;
-    --accent2: #a855f7;
-    --accent3: #06b6d4;
-    --green: #10b981;
-    --red: #ef4444;
-    --yellow: #f59e0b;
-    --orange: #f97316;
-    --text: #e2e8f0;
-    --muted: #64748b;
-    --glow: rgba(124, 58, 237, 0.15);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,58,237,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(6,182,212,0.08) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* ── Login ── */
-  #loginScreen {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    backdrop-filter: blur(2px);
-  }
-
-  .login-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 48px 40px;
-    width: 420px;
-    position: relative;
-    box-shadow: 0 0 80px rgba(124,58,237,0.15), 0 32px 64px rgba(0,0,0,0.5);
-    animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1);
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .login-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 20%; right: 20%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
-  }
-
-  .login-logo {
-    font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.3em;
-    color: var(--accent2);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .login-logo::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: var(--accent2);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--accent2);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
-
-  .login-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    color: #fff;
-    margin-bottom: 32px;
-    line-height: 1.2;
-  }
-
-  .login-title span { color: var(--accent2); }
-
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 24px;
-  }
-
-  .input-group label {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .input-row { display: flex; gap: 8px; }
-
-  input[type="text"], input[type="password"], input[type="number"], select {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    padding: 12px 16px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  input:focus, select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
-  }
-
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button { filter: invert(1) brightness(0.5); }
-
-  select option { background: var(--surface2); color: var(--text); }
-
-  .select-wrapper { position: relative; flex: 1; }
-  .select-wrapper::after {
-    content: '▾';
-    position: absolute;
-    right: 12px; top: 50%;
-    transform: translateY(-50%);
-    color: var(--muted);
-    font-size: 12px;
-    pointer-events: none;
-  }
-  .select-wrapper select { width: 100%; padding-right: 32px; cursor: pointer; }
-
-  /* ── Buttons ── */
-  .btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    padding: 12px 20px;
-    cursor: pointer;
-    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
-    white-space: nowrap;
-  }
-  .btn:hover { opacity: 0.9; box-shadow: 0 0 20px rgba(124,58,237,0.3); }
-  .btn:active { transform: scale(0.98); }
-  .btn-sm { padding: 8px 14px; font-size: 11px; border-radius: 6px; }
-  .btn-danger   { background: linear-gradient(135deg, #dc2626, #ef4444); }
-  .btn-success  { background: linear-gradient(135deg, #059669, #10b981); }
-  .btn-warning  { background: linear-gradient(135deg, #d97706, #f59e0b); }
-  .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
-  .btn-secondary:hover { color: var(--text); border-color: var(--accent); }
-  .btn-orange { background: linear-gradient(135deg, #ea580c, #f97316); }
-  .btn-cyan   { background: linear-gradient(135deg, #0891b2, #06b6d4); }
-  .btn-pink   { background: linear-gradient(135deg, #be185d, #ec4899); }
-
-  .login-error {
-    color: var(--red);
-    font-size: 12px;
-    margin-top: 12px;
-    display: none;
-    padding: 10px 14px;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.2);
-    border-radius: 6px;
-  }
-
-  /* ── App shell ── */
-  #app { display: none; position: relative; z-index: 1; }
-
-  .header {
-    border-bottom: 1px solid var(--border);
-    background: rgba(10,10,15,0.8);
-    backdrop-filter: blur(12px);
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-
-  .header-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 24px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .header-brand {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .header-brand::before { content: '◆'; color: var(--accent2); font-size: 10px; }
-
-  .header-meta { display: flex; align-items: center; gap: 16px; font-size: 11px; color: var(--muted); }
-
-  .status-dot {
-    width: 7px; height: 7px;
-    background: var(--green);
-    border-radius: 50%;
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
-    display: inline-block;
-  }
-
-  /* ── Layout ── */
-  .layout {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 32px 24px;
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-
-  .sidebar { position: sticky; top: 84px; }
-
-  .nav-section { margin-bottom: 24px; }
-  .nav-label {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    padding: 0 12px;
-    margin-bottom: 8px;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.15s;
-    border: 1px solid transparent;
-    margin-bottom: 2px;
-  }
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { background: var(--glow); color: var(--accent2); border-color: rgba(124,58,237,0.2); }
-  .nav-item.danger-nav.active { background: rgba(239,68,68,0.08); color: var(--red); border-color: rgba(239,68,68,0.2); }
-  .nav-item.danger-nav:hover  { color: var(--red); }
-  .nav-item .icon { font-size: 14px; width: 18px; text-align: center; }
-
-  .nav-badge {
-    margin-left: auto;
-    background: rgba(239,68,68,0.15);
-    color: var(--red);
-    border: 1px solid rgba(239,68,68,0.25);
-    border-radius: 10px;
-    font-size: 10px;
-    padding: 1px 6px;
-    font-weight: 700;
-    min-width: 20px;
-    text-align: center;
-  }
-
-  /* ── Stats ── */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .stat-card:hover { border-color: var(--accent); }
-  .stat-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .stat-card:hover::after { opacity: 1; }
-
-  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
-  .stat-value { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: #fff; }
-  .stat-value.green  { color: var(--green); }
-  .stat-value.red    { color: var(--red); }
-  .stat-value.yellow { color: var(--yellow); }
-  .stat-value.cyan   { color: var(--accent3); }
-  .stat-value.orange { color: var(--orange); }
-  .stat-value.pink   { color: #ec4899; }
-
-  /* ── Panels ── */
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    display: none;
-    animation: fadeIn 0.3s ease;
-  }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-  .panel.visible { display: block; }
-
-  .panel-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(255,255,255,0.01);
-  }
-
-  .panel-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .panel-title span { color: var(--accent2); }
-  .panel-title.danger span { color: var(--red); }
-
-  .panel-body { padding: 20px; }
-
-  /* ── Forms ── */
-  .form-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: flex-end;
-  }
-
-  .form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex: 1;
-    min-width: 160px;
-  }
-  .form-field label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-
-  /* ── Table ── */
-  .table-wrap { overflow-x: auto; }
-
-  table { width: 100%; border-collapse: collapse; }
-
-  thead th {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    padding: 10px 16px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-    background: rgba(255,255,255,0.01);
-  }
-
-  tbody tr { border-bottom: 1px solid rgba(37,37,53,0.5); transition: background 0.1s; }
-  tbody tr:hover { background: rgba(124,58,237,0.04); }
-  tbody tr:last-child { border-bottom: none; }
-
-  td { padding: 12px 16px; font-size: 12px; vertical-align: middle; }
-
-  .key-val {
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--accent3);
-    font-size: 11px;
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-  }
-  .key-val:hover { color: #fff; }
-
-  /* ── Badges ── */
-  .badge {
-    display: inline-block;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-  }
-  .badge-green  { background: rgba(16,185,129,0.15);  color: var(--green);   border: 1px solid rgba(16,185,129,0.2); }
-  .badge-red    { background: rgba(239,68,68,0.15);   color: var(--red);     border: 1px solid rgba(239,68,68,0.2); }
-  .badge-yellow { background: rgba(245,158,11,0.15);  color: var(--yellow);  border: 1px solid rgba(245,158,11,0.2); }
-  .badge-purple { background: rgba(168,85,247,0.15);  color: var(--accent2); border: 1px solid rgba(168,85,247,0.2); }
-  .badge-cyan   { background: rgba(6,182,212,0.15);   color: var(--accent3); border: 1px solid rgba(6,182,212,0.2); }
-  .badge-orange { background: rgba(249,115,22,0.15);  color: var(--orange);  border: 1px solid rgba(249,115,22,0.2); }
-  .badge-pink   { background: rgba(236,72,153,0.15);  color: #ec4899;        border: 1px solid rgba(236,72,153,0.2); }
-
-  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
-
-  /* ── Logs ── */
-  .log-container {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 16px;
-    max-height: 400px;
-    overflow-y: auto;
-    font-size: 11px;
-    line-height: 1.8;
-  }
-  .log-line         { color: var(--muted); }
-  .log-line.valid   { color: var(--green); }
-  .log-line.invalid { color: var(--red); }
-
-  /* ── Toast ── */
-  #toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 20px;
-    font-size: 12px;
-    color: var(--text);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    z-index: 200;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
-    pointer-events: none;
-    max-width: 320px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  #toast.show { opacity: 1; transform: translateY(0); }
-  #toast.success::before { content: '✓'; color: var(--green);   font-weight: bold; }
-  #toast.error::before   { content: '✕'; color: var(--red);     font-weight: bold; }
-  #toast.info::before    { content: '◆'; color: var(--accent2); font-weight: bold; }
-
-  .empty { padding: 40px; text-align: center; color: var(--muted); font-size: 12px; }
-  .empty .icon { font-size: 32px; margin-bottom: 12px; opacity: 0.3; }
-
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-  /* ── Auth mode toggle ── */
-  .auth-mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 24px; }
-
-  .auth-mode-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 10px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
-    color: var(--muted);
-  }
-  .auth-mode-btn:hover { border-color: var(--accent); color: var(--text); }
-  .auth-mode-btn.active { background: rgba(124,58,237,0.12); border-color: var(--accent2); color: var(--text); }
-  .auth-mode-btn .mode-icon  { font-size: 20px; margin-bottom: 6px; }
-  .auth-mode-btn .mode-label { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
-  .auth-mode-btn .mode-desc  { font-size: 10px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
-  .auth-mode-btn.active .mode-desc { color: var(--accent2); opacity: 0.8; }
-
-  /* ── API bar ── */
-  .api-bar {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .api-bar input { flex: 1; font-size: 11px; padding: 6px 10px; }
-
-  .separator { height: 1px; background: var(--border); margin: 16px 0; }
-
-  /* ── Shared box styles ── */
-  .create-account-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 24px;
-  }
-  .create-account-box-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent2);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .create-account-box-title::before { content: '+'; font-size: 14px; }
-
-  /* ── Blacklist ── */
-  .blacklist-add-box {
-    background: rgba(239,68,68,0.04);
-    border: 1px solid rgba(239,68,68,0.15);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  .blacklist-add-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--red);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .blacklist-add-title::before { content: '⊘'; font-size: 14px; }
-
-  /* ── Fail tracker ── */
-  .fail-tracker-box {
-    background: rgba(249,115,22,0.04);
-    border: 1px solid rgba(249,115,22,0.15);
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 20px;
-  }
-  .fail-tracker-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--orange);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  /* ── Loader ── */
-  .loader-status-box {
-    padding: 16px 18px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 20px;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-
-  .loader-upload-box {
-    background: rgba(124,58,237,0.05);
-    border: 1px solid rgba(124,58,237,0.2);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-
-  .loader-upload-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent2);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .loader-download-box {
-    background: rgba(6,182,212,0.04);
-    border: 1px solid rgba(6,182,212,0.15);
-    border-radius: 10px;
-    padding: 20px;
-  }
-
-  .loader-download-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent3);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* Drop zone */
-  .drop-zone {
-    border: 2px dashed rgba(124,58,237,0.3);
-    border-radius: 10px;
-    padding: 32px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 14px;
-    position: relative;
-  }
-  .drop-zone:hover, .drop-zone.drag-over {
-    border-color: var(--accent2);
-    background: rgba(124,58,237,0.05);
-  }
-  .drop-zone input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-  }
-  .drop-zone .dz-icon  { font-size: 28px; margin-bottom: 8px; opacity: 0.5; }
-  .drop-zone .dz-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-  .drop-zone .dz-sub   { font-size: 10px; color: var(--muted); opacity: 0.6; }
-  .drop-zone .dz-file  { font-size: 12px; color: var(--accent2); font-weight: 600; }
-
-  .upload-progress-wrap { display: none; margin-top: 12px; }
-  .upload-progress-bar-bg {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    height: 6px;
-    overflow: hidden;
-    margin-bottom: 6px;
-  }
-  .upload-progress-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 100px;
-    transition: width 0.2s;
-  }
-  .upload-progress-label { font-size: 11px; color: var(--accent2); }
-
-  .dl-link-box {
-    display: none;
-    background: var(--bg);
-    border: 1px solid rgba(6,182,212,0.25);
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--accent3);
-    word-break: break-all;
-    cursor: pointer;
-    transition: background 0.15s;
-    margin-top: 12px;
-  }
-  .dl-link-box:hover { background: rgba(6,182,212,0.05); }
-
-  /* ── Products ── */
-  .products-add-box {
-    background: rgba(236,72,153,0.04);
-    border: 1px solid rgba(236,72,153,0.2);
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  .products-add-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: #ec4899;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .products-assign-box {
-    background: rgba(124,58,237,0.04);
-    border: 1px solid rgba(124,58,237,0.2);
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 20px;
-  }
-  .products-assign-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent2);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  @media (max-width: 900px) {
-    .layout { grid-template-columns: 1fr; }
-    .sidebar { position: static; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>IMMORTAL | MPOSED CONTROL CORE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #05060a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #eef2ff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Particle canvas & glow */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(5,6,10,0.4) 60%, #05060a 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1450px;
+            padding: 1.8rem;
+            animation: fadeInUp 0.7s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(25px) scale(0.98); filter: blur(5px); }
+            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+
+        /* ---------- AUTH CARD (GLASS + CUSTOM IMAGE VIA URL) ---------- */
+        .auth-card {
+            max-width: 540px;
+            margin: 2rem auto;
+            background: rgba(10, 12, 22, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 100, 120, 0.35);
+            border-radius: 2.5rem;
+            padding: 2rem 2rem 2.2rem;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 100, 100, 0.15) inset;
+        }
+        .auth-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+        .auth-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff4d6d, #b81c3c);
+            padding: 3px;
+            margin-bottom: 0.6rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .auth-avatar:hover {
+            transform: scale(1.02);
+        }
+        .auth-avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #1a1e2c;
+        }
+        .auth-title {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: 5px;
+            background: linear-gradient(135deg, #ffffff, #ffa0b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+        }
+        .auth-sub {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: #ffb7c4;
+            text-transform: uppercase;
+            margin-top: 0.2rem;
+        }
+        .image-url-row {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.8rem 0 1rem 0;
+            background: rgba(0,0,0,0.4);
+            border-radius: 2rem;
+            padding: 0.3rem 0.3rem 0.3rem 1rem;
+            align-items: center;
+        }
+        .image-url-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ffb7c4;
+            font-size: 0.7rem;
+            outline: none;
+            font-family: monospace;
+        }
+        .image-url-input::placeholder {
+            color: #6a6f8a;
+        }
+        .set-image-btn {
+            background: #ff4d6d30;
+            border: none;
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            color: white;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .set-image-btn:hover {
+            background: #ff4d6d;
+        }
+        .auth-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 60px;
+            padding: 0.25rem;
+        }
+        .auth-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0.7rem;
+            font-weight: 600;
+            border-radius: 40px;
+            color: #bbb;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .auth-tab.active {
+            background: linear-gradient(135deg, #ff4d6d, #b81c3c);
+            color: white;
+            box-shadow: 0 5px 12px rgba(255, 77, 109, 0.3);
+        }
+        .auth-input {
+            width: 100%;
+            background: #0c1020;
+            border: 1px solid #2e334f;
+            border-radius: 1.2rem;
+            padding: 0.85rem 1.2rem;
+            color: white;
+            margin-bottom: 1.1rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .auth-input:focus {
+            outline: none;
+            border-color: #ff4d6d;
+            box-shadow: 0 0 0 2px rgba(255, 77, 109, 0.2);
+        }
+        .auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff4d6d, #b81c3c);
+            border: none;
+            padding: 0.9rem;
+            border-radius: 1.5rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+        .auth-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .error-msg { color: #ff8888; font-size: 0.8rem; margin-top: 0.6rem; text-align: center; }
+
+        /* ---------- DASHBOARD (MPOSED / IMMORTAL) ---------- */
+        .dashboard {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+        .brand-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 100, 130, 0.3);
+            padding-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .logo h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            letter-spacing: 6px;
+            background: linear-gradient(135deg, #ffffff, #ff8a9f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .logo p {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: #ffb0bc;
+            text-transform: uppercase;
+        }
+        .logout-btn {
+            background: rgba(255, 70, 100, 0.2);
+            border: 1px solid rgba(255, 100, 130, 0.5);
+            padding: 0.5rem 1.3rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .logout-btn:hover { background: rgba(255, 70, 100, 0.5); transform: scale(0.98); }
+
+        /* Grid 2 columns */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 1.8rem;
+        }
+
+        /* Glass cards */
+        .card {
+            background: rgba(12, 16, 28, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(100, 80, 140, 0.35);
+            border-radius: 2rem;
+            padding: 1.5rem;
+            transition: all 0.2s;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+        }
+        .card:hover {
+            border-color: rgba(255, 100, 120, 0.4);
+            background: rgba(18, 22, 36, 0.7);
+        }
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.2rem;
+            color: #ffc0cd;
+            border-left: 3px solid #ff4d6d;
+            padding-left: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+        }
+        .info-label { color: #9ea7c5; font-weight: 500; }
+        .info-value { font-family: 'JetBrains Mono', monospace; color: #f0f3ff; font-weight: 500; }
+
+        .quick-action-group {
+            margin: 1rem 0;
+        }
+        .flex-input {
+            display: flex;
+            gap: 0.7rem;
+            margin-top: 0.4rem;
+            flex-wrap: wrap;
+        }
+        .action-input {
+            flex: 1;
+            background: #070c18;
+            border: 1px solid #2c2f4a;
+            border-radius: 1rem;
+            padding: 0.7rem 1rem;
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+        .action-input:focus { border-color: #ff4d6d; outline: none; }
+        .btn-action {
+            background: #2a2f48;
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 1.2rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-action.primary { background: linear-gradient(135deg, #ff4d6d, #b81c3c); }
+        .btn-action.primary:hover, .btn-action:hover { transform: translateY(-2px); filter: brightness(1.05); }
+
+        .hwid-box {
+            background: #050911;
+            border-radius: 1rem;
+            padding: 0.7rem 1rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            margin: 0.8rem 0;
+            border: 1px solid #2c2f4a;
+            word-break: break-all;
+        }
+        .open-web-menu {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            background: rgba(255, 77, 109, 0.1);
+            padding: 0.6rem 1.3rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .open-web-menu:hover { background: rgba(255, 77, 109, 0.3); color: #ffc0cd; }
+
+        .subscription-list {
+            margin-top: 1rem;
+        }
+        .sub-item {
+            background: rgba(255, 77, 109, 0.08);
+            border-left: 3px solid #ff4d6d;
+            padding: 0.8rem 1rem;
+            border-radius: 1.2rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(2px);
+        }
+        .sub-name { font-weight: 600; color: #ffccd5; }
+        .sub-tier { font-size: 0.7rem; background: #1e243f; padding: 0.2rem 0.7rem; border-radius: 20px; }
+
+        .download-btn {
+            background: linear-gradient(135deg, #186e48, #0a3a24);
+            width: 100%;
+            border: none;
+            justify-content: center;
+        }
+        .status-badge {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 0.6rem;
+            color: #9effcf;
+        }
+
+        @media (max-width: 860px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .main-container { padding: 1rem; }
+        }
+        .hidden { display: none; }
+        .note-text { font-size: 0.65rem; text-align: center; margin-top: 0.5rem; opacity: 0.6; }
+    </style>
 </head>
 <body>
+    <canvas id="particleCanvas"></canvas>
+    <div class="vignette"></div>
 
-<!-- ══ LOGIN ══════════════════════════════════════════════════════════════════ -->
-<div id="loginScreen">
-  <div class="login-card">
-    <div class="login-logo">TLine Systems</div>
-    <div class="login-title">Key Management<br><span>Admin Panel</span></div>
-
-    <div class="auth-mode-toggle">
-      <div class="auth-mode-btn active" id="modeToggleKey" onclick="selectAuthMode('key')">
-        <div class="mode-icon">🔑</div>
-        <div class="mode-label">Key Only</div>
-        <div class="mode-desc">License key<br>authentication</div>
-      </div>
-      <div class="auth-mode-btn" id="modeToggleAccount" onclick="selectAuthMode('account')">
-        <div class="mode-icon">👤</div>
-        <div class="mode-label">Account + Key</div>
-        <div class="mode-desc">Username, password<br>&amp; license key</div>
-      </div>
-    </div>
-
-    <div class="input-group">
-      <label>API Base URL</label>
-      <input type="text" id="loginUrl" placeholder="https://your-api.pythonanywhere.com" />
-    </div>
-    <div class="input-group">
-      <label>Admin Secret Key</label>
-      <div class="input-row">
-        <input type="password" id="loginKey" placeholder="Enter admin key..." />
-        <button class="btn" onclick="attemptLogin()">Enter</button>
-      </div>
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);cursor:pointer;margin-bottom:4px;">
-      <input type="checkbox" id="rememberMe" checked style="accent-color:var(--accent2);width:13px;height:13px;" />
-      Remember me on this device
-    </label>
-    <div class="login-error" id="loginError">Connection failed. Check URL and admin key.</div>
-    <div id="savedNote" style="display:none;font-size:11px;color:var(--muted);margin-top:10px;text-align:center;">
-      Saved credentials loaded. <span onclick="clearSaved()" style="color:var(--accent2);cursor:pointer;text-decoration:underline;">Clear saved login</span>
-    </div>
-  </div>
-</div>
-
-<!-- ══ APP ════════════════════════════════════════════════════════════════════ -->
-<div id="app">
-  <header class="header">
-    <div class="header-inner">
-      <div class="header-brand">TLine Key System</div>
-      <div class="header-meta">
-        <span class="status-dot"></span>
-        <span id="apiUrlDisplay"></span>
-        <button class="btn btn-sm btn-secondary" onclick="logout()">Logout</button>
-      </div>
-    </div>
-  </header>
-
-  <div class="layout">
-    <!-- ── Sidebar ── -->
-    <nav class="sidebar">
-      <div class="nav-section">
-        <div class="nav-label">Overview</div>
-        <div class="nav-item active" onclick="showTab('dashboard')" id="nav-dashboard">
-          <span class="icon">◈</span> Dashboard
-        </div>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Keys</div>
-        <div class="nav-item" onclick="showTab('keys')"      id="nav-keys">      <span class="icon">⌗</span> Regular Keys</div>
-        <div class="nav-item" onclick="showTab('special')"   id="nav-special">   <span class="icon">★</span> Special Keys</div>
-        <div class="nav-item" onclick="showTab('accounts')"  id="nav-accounts">  <span class="icon">👤</span> Accounts</div>
-        <div class="nav-item" onclick="showTab('generator')" id="nav-generator"> <span class="icon">⚡</span> Key Generator</div>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Products</div>
-        <div class="nav-item" onclick="showTab('products')" id="nav-products">
-          <span class="icon">📦</span> Products
-          <span class="nav-badge" id="navProductsCount" style="display:none;background:rgba(236,72,153,0.15);color:#ec4899;border-color:rgba(236,72,153,0.25);">0</span>
-        </div>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Distribution</div>
-        <div class="nav-item" onclick="showTab('loader')" id="nav-loader">
-          <span class="icon">⬇</span> Loader
-          <span class="nav-badge" id="navLoaderBadge" style="display:none;background:rgba(16,185,129,0.15);color:var(--green);border-color:rgba(16,185,129,0.25);">✓</span>
-        </div>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">Security</div>
-        <div class="nav-item danger-nav" onclick="showTab('blacklist')" id="nav-blacklist">
-          <span class="icon">⊘</span> IP Blacklist
-          <span class="nav-badge" id="navBlacklistCount" style="display:none;">0</span>
-        </div>
-      </div>
-      <div class="nav-section">
-        <div class="nav-label">System</div>
-        <div class="nav-item" onclick="showTab('logs')"     id="nav-logs">     <span class="icon">▤</span> Logs</div>
-        <div class="nav-item" onclick="showTab('validate')" id="nav-validate"> <span class="icon">✦</span> Validate Key</div>
-      </div>
-    </nav>
-
-    <!-- ── Main ── -->
-    <main class="content">
-
-      <div class="api-bar">
-        <span>API:</span>
-        <span id="apiUrlFull" style="color:var(--accent3);font-family:monospace;"></span>
-        <button class="btn btn-sm btn-secondary" onclick="refreshAll()" style="margin-left:auto;">↻ Refresh</button>
-      </div>
-
-      <!-- Stats -->
-      <div class="stats-grid" id="statsGrid">
-        <div class="stat-card"><div class="stat-label">Total Keys</div><div class="stat-value" id="st-total">—</div></div>
-        <div class="stat-card"><div class="stat-label">Bound</div><div class="stat-value green" id="st-bound">—</div></div>
-        <div class="stat-card"><div class="stat-label">Unbound</div><div class="stat-value cyan" id="st-unbound">—</div></div>
-        <div class="stat-card"><div class="stat-label">Special</div><div class="stat-value" style="color:var(--accent2)" id="st-special">—</div></div>
-        <div class="stat-card"><div class="stat-label">Expired</div><div class="stat-value red" id="st-expired">—</div></div>
-        <div class="stat-card" id="st-accounts-card"><div class="stat-label">Accounts</div><div class="stat-value yellow" id="st-accounts">—</div></div>
-        <div class="stat-card"><div class="stat-label">Products</div><div class="stat-value pink" id="st-products">—</div></div>
-        <div class="stat-card"><div class="stat-label">Blacklisted IPs</div><div class="stat-value orange" id="st-blacklisted">—</div></div>
-        <div class="stat-card"><div class="stat-label">Loader</div><div class="stat-value" id="st-loader" style="font-size:14px;">—</div></div>
-      </div>
-
-      <!-- ── DASHBOARD ── -->
-      <div class="panel visible" id="panel-dashboard">
-        <div class="panel-header">
-          <div class="panel-title">◈ <span>Dashboard</span></div>
-        </div>
-        <div class="panel-body">
-          <p style="color:var(--muted);font-size:12px;line-height:1.8;">
-            Welcome to the TLine Key System admin panel. Use the sidebar to manage keys, accounts, products, view logs, validate licenses, upload the loader, and manage the IP blacklist.
-          </p>
-          <div class="separator"></div>
-          <p style="color:var(--muted);font-size:11px;">Connected as admin · All actions are logged.</p>
-        </div>
-      </div>
-
-      <!-- ── REGULAR KEYS ── -->
-      <div class="panel" id="panel-keys">
-        <div class="panel-header">
-          <div class="panel-title">⌗ <span>Regular Keys</span></div>
-          <button class="btn btn-sm" onclick="loadKeys()">↻ Refresh</button>
-        </div>
-        <div class="panel-body">
-          <div class="form-row" style="margin-bottom:16px;">
-            <div class="form-field">
-              <label>New Key</label>
-              <input type="text" id="newKey" placeholder="KEY-XXXX-XXXX-XXXX" />
-            </div>
-            <div class="form-field" style="max-width:160px;">
-              <label>Expiry Unit</label>
-              <div class="select-wrapper">
-                <select id="newKeyExpiryUnit" onchange="toggleNewKeyDuration()">
-                  <option value="seconds">Seconds</option>
-                  <option value="minutes">Minutes</option>
-                  <option value="hours">Hours</option>
-                  <option value="days">Days</option>
-                  <option value="weeks" selected>Weeks</option>
-                  <option value="months">Months</option>
-                  <option value="years">Years</option>
-                  <option value="lifetime">Lifetime</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-field" style="max-width:110px;" id="newKeyDurationWrapper">
-              <label>Duration</label>
-              <input type="number" id="newKeyExpiryDuration" value="3" min="1" />
-            </div>
-            <button class="btn btn-sm btn-success" onclick="addKey()" style="align-self:flex-end;">+ Add Key</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Key</th>
-                  <th id="th-account">Account</th>
-                  <th>Product</th>
-                  <th>HWID</th>
-                  <th>Status</th>
-                  <th>Expiration</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="keysTable">
-                <tr><td colspan="7"><div class="empty"><div class="icon">⌗</div>No keys loaded</div></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── SPECIAL KEYS ── -->
-      <div class="panel" id="panel-special">
-        <div class="panel-header">
-          <div class="panel-title">★ <span>Special Keys</span></div>
-          <button class="btn btn-sm" onclick="loadSpecialKeys()">↻ Refresh</button>
-        </div>
-        <div class="panel-body">
-          <div class="form-row" style="margin-bottom:16px;">
-            <div class="form-field">
-              <label>New Special Key</label>
-              <input type="text" id="newSpecialKey" placeholder="SPECIAL-KEY-VALUE" />
-            </div>
-            <button class="btn btn-sm btn-success" onclick="addSpecialKey()" style="align-self:flex-end;">+ Add Special Key</button>
-          </div>
-          <p style="font-size:11px;color:var(--muted);margin-bottom:16px;">Special keys bypass HWID checks and never expire.</p>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Key</th><th>Type</th><th>Actions</th></tr>
-              </thead>
-              <tbody id="specialTable">
-                <tr><td colspan="3"><div class="empty"><div class="icon">★</div>No special keys loaded</div></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── PRODUCTS ── -->
-      <div class="panel" id="panel-products">
-        <div class="panel-header">
-          <div class="panel-title">📦 <span>Products</span></div>
-          <button class="btn btn-sm" onclick="loadProducts()">↻ Refresh</button>
-        </div>
-        <div class="panel-body">
-
-          <div class="products-add-box">
-            <div class="products-add-title">➕ Add Product</div>
-            <div class="form-row">
-              <div class="form-field" style="max-width:180px;">
-                <label>Product ID</label>
-                <input type="text" id="newProductId" placeholder="e.g. AIMBOT" />
-              </div>
-              <div class="form-field">
-                <label>Product Name</label>
-                <input type="text" id="newProductName" placeholder="e.g. AimBot Pro v2" />
-              </div>
-              <button class="btn btn-sm btn-pink" onclick="addProduct()" style="align-self:flex-end;">+ Add Product</button>
-            </div>
-          </div>
-
-          <div class="table-wrap" style="margin-bottom:8px;">
-            <table>
-              <thead>
-                <tr><th>Product ID</th><th>Product Name</th><th>Keys Assigned</th><th>Actions</th></tr>
-              </thead>
-              <tbody id="productsTable">
-                <tr><td colspan="4"><div class="empty"><div class="icon">📦</div>No products found</div></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="products-assign-box">
-            <div class="products-assign-title">🔗 Assign Product to Key</div>
-            <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">
-              Assign a product to a key so that when a user validates or logs in, the server tells them which product they have access to.
-            </p>
-            <div class="form-row">
-              <div class="form-field">
-                <label>License Key</label>
-                <input type="text" id="assignKey" placeholder="KEY-XXXX-XXXX" />
-              </div>
-              <div class="form-field" style="max-width:240px;">
-                <label>Product</label>
-                <div class="select-wrapper">
-                  <select id="assignProductId">
-                    <option value="">— Select a product —</option>
-                  </select>
+    <div class="main-container">
+        <!-- AUTHENTICATION CARD WITH CUSTOM IMAGE URL INPUT -->
+        <div id="authPanel" class="auth-card">
+            <div class="auth-header">
+                <div class="auth-avatar" id="authAvatarBtn">
+                    <img id="avatarImg" class="auth-avatar-inner" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="avatar">
                 </div>
-              </div>
-              <button class="btn btn-sm" onclick="assignProduct()" style="align-self:flex-end;">Assign →</button>
-              <button class="btn btn-sm btn-secondary" onclick="unassignProduct()" style="align-self:flex-end;">Unassign</button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ── LOADER ── -->
-      <div class="panel" id="panel-loader">
-        <div class="panel-header">
-          <div class="panel-title">⬇ <span>Loader Management</span></div>
-          <button class="btn btn-sm" onclick="checkLoaderStatus()">↻ Refresh</button>
-        </div>
-        <div class="panel-body">
-
-          <div class="loader-status-box" id="loaderStatusBox">
-            <span style="color:var(--muted);">Checking status...</span>
-          </div>
-
-          <div class="loader-upload-box">
-            <div class="loader-upload-title">⬆ Upload Loader EXE</div>
-            <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">
-              Uploading a new file will <strong style="color:var(--yellow);">permanently replace</strong> any existing loader.
-              Only one EXE is stored at a time.
-            </p>
-
-            <div class="drop-zone" id="dropZone">
-              <input type="file" id="loaderFileInput" accept=".exe" onchange="onFileSelected(this)" />
-              <div class="dz-icon">📦</div>
-              <div class="dz-label" id="dzLabel">Drop your .exe here, or click to browse</div>
-              <div class="dz-sub">Only .exe files</div>
-            </div>
-
-            <div class="upload-progress-wrap" id="uploadProgressWrap">
-              <div class="upload-progress-bar-bg">
-                <div class="upload-progress-bar" id="uploadProgressBar"></div>
-              </div>
-              <div class="upload-progress-label" id="uploadProgressLabel">Uploading...</div>
-            </div>
-
-            <div style="display:flex;gap:8px;margin-top:12px;">
-              <button class="btn btn-sm btn-success" onclick="uploadLoader()">⬆ Upload to Server</button>
-              <button class="btn btn-sm btn-secondary" onclick="clearFileSelection()">✕ Clear</button>
-            </div>
-          </div>
-
-          <div class="loader-download-box">
-            <div class="loader-download-title">⬇ Generate Download Link</div>
-            <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">
-              The <code style="color:var(--accent3);background:var(--surface2);padding:2px 6px;border-radius:4px;">/download</code>
-              endpoint requires a valid license key + HWID. Generate a test link here.
-            </p>
-            <div class="form-row" style="margin-bottom:0;">
-              <div class="form-field">
-                <label>License Key</label>
-                <input type="text" id="dlTestKey" placeholder="KEY-XXXX-XXXX" />
-              </div>
-              <div class="form-field">
-                <label>HWID</label>
-                <input type="text" id="dlTestHwid" placeholder="Hardware ID" />
-              </div>
-              <button class="btn btn-sm btn-cyan" onclick="genDownloadLink()" style="align-self:flex-end;">Generate Link</button>
-            </div>
-            <div class="dl-link-box" id="dlLinkResult" onclick="copyDlLink()" title="Click to copy"></div>
-            <p id="dlLinkHint" style="display:none;font-size:10px;color:var(--muted);margin-top:6px;">Click the link above to copy it.</p>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ── ACCOUNTS ── -->
-      <div class="panel" id="panel-accounts">
-        <div class="panel-header">
-          <div class="panel-title">👤 <span>Accounts</span></div>
-          <button class="btn btn-sm" onclick="loadAccounts()">↻ Refresh</button>
-        </div>
-        <div class="panel-body">
-          <div class="create-account-box">
-            <div class="create-account-box-title">Create Account</div>
-            <div class="form-row">
-              <div class="form-field">
-                <label>Username</label>
-                <input type="text" id="createUsername" placeholder="username" />
-              </div>
-              <div class="form-field">
-                <label>Password</label>
-                <input type="password" id="createPassword" placeholder="password" />
-              </div>
-              <div class="form-field">
-                <label>License Key</label>
-                <input type="text" id="createKey" placeholder="KEY-XXXX-XXXX" />
-              </div>
-              <button class="btn btn-sm btn-success" onclick="createAccount()" style="align-self:flex-end;">Create Account</button>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Username</th><th>Bound Key</th><th>Product</th><th>Expiration</th><th>Actions</th></tr>
-              </thead>
-              <tbody id="accountsTable">
-                <tr><td colspan="5"><div class="empty"><div class="icon">👤</div>No accounts loaded</div></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── KEY GENERATOR ── -->
-      <div class="panel" id="panel-generator">
-        <div class="panel-header">
-          <div class="panel-title">⚡ <span>Key Generator</span></div>
-        </div>
-        <div class="panel-body">
-          <div class="form-row" style="margin-bottom:16px;align-items:flex-end;">
-            <div class="form-field" style="max-width:100px;">
-              <label>Quantity</label>
-              <input type="number" id="genQty" value="1" min="1" max="1000" oninput="updateGenPreview()" />
-            </div>
-            <div class="form-field" style="max-width:100px;">
-              <label>Groups</label>
-              <input type="number" id="genGroups" value="3" min="1" max="10" oninput="updateGenPreview()" />
-            </div>
-            <div class="form-field" style="max-width:100px;">
-              <label>Chars/Group</label>
-              <input type="number" id="genChars" value="5" min="3" max="12" oninput="updateGenPreview()" />
-            </div>
-            <div class="form-field">
-              <label>Prefix</label>
-              <input type="text" id="genPrefix" value="TLINE" oninput="updateGenPreview()" />
-            </div>
-            <div class="form-field">
-              <label>Expiry Unit</label>
-              <div class="select-wrapper">
-                <select id="genExpiryUnit" onchange="toggleExpiryDuration()">
-                  <option value="seconds">Seconds</option>
-                  <option value="minutes">Minutes</option>
-                  <option value="hours">Hours</option>
-                  <option value="days">Days</option>
-                  <option value="weeks" selected>Weeks</option>
-                  <option value="months">Months</option>
-                  <option value="years">Years</option>
-                  <option value="lifetime">Lifetime</option>
-                </select>
-              </div>
-            </div>
-            <div class="form-field" style="max-width:120px;" id="genExpiryDurationWrapper">
-              <label>Expiry Duration</label>
-              <input type="number" id="genExpiryDuration" value="3" min="1" />
-            </div>
-            <button class="btn btn-sm btn-success" onclick="runGenerator()">Generate</button>
-          </div>
-          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--accent3);margin-bottom:16px;letter-spacing:0.05em;" id="genPreview">TLINE-XXXXX-XXXXX-XXXXX</div>
-          <textarea id="generatedKeys" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:12px;outline:none;resize:vertical;min-height:140px;line-height:1.9;" readonly placeholder="Generated keys will appear here..."></textarea>
-          <div style="display:flex;gap:8px;margin-top:12px;">
-            <button class="btn btn-sm btn-secondary" onclick="copyGeneratedKeys()">Copy All</button>
-            <button class="btn btn-sm btn-secondary" onclick="document.getElementById('generatedKeys').value=''">Clear</button>
-            <button class="btn btn-sm" style="margin-left:auto;" onclick="addGeneratedToSystem()">Add to System →</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── IP BLACKLIST ── -->
-      <div class="panel" id="panel-blacklist">
-        <div class="panel-header">
-          <div class="panel-title danger">⊘ <span style="color:var(--red)">IP Blacklist</span></div>
-          <button class="btn btn-sm" onclick="loadBlacklist()">↻ Refresh</button>
-        </div>
-        <div class="panel-body">
-
-          <div class="blacklist-add-box">
-            <div class="blacklist-add-title">Ban an IP Address</div>
-            <div class="form-row">
-              <div class="form-field" style="max-width:220px;">
-                <label>IP Address</label>
-                <input type="text" id="banIp" placeholder="e.g. 192.168.1.1" />
-              </div>
-              <div class="form-field">
-                <label>Reason</label>
-                <input type="text" id="banReason" placeholder="e.g. Brute force attempt" value="Manual ban" />
-              </div>
-              <button class="btn btn-sm btn-danger" onclick="doBanIp()" style="align-self:flex-end;">⊘ Blacklist IP</button>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>IP Address</th><th>Reason</th><th>Actions</th></tr>
-              </thead>
-              <tbody id="blacklistTable">
-                <tr><td colspan="3"><div class="empty"><div class="icon">⊘</div>No blacklisted IPs</div></td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="fail-tracker-box">
-            <div class="fail-tracker-title">
-              <span>⚡ Auto-Blacklist Tracker</span>
-              <div style="display:flex;gap:8px;align-items:center;">
-                <button class="btn btn-sm btn-secondary" onclick="loadFailTracker()">↻</button>
-                <button class="btn btn-sm btn-danger"    onclick="clearFailTracker()">Clear All</button>
-              </div>
-            </div>
-
-            <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;padding:12px 14px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap;">
-              <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Auto-Ban</span>
-                <div id="autoBanToggleWrap" onclick="toggleAutoBan()" style="cursor:pointer;width:44px;height:24px;border-radius:12px;background:var(--border);position:relative;transition:background 0.25s;flex-shrink:0;">
-                  <div id="autoBanThumb" style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform 0.25s;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>
+                <div class="image-url-row">
+                    <input type="text" id="avatarUrlInput" class="image-url-input" placeholder="Paste image URL (jpg/png)" value="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+                    <button id="setAvatarUrlBtn" class="set-image-btn"><i class="fas fa-link"></i> Set</button>
                 </div>
-                <span id="autoBanLabel" style="font-size:11px;font-weight:700;color:var(--muted);">OFF</span>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px;" id="thresholdRow">
-                <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Threshold (failures)</span>
-                <input type="number" id="autoBanThresholdInput" value="10" min="1" max="9999"
-                       style="width:72px;padding:6px 10px;font-size:12px;border-radius:6px;"
-                       onkeydown="if(event.key==='Enter')saveAutoBanConfig()" />
-                <button class="btn btn-sm" onclick="saveAutoBanConfig()" style="padding:6px 12px;font-size:11px;">Save</button>
-              </div>
+                <div class="auth-title">MPOSED</div>
+                <div class="auth-sub">AUTHENTICATION CORE • THE STANDARD</div>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-auth="login">LOGIN</button>
+                <button class="auth-tab" data-auth="signup">SIGN UP</button>
+            </div>
+            <div id="loginForm">
+                <input type="text" id="loginUsername" class="auth-input" placeholder="Username">
+                <input type="password" id="loginPassword" class="auth-input" placeholder="Password">
+                <button id="doLoginBtn" class="auth-btn"><i class="fas fa-arrow-right-to-bracket"></i> LOGIN</button>
+                <div id="loginError" class="error-msg"></div>
+            </div>
+            <div id="signupForm" style="display:none;">
+                <input type="text" id="regUsername" class="auth-input" placeholder="Username">
+                <input type="email" id="regEmail" class="auth-input" placeholder="Email">
+                <input type="password" id="regPassword" class="auth-input" placeholder="Password">
+                <input type="text" id="regLicense" class="auth-input" placeholder="License Key (optional)">
+                <button id="doSignupBtn" class="auth-btn"><i class="fas fa-user-plus"></i> CREATE ACCOUNT</button>
+                <div id="regError" class="error-msg"></div>
+            </div>
+            <div class="note-text"><i class="fas fa-image"></i> Click avatar or use URL to set your photo</div>
+        </div>
+
+        <!-- IMMORTAL DASHBOARD (MPOSED STYLE) -->
+        <div id="dashboard" class="dashboard">
+            <div class="brand-header">
+                <div class="logo">
+                    <h1>IMMORTAL</h1>
+                    <p>MPOSED DASHBOARD CONTROL CORE</p>
+                </div>
+                <button id="dashboardLogoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> EXIT</button>
             </div>
 
-            <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">
-              When enabled, IPs are automatically blacklisted after hitting the failure threshold.
-            </p>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>IP Address</th><th>Failed Attempts</th><th>Risk</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="failTrackerTable">
-                  <tr><td colspan="4"><div class="empty"><div class="icon">⚡</div>No failure data</div></td></tr>
-                </tbody>
-              </table>
+            <div class="dashboard-grid">
+                <!-- LEFT COLUMN -->
+                <div>
+                    <!-- MAIN CARD -->
+                    <div class="card">
+                        <div class="card-title"><i class="fas fa-chart-line"></i> MAIN // OVERVIEW</div>
+                        <div class="info-row"><span class="info-label">Active Subscriptions</span><span class="info-value" id="activeSubsCount">0</span></div>
+                    </div>
+
+                    <!-- ACCOUNT CARD (with IP) -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-title"><i class="fas fa-user-circle"></i> ACCOUNT</div>
+                        <div class="info-row"><span class="info-label">Username</span><span class="info-value" id="accountUsername">—</span></div>
+                        <div class="info-row"><span class="info-label">Email</span><span class="info-value" id="accountEmail">—</span></div>
+                        <div class="info-row"><span class="info-label">IP Address</span><span class="info-value" id="accountIp">Fetching...</span></div>
+                        <div class="info-row"><span class="info-label">Role</span><span class="info-value" id="accountRole">USER</span></div>
+                    </div>
+
+                    <!-- QUICK ACTIONS CARD -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-title"><i class="fas fa-bolt"></i> QUICK ACTIONS</div>
+                        <div class="quick-action-group">
+                            <div class="info-label"><i class="fas fa-ticket-alt"></i> License Key</div>
+                            <div class="flex-input">
+                                <input type="text" id="licenseKeyInput" class="action-input" placeholder="XXXX-XXXX-XXXX">
+                                <button id="activateKeyBtn" class="btn-action primary"><i class="fas fa-check"></i> Activate Key</button>
+                            </div>
+                        </div>
+                        <div class="quick-action-group">
+                            <div class="info-label"><i class="fas fa-redo-alt"></i> HWID reset reason</div>
+                            <textarea id="hwidResetReason" class="action-input" rows="2" placeholder="Explain why you need HWID reset..."></textarea>
+                            <button id="requestHwidResetBtn" class="btn-action" style="margin-top: 0.5rem; width:100%; justify-content:center;"><i class="fab fa-discord"></i> Request HWID Reset → Webhook</button>
+                        </div>
+                        <div class="quick-action-group">
+                            <button id="downloadLoaderBtnDash" class="btn-action download-btn" style="width:100%;" disabled><i class="fas fa-download"></i> DOWNLOAD LOADER</button>
+                            <div id="downloadMsg" class="status-badge">Activate a license to unlock</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN -->
+                <div>
+                    <!-- STATUS / REVIEWS (Keys Used) -->
+                    <div class="card">
+                        <div class="card-title"><i class="fas fa-star"></i> STATUS / REVIEWS</div>
+                        <div class="info-row"><span class="info-label">Keys Used</span><span class="info-value" id="keysUsedCount">0</span></div>
+                        <div class="info-row"><span class="info-label">License Status</span><span class="info-value" id="licenseStatusInfo">✖ No active license</span></div>
+                    </div>
+
+                    <!-- HWID + OPEN WEB MENU (combined) -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-title"><i class="fas fa-microchip"></i> HWID</div>
+                        <div class="hwid-box" id="hwidDisplay">ee22220c7e26601e99732b85...</div>
+                        <div id="openWebMenuBtn" class="open-web-menu">
+                            <i class="fas fa-globe"></i> <span>OPEN WEB MENU</span> <i class="fas fa-external-link-alt"></i>
+                        </div>
+                    </div>
+
+                    <!-- ACTIVATE SUBSCRIPTIONS (list) -->
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <div class="card-title"><i class="fas fa-gem"></i> ACTIVATE SUBSCRIPTIONS</div>
+                        <div id="subscriptionsList" class="subscription-list">
+                            <div style="color:#8f9bb3; text-align:center; padding:1rem;">✨ No active subscriptions ✨</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-
         </div>
-      </div>
-
-      <!-- ── LOGS ── -->
-      <div class="panel" id="panel-logs">
-        <div class="panel-header">
-          <div class="panel-title">▤ <span>Usage Logs</span></div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-sm btn-secondary" onclick="loadLogs()">↻ Refresh</button>
-            <button class="btn btn-sm btn-danger"    onclick="clearLogs()">Clear Logs</button>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="log-container" id="logContainer">
-            <div class="log-line">No logs loaded. Click Refresh.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── VALIDATE ── -->
-      <div class="panel" id="panel-validate">
-        <div class="panel-header">
-          <div class="panel-title">✦ <span>Validate / Test Auth</span></div>
-        </div>
-        <div class="panel-body">
-          <div id="validateModeToggle" style="display:flex;gap:8px;margin-bottom:20px;">
-            <button class="btn btn-sm" id="modeKeyBtn" onclick="setValidateMode('key')">Key Only</button>
-            <button class="btn btn-sm btn-secondary" id="modeAccountBtn" onclick="setValidateMode('account')">Username + Password</button>
-          </div>
-
-          <div id="validateModeKey">
-            <div class="form-row" style="margin-bottom:16px;">
-              <div class="form-field">
-                <label>Key</label>
-                <input type="text" id="validateKey" placeholder="Enter key to test..." />
-              </div>
-              <div class="form-field">
-                <label>HWID</label>
-                <input type="text" id="validateHwid" placeholder="Hardware ID..." />
-              </div>
-              <button class="btn btn-sm" onclick="doValidateKey()" style="align-self:flex-end;">Validate</button>
-            </div>
-          </div>
-
-          <div id="validateModeAccount" style="display:none;">
-            <div class="form-row" style="margin-bottom:16px;">
-              <div class="form-field">
-                <label>Username</label>
-                <input type="text" id="validateUsername" placeholder="Username..." />
-              </div>
-              <div class="form-field">
-                <label>Password</label>
-                <input type="password" id="validatePassword" placeholder="Password..." />
-              </div>
-              <div class="form-field">
-                <label>HWID (optional)</label>
-                <input type="text" id="validateAccountHwid" placeholder="Hardware ID..." />
-              </div>
-              <button class="btn btn-sm" onclick="doValidateAccount()" style="align-self:flex-end;">Test Login</button>
-            </div>
-          </div>
-
-          <div id="validateResult" style="display:none;"></div>
-        </div>
-      </div>
-
-    </main>
-  </div>
-</div>
-
-<div id="toast"></div>
-
-<!-- ══ SCRIPT ════════════════════════════════════════════════════════════════ -->
-<script>
-let API_BASE  = '';
-let ADMIN_KEY = '';
-let AUTH_MODE = 'key';
-
-const LS_URL  = 'tline_api_url';
-const LS_KEY  = 'tline_admin_key';
-const LS_MODE = 'tline_auth_mode';
-const SAFE_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-// ─── Init ─────────────────────────────────────────────────────────────────────
-
-window.addEventListener('DOMContentLoaded', () => {
-  const savedUrl  = localStorage.getItem(LS_URL);
-  const savedKey  = localStorage.getItem(LS_KEY);
-  const savedMode = localStorage.getItem(LS_MODE) || 'key';
-
-  if (savedUrl) document.getElementById('loginUrl').value = savedUrl;
-  if (savedKey) document.getElementById('loginKey').value = savedKey;
-
-  selectAuthMode(savedMode, true);
-
-  if (savedUrl && savedKey) {
-    document.getElementById('savedNote').style.display = 'block';
-    autoLogin(savedUrl, savedKey);
-  }
-
-  document.getElementById('loginKey').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
-
-  const dz = document.getElementById('dropZone');
-  dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault();
-    dz.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      document.getElementById('loaderFileInput').files = e.dataTransfer.files;
-      onFileSelected({ files: e.dataTransfer.files });
-    }
-  });
-
-  updateGenPreview();
-});
-
-// ─── Auth mode ────────────────────────────────────────────────────────────────
-
-function selectAuthMode(mode, silent = false) {
-  AUTH_MODE = mode;
-  document.getElementById('modeToggleKey').classList.toggle('active',     mode === 'key');
-  document.getElementById('modeToggleAccount').classList.toggle('active', mode === 'account');
-  if (!silent) localStorage.setItem(LS_MODE, mode);
-}
-
-// ─── Login ────────────────────────────────────────────────────────────────────
-
-async function autoLogin(url, key) {
-  try {
-    const r = await fetch(`${url}/stats?admin_key=${encodeURIComponent(key)}`);
-    const d = await r.json();
-    if (d.error) throw new Error();
-    API_BASE = url; ADMIN_KEY = key;
-    enterApp(d);
-  } catch {}
-}
-
-async function attemptLogin() {
-  const url      = document.getElementById('loginUrl').value.trim().replace(/\/$/, '');
-  const key      = document.getElementById('loginKey').value.trim();
-  const remember = document.getElementById('rememberMe').checked;
-  const errEl    = document.getElementById('loginError');
-  errEl.style.display = 'none';
-
-  if (!url || !key) {
-    errEl.textContent = 'Please fill in both fields.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  try {
-    const resp = await fetch(`${url}/stats?admin_key=${encodeURIComponent(key)}`);
-    if (!resp.ok) throw new Error('bad');
-    const data = await resp.json();
-    if (data.error) throw new Error('bad');
-    API_BASE = url; ADMIN_KEY = key;
-    if (remember) {
-      localStorage.setItem(LS_URL, url);
-      localStorage.setItem(LS_KEY, key);
-      localStorage.setItem(LS_MODE, AUTH_MODE);
-    } else {
-      localStorage.removeItem(LS_URL);
-      localStorage.removeItem(LS_KEY);
-      localStorage.removeItem(LS_MODE);
-    }
-    enterApp(data);
-  } catch {
-    errEl.textContent = 'Connection failed. Check URL and admin key.';
-    errEl.style.display = 'block';
-  }
-}
-
-function enterApp(statsData) {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').style.display         = 'block';
-  document.getElementById('apiUrlDisplay').textContent  = API_BASE.replace('https://', '');
-  document.getElementById('apiUrlFull').textContent     = API_BASE;
-  applyStats(statsData);
-  loadKeys();
-  loadBlacklist();
-  loadFailTracker();
-  checkLoaderStatus();
-  loadProducts();
-
-  const isAccount = AUTH_MODE === 'account';
-  document.getElementById('nav-accounts').style.display     = isAccount ? '' : 'none';
-  document.getElementById('st-accounts-card').style.display = isAccount ? '' : 'none';
-  document.getElementById('th-account').style.display       = isAccount ? '' : 'none';
-
-  setValidateMode(AUTH_MODE);
-  document.getElementById('validateModeToggle').style.display = isAccount ? '' : 'none';
-}
-
-function logout() {
-  API_BASE = ''; ADMIN_KEY = '';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('app').style.display         = 'none';
-  document.getElementById('loginKey').value = '';
-}
-
-function clearSaved() {
-  localStorage.removeItem(LS_URL);
-  localStorage.removeItem(LS_KEY);
-  localStorage.removeItem(LS_MODE);
-  document.getElementById('loginUrl').value = '';
-  document.getElementById('loginKey').value = '';
-  document.getElementById('savedNote').style.display = 'none';
-}
-
-// ─── API helper ───────────────────────────────────────────────────────────────
-
-async function api(path, method = 'GET', body = null) {
-  const opts = { method, headers: {} };
-  if (body) {
-    opts.body = new URLSearchParams(body);
-    opts.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-  }
-  const sep = path.includes('?') ? '&' : '?';
-  const r   = await fetch(`${API_BASE}${path}${sep}admin_key=${encodeURIComponent(ADMIN_KEY)}`, opts);
-  return r.json();
-}
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
-
-function toast(msg, type = 'info') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className   = `show ${type}`;
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.className = '', 3000);
-}
-
-// ─── Tab switching ────────────────────────────────────────────────────────────
-
-function showTab(tab) {
-  document.querySelectorAll('.panel').forEach(p   => p.classList.remove('visible'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById(`panel-${tab}`).classList.add('visible');
-  document.getElementById(`nav-${tab}`).classList.add('active');
-  if (tab === 'keys')      loadKeys();
-  if (tab === 'special')   loadSpecialKeys();
-  if (tab === 'logs')      loadLogs();
-  if (tab === 'accounts')  loadAccounts();
-  if (tab === 'products')  loadProducts();
-  if (tab === 'blacklist') { loadBlacklist(); loadFailTracker(); }
-  if (tab === 'loader')    checkLoaderStatus();
-}
-
-// ─── Stats ────────────────────────────────────────────────────────────────────
-
-function applyStats(data) {
-  document.getElementById('st-total').textContent      = data.total_keys      ?? '—';
-  document.getElementById('st-bound').textContent      = data.bound_keys      ?? '—';
-  document.getElementById('st-unbound').textContent    = data.unbound_keys    ?? '—';
-  document.getElementById('st-special').textContent    = data.special_keys    ?? '—';
-  document.getElementById('st-expired').textContent    = data.expired_keys    ?? '—';
-  document.getElementById('st-accounts').textContent   = data.total_accounts  ?? '—';
-  document.getElementById('st-products').textContent   = data.total_products  ?? '—';
-  document.getElementById('st-blacklisted').textContent = data.blacklisted_ips ?? '—';
-
-  const loaderEl = document.getElementById('st-loader');
-  if (data.loader_present === true) {
-    loaderEl.textContent = '✓ Ready';
-    loaderEl.style.color = 'var(--green)';
-  } else if (data.loader_present === false) {
-    loaderEl.textContent = '✕ Missing';
-    loaderEl.style.color = 'var(--red)';
-  } else {
-    loaderEl.textContent = '—';
-    loaderEl.style.color = '';
-  }
-}
-
-async function refreshAll() {
-  const data = await api('/stats');
-  applyStats(data);
-  toast('Stats refreshed', 'success');
-}
-
-// ─── Keys ─────────────────────────────────────────────────────────────────────
-
-async function loadKeys() {
-  const data  = await api('/list_keys');
-  const tbody = document.getElementById('keysTable');
-  if (!data.keys || data.keys.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="icon">⌗</div>No keys found</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = data.keys.map(k => {
-    const status   = k.bound
-      ? `<span class="badge badge-green">Bound</span>`
-      : `<span class="badge badge-cyan">Unbound</span>`;
-    const exp      = k.expiration
-      ? `<span class="badge badge-yellow" title="${k.expiration}">${k.expiration.substring(0,10)}</span>`
-      : `<span class="badge badge-purple">Permanent</span>`;
-    const hwid     = k.hwid
-      ? `<span style="color:var(--muted);font-size:11px;max-width:130px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${k.hwid}">${k.hwid}</span>`
-      : `<span style="color:var(--muted);font-size:11px;">—</span>`;
-    const acctCell = AUTH_MODE === 'account'
-      ? `<td>${k.username ? `<span style="color:var(--accent2);font-size:11px;">@${k.username}</span>` : `<span style="color:var(--muted);font-size:11px;">—</span>`}</td>`
-      : '';
-    const productCell = k.product_name
-      ? `<span class="badge badge-pink">${escapeHtml(k.product_name)}</span>`
-      : `<span style="color:var(--muted);font-size:11px;">—</span>`;
-    return `<tr>
-      <td><span class="key-val" onclick="navigator.clipboard.writeText('${k.key}');toast('Copied!','info')">${k.key}</span></td>
-      ${acctCell}
-      <td>${productCell}</td>
-      <td>${hwid}</td>
-      <td>${status}</td>
-      <td>${exp}</td>
-      <td><div class="actions">
-        ${k.bound ? `<button class="btn btn-sm btn-secondary" onclick="resetHwid('${k.key}')">Reset HWID</button>` : ''}
-        <button class="btn btn-sm btn-danger" onclick="removeKey('${k.key}')">Remove</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-function toggleNewKeyDuration() {
-  const unit = document.getElementById('newKeyExpiryUnit').value;
-  document.getElementById('newKeyDurationWrapper').style.display = unit === 'lifetime' ? 'none' : '';
-}
-
-function buildExpiryISOFrom(unitId, durationId) {
-  const unit = document.getElementById(unitId).value;
-  if (unit === 'lifetime') return null;
-  const duration = parseInt(document.getElementById(durationId).value) || 1;
-  const now = new Date();
-  ({
-    seconds: () => now.setSeconds(now.getSeconds() + duration),
-    minutes: () => now.setMinutes(now.getMinutes() + duration),
-    hours:   () => now.setHours(now.getHours() + duration),
-    days:    () => now.setDate(now.getDate() + duration),
-    weeks:   () => now.setDate(now.getDate() + duration * 7),
-    months:  () => now.setMonth(now.getMonth() + duration),
-    years:   () => now.setFullYear(now.getFullYear() + duration),
-  })[unit]?.();
-  return now.toISOString();
-}
-
-async function addKey() {
-  const key = document.getElementById('newKey').value.trim();
-  if (!key) return toast('Key cannot be empty', 'error');
-  const exp  = buildExpiryISOFrom('newKeyExpiryUnit', 'newKeyExpiryDuration');
-  const body = { key };
-  if (exp) body.expiration = exp;
-  const data = await api('/add_key', 'POST', body);
-  if (data.error) return toast(data.error, 'error');
-  toast('Key added successfully', 'success');
-  document.getElementById('newKey').value = '';
-  loadKeys(); refreshAll();
-}
-
-async function removeKey(key) {
-  if (!confirm(`Remove key: ${key}?`)) return;
-  const data = await api('/remove_key', 'POST', { key });
-  if (data.error) return toast(data.error, 'error');
-  toast('Key removed', 'success');
-  loadKeys(); refreshAll();
-}
-
-async function resetHwid(key) {
-  const data = await api('/reset_hwid', 'POST', { key });
-  if (data.error) return toast(data.error, 'error');
-  toast('HWID reset', 'success');
-  loadKeys();
-}
-
-// ─── Special keys ─────────────────────────────────────────────────────────────
-
-async function loadSpecialKeys() {
-  const data  = await api('/list_special_keys');
-  const tbody = document.getElementById('specialTable');
-  if (!data.keys || data.keys.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="3"><div class="empty"><div class="icon">★</div>No special keys</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = data.keys.map(k => `<tr>
-    <td><span class="key-val" onclick="navigator.clipboard.writeText('${k}');toast('Copied!','info')">${k}</span></td>
-    <td><span class="badge badge-purple">Special</span></td>
-    <td><button class="btn btn-sm btn-danger" onclick="removeSpecialKey('${k}')">Remove</button></td>
-  </tr>`).join('');
-}
-
-async function addSpecialKey() {
-  const key = document.getElementById('newSpecialKey').value.trim();
-  if (!key) return toast('Key cannot be empty', 'error');
-  const data = await api('/add_special_key', 'POST', { key });
-  if (data.error) return toast(data.error, 'error');
-  toast('Special key added', 'success');
-  document.getElementById('newSpecialKey').value = '';
-  loadSpecialKeys(); refreshAll();
-}
-
-async function removeSpecialKey(key) {
-  if (!confirm(`Remove special key: ${key}?`)) return;
-  await api('/remove_special_key', 'POST', { key });
-  toast('Special key removed', 'success');
-  loadSpecialKeys(); refreshAll();
-}
-
-// ─── Products ────────────────────────────────────────────────────────────────
-
-async function loadProducts() {
-  const data  = await api('/list_products');
-  const tbody = document.getElementById('productsTable');
-  const sel   = document.getElementById('assignProductId');
-  const badge = document.getElementById('navProductsCount');
-
-  if (!data.products || data.products.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4"><div class="empty"><div class="icon">📦</div>No products found</div></td></tr>`;
-    sel.innerHTML   = '<option value="">— No products —</option>';
-    badge.style.display = 'none';
-    return;
-  }
-
-  badge.textContent   = data.products.length;
-  badge.style.display = '';
-
-  tbody.innerHTML = data.products.map(p => `<tr>
-    <td><span class="badge badge-pink">${escapeHtml(p.product_id)}</span></td>
-    <td style="color:var(--text);font-size:12px;font-weight:600;">${escapeHtml(p.product_name)}</td>
-    <td style="color:var(--muted);font-size:12px;">${p.key_count} key${p.key_count !== 1 ? 's' : ''}</td>
-    <td><div class="actions">
-      <button class="btn btn-sm btn-danger" onclick="removeProduct('${escapeHtml(p.product_id)}')">Remove</button>
-    </div></td>
-  </tr>`).join('');
-
-  sel.innerHTML = '<option value="">— Select a product —</option>' + data.products.map(p =>
-    `<option value="${escapeHtml(p.product_id)}">${escapeHtml(p.product_name)}</option>`
-  ).join('');
-}
-
-async function addProduct() {
-  const pid  = document.getElementById('newProductId').value.trim().toUpperCase();
-  const name = document.getElementById('newProductName').value.trim();
-  if (!pid || !name) return toast('Product ID and name are required', 'error');
-  const data = await api('/add_product', 'POST', { product_id: pid, product_name: name });
-  if (data.error) return toast(data.error, 'error');
-  toast(`Product "${name}" added`, 'success');
-  document.getElementById('newProductId').value   = '';
-  document.getElementById('newProductName').value = '';
-  loadProducts(); refreshAll();
-}
-
-async function removeProduct(pid) {
-  if (!confirm(`Remove product "${pid}"? All key assignments will be cleared.`)) return;
-  const data = await api('/remove_product', 'POST', { product_id: pid });
-  if (data.error) return toast(data.error, 'error');
-  toast('Product removed', 'success');
-  loadProducts(); loadKeys(); refreshAll();
-}
-
-async function assignProduct() {
-  const key = document.getElementById('assignKey').value.trim();
-  const pid = document.getElementById('assignProductId').value;
-  if (!key)  return toast('Enter a license key', 'error');
-  if (!pid)  return toast('Select a product', 'error');
-  const data = await api('/assign_product', 'POST', { key, product_id: pid });
-  if (data.error) return toast(data.error, 'error');
-  toast(data.message, 'success');
-  document.getElementById('assignKey').value = '';
-  loadProducts(); loadKeys();
-}
-
-async function unassignProduct() {
-  const key = document.getElementById('assignKey').value.trim();
-  if (!key) return toast('Enter a license key to unassign', 'error');
-  const data = await api('/unassign_product', 'POST', { key });
-  if (data.error) return toast(data.error, 'error');
-  toast('Product unassigned from key', 'success');
-  document.getElementById('assignKey').value = '';
-  loadProducts(); loadKeys();
-}
-
-// ─── Loader ───────────────────────────────────────────────────────────────────
-
-function onFileSelected(input) {
-  const file  = input.files && input.files[0];
-  const label = document.getElementById('dzLabel');
-  if (file) {
-    label.className   = 'dz-file';
-    label.textContent = `${file.name}  (${(file.size / 1048576).toFixed(2)} MB)`;
-  } else {
-    label.className   = 'dz-label';
-    label.textContent = 'Drop your .exe here, or click to browse';
-  }
-}
-
-function clearFileSelection() {
-  document.getElementById('loaderFileInput').value = '';
-  onFileSelected({ files: [] });
-}
-
-async function checkLoaderStatus() {
-  const box   = document.getElementById('loaderStatusBox');
-  const badge = document.getElementById('navLoaderBadge');
-  try {
-    const data = await api('/loader_status');
-    if (data.exists) {
-      const mb  = (data.size_bytes / 1048576).toFixed(2);
-      const mod = data.last_modified ? data.last_modified.substring(0,19).replace('T',' ') : '—';
-      box.innerHTML = `
-        <span style="color:var(--green);font-weight:700;font-family:'Syne',sans-serif;">✓ Loader ready</span>
-        <span style="color:var(--muted);">│</span>
-        <span style="color:var(--text);">${data.filename || 'loader.exe'}</span>
-        <span style="color:var(--muted);">${mb} MB</span>
-        <span style="color:var(--muted);">│ Modified: ${mod}</span>`;
-      badge.style.display = '';
-      document.getElementById('st-loader').textContent = '✓ Ready';
-      document.getElementById('st-loader').style.color = 'var(--green)';
-    } else {
-      box.innerHTML = `
-        <span style="color:var(--red);font-weight:700;font-family:'Syne',sans-serif;">✕ No loader on server</span>
-        <span style="color:var(--muted);">Upload one below to enable downloads.</span>`;
-      badge.style.display = 'none';
-      document.getElementById('st-loader').textContent = '✕ Missing';
-      document.getElementById('st-loader').style.color = 'var(--red)';
-    }
-  } catch {
-    box.innerHTML = `<span style="color:var(--red);">Failed to fetch loader status.</span>`;
-  }
-}
-
-async function uploadLoader() {
-  const fileInput = document.getElementById('loaderFileInput');
-  if (!fileInput.files || !fileInput.files.length) return toast('Select an .exe file first', 'error');
-
-  const file = fileInput.files[0];
-  if (!file.name.toLowerCase().endsWith('.exe')) return toast('Only .exe files are allowed', 'error');
-
-  const progressWrap = document.getElementById('uploadProgressWrap');
-  const progressBar  = document.getElementById('uploadProgressBar');
-  const progressLbl  = document.getElementById('uploadProgressLabel');
-
-  progressWrap.style.display = 'block';
-  progressBar.style.width    = '0%';
-  progressLbl.textContent    = `Uploading ${file.name} (${(file.size / 1048576).toFixed(2)} MB)...`;
-
-  const formData = new FormData();
-  formData.append('file', file);
-
-  try {
-    await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${API_BASE}/upload_loader?admin_key=${encodeURIComponent(ADMIN_KEY)}`);
-
-      xhr.upload.addEventListener('progress', e => {
-        if (e.lengthComputable) {
-          const pct = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = `${pct}%`;
-          progressLbl.textContent = `Uploading... ${pct}%`;
+    </div>
+
+    <script>
+        // ---------- CONFIG ----------
+        const API_BASE = 'https://immortal1234.pythonanywhere.com';
+        // ⚠️ REPLACE WITH YOUR ACTUAL DISCORD WEBHOOK URL FOR HWID RESET REQUESTS
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/your_webhook_id/your_webhook_token';
+
+        // HWID persistent
+        function getOrCreateHWID() {
+            let hwid = localStorage.getItem('immortal_hwid');
+            if (!hwid) {
+                hwid = 'HWID-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8).toUpperCase();
+                localStorage.setItem('immortal_hwid', hwid);
+            }
+            return hwid;
         }
-      });
 
-      xhr.onload = () => {
-        if (xhr.status === 0) {
-          reject(new Error('Network error — server unreachable or CORS blocked'));
-          return;
+        let currentUser = null;
+        let activeProducts = [];      // { name, tier }
+        let activationHistory = [];
+        let currentHwid = getOrCreateHWID();
+
+        // DOM elements
+        const authPanel = document.getElementById('authPanel');
+        const dashboardDiv = document.getElementById('dashboard');
+        const loginFormDiv = document.getElementById('loginForm');
+        const signupFormDiv = document.getElementById('signupForm');
+        const loginError = document.getElementById('loginError');
+        const regError = document.getElementById('regError');
+
+        const activeSubsSpan = document.getElementById('activeSubsCount');
+        const accountUserSpan = document.getElementById('accountUsername');
+        const accountEmailSpan = document.getElementById('accountEmail');
+        const accountIpSpan = document.getElementById('accountIp');
+        const accountRoleSpan = document.getElementById('accountRole');
+        const keysUsedSpan = document.getElementById('keysUsedCount');
+        const licenseStatusSpan = document.getElementById('licenseStatusInfo');
+        const hwidDisplaySpan = document.getElementById('hwidDisplay');
+        const subsContainer = document.getElementById('subscriptionsList');
+        const downloadBtnDash = document.getElementById('downloadLoaderBtnDash');
+        const downloadMsgSpan = document.getElementById('downloadMsg');
+        const licenseKeyInput = document.getElementById('licenseKeyInput');
+        const activateBtn = document.getElementById('activateKeyBtn');
+        const requestHwidBtn = document.getElementById('requestHwidResetBtn');
+        const hwidReason = document.getElementById('hwidResetReason');
+        const openWebBtn = document.getElementById('openWebMenuBtn');
+
+        // Avatar URL handling
+        const avatarImg = document.getElementById('avatarImg');
+        const avatarUrlInput = document.getElementById('avatarUrlInput');
+        const setAvatarBtn = document.getElementById('setAvatarUrlBtn');
+        const authAvatarBtn = document.getElementById('authAvatarBtn');
+
+        function setAvatarFromUrl(url) {
+            if (url && url.trim() !== '') {
+                avatarImg.src = url.trim();
+                localStorage.setItem('user_avatar_url', url.trim());
+            }
         }
-        try {
-          const data = JSON.parse(xhr.responseText);
-          if (data.error) reject(new Error(data.error));
-          else resolve(data);
-        } catch {
-          reject(new Error(`Unexpected response (HTTP ${xhr.status})`));
+        setAvatarBtn.addEventListener('click', () => setAvatarFromUrl(avatarUrlInput.value));
+        authAvatarBtn.addEventListener('click', () => {
+            const newUrl = prompt('Enter image URL for your avatar:', avatarUrlInput.value);
+            if (newUrl) setAvatarFromUrl(newUrl);
+        });
+        // Load saved avatar
+        const savedAvatar = localStorage.getItem('user_avatar_url');
+        if (savedAvatar) setAvatarFromUrl(savedAvatar);
+
+        // Fetch public IP
+        async function fetchUserIP() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                accountIpSpan.innerText = data.ip || 'Unknown';
+            } catch(e) { accountIpSpan.innerText = '127.0.0.1'; }
         }
-      };
 
-      xhr.onerror   = () => reject(new Error('Network error — check your API URL and server'));
-      xhr.ontimeout = () => reject(new Error('Upload timed out'));
-      xhr.timeout   = 0;
-      xhr.send(formData);
-    });
+        function saveUserData() {
+            if (!currentUser) return;
+            localStorage.setItem(`mposed_subs_${currentUser.username}`, JSON.stringify(activeProducts));
+            localStorage.setItem(`mposed_keys_used_${currentUser.username}`, activationHistory.length);
+            localStorage.setItem(`mposed_licenses_${currentUser.username}`, JSON.stringify(activationHistory));
+        }
 
-    progressBar.style.width = '100%';
-    progressLbl.textContent = 'Upload complete!';
-    setTimeout(() => { progressWrap.style.display = 'none'; }, 1500);
+        function loadUserData() {
+            if (!currentUser) return;
+            const storedSubs = localStorage.getItem(`mposed_subs_${currentUser.username}`);
+            activeProducts = storedSubs ? JSON.parse(storedSubs) : [];
+            const storedLicenses = localStorage.getItem(`mposed_licenses_${currentUser.username}`);
+            activationHistory = storedLicenses ? JSON.parse(storedLicenses) : [];
+            refreshUI();
+        }
 
-    toast('Loader uploaded successfully!', 'success');
-    clearFileSelection();
-    checkLoaderStatus();
-    refreshAll();
-  } catch (err) {
-    progressWrap.style.display = 'none';
-    toast(err.message || 'Upload failed', 'error');
-  }
-}
+        function refreshUI() {
+            activeSubsSpan.innerText = activeProducts.length;
+            if (activeProducts.length === 0) {
+                subsContainer.innerHTML = '<div style="color:#8f9bb3; text-align:center; padding:1rem;">✨ No active subscriptions ✨<br>Activate a license key</div>';
+            } else {
+                let html = '';
+                activeProducts.forEach(prod => {
+                    html += `<div class="sub-item"><span class="sub-name"><i class="fas fa-crown"></i> ${escapeHtml(prod.name)}</span><span class="sub-tier">${escapeHtml(prod.tier || 'LIFETIME')}</span></div>`;
+                });
+                subsContainer.innerHTML = html;
+            }
+            keysUsedSpan.innerText = activationHistory.length;
+            const hasActive = activeProducts.length > 0;
+            if (hasActive) {
+                downloadBtnDash.disabled = false;
+                downloadMsgSpan.innerText = "✓ Ready to download loader";
+                downloadBtnDash.style.opacity = "1";
+            } else {
+                downloadBtnDash.disabled = true;
+                downloadMsgSpan.innerText = "🔒 Activate a license to unlock";
+                downloadBtnDash.style.opacity = "0.5";
+            }
+            if (activeProducts.length > 0) {
+                const lastProd = activeProducts[0].name;
+                licenseStatusSpan.innerHTML = `<i class="fas fa-check-circle"></i> Active (${lastProd})`;
+                licenseStatusSpan.style.color = "#a5ffc3";
+            } else {
+                licenseStatusSpan.innerHTML = `<i class="fas fa-info-circle"></i> No active license`;
+                licenseStatusSpan.style.color = "#ffb7c0";
+            }
+            saveUserData();
+        }
 
-function genDownloadLink() {
-  const key  = document.getElementById('dlTestKey').value.trim();
-  const hwid = document.getElementById('dlTestHwid').value.trim();
-  if (!key || !hwid) return toast('Key and HWID are required', 'error');
-  const url  = `${API_BASE}/download?key=${encodeURIComponent(key)}&hwid=${encodeURIComponent(hwid)}`;
-  const box  = document.getElementById('dlLinkResult');
-  const hint = document.getElementById('dlLinkHint');
-  box.style.display  = 'block';
-  hint.style.display = 'block';
-  box.textContent    = url;
-  box._url           = url;
-  toast('Link generated — click to copy', 'info');
-}
+        function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
 
-function copyDlLink() {
-  const el = document.getElementById('dlLinkResult');
-  if (el._url) { navigator.clipboard.writeText(el._url); toast('Link copied!', 'success'); }
-}
+        async function activateLicense(licenseKey) {
+            if (!currentUser) { alert("Not logged in"); return false; }
+            const hwid = currentHwid;
+            try {
+                const url = `${API_BASE}/validate?key=${encodeURIComponent(licenseKey)}&hwid=${encodeURIComponent(hwid)}&username=${encodeURIComponent(currentUser.username)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.valid === true) {
+                    let productName = data.product || "Standard Access";
+                    if (licenseKey.toUpperCase().includes("SPOOFER")) productName = "Perm-Spoofer";
+                    if (licenseKey.toUpperCase().includes("VALORANT")) productName = "Valorant-Internal";
+                    const newSub = { name: productName, tier: "LIFETIME" };
+                    if (!activeProducts.some(p => p.name === productName)) activeProducts.push(newSub);
+                    if (!activationHistory.includes(licenseKey)) activationHistory.push(licenseKey);
+                    refreshUI();
+                    licenseKeyInput.value = "";
+                    licenseStatusSpan.innerHTML = `<i class="fas fa-check-circle"></i> Activated: ${productName}`;
+                    setTimeout(() => refreshUI(), 800);
+                    return true;
+                } else {
+                    let errMsg = data.message || data.error || "Invalid license / HWID mismatch.";
+                    licenseStatusSpan.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${errMsg}`;
+                    return false;
+                }
+            } catch(err) {
+                licenseStatusSpan.innerHTML = `<i class="fas fa-wifi"></i> Network error (CORS?)`;
+                return false;
+            }
+        }
 
-// ─── IP Blacklist ─────────────────────────────────────────────────────────────
+        async function sendHwidResetRequest(reason) {
+            if (!currentUser) { alert("Not logged in"); return; }
+            if (!reason.trim()) { alert("Provide a reason for HWID reset"); return; }
+            if (!DISCORD_WEBHOOK_URL.includes("discord.com")) {
+                alert("[DEMO] Set real Discord webhook URL in the code to send requests.\nCheck DISCORD_WEBHOOK_URL variable.");
+                console.log("WEBHOOK MOCK:", { user: currentUser.username, hwid: currentHwid, reason });
+                licenseStatusSpan.innerHTML = "<i class='fab fa-discord'></i> Request sent (webhook not configured)";
+                hwidReason.value = "";
+                return;
+            }
+            const payload = { content: `**🔁 HWID RESET REQUEST**\n**User:** ${currentUser.username}\n**Email:** ${currentUser.email}\n**HWID:** \`${currentHwid}\`\n**Reason:** ${reason}\n**Time:** ${new Date().toISOString()}` };
+            try {
+                const res = await fetch(DISCORD_WEBHOOK_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                if (res.ok) {
+                    licenseStatusSpan.innerHTML = "<i class='fas fa-check'></i> HWID reset request sent to staff.";
+                    hwidReason.value = "";
+                } else alert("Webhook error, check URL");
+            } catch(e) { alert("Webhook failed: " + e.message); }
+        }
 
-async function loadBlacklist() {
-  const data  = await api('/list_blacklist');
-  const tbody = document.getElementById('blacklistTable');
-  const badge = document.getElementById('navBlacklistCount');
+        async function performLogin(username, password) {
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('hwid', currentHwid);
+            try {
+                const response = await fetch(`${API_BASE}/login`, { method: 'POST', body: formData });
+                const data = await response.json();
+                if (data.valid === true) {
+                    currentUser = { username, email: data.email || `${username}@immortal.net`, role: "USER" };
+                    accountUserSpan.innerText = currentUser.username;
+                    accountEmailSpan.innerText = currentUser.email;
+                    accountRoleSpan.innerText = currentUser.role;
+                    hwidDisplaySpan.innerText = currentHwid.substring(0, 22) + "...";
+                    await fetchUserIP();
+                    loadUserData();
+                    authPanel.style.display = 'none';
+                    dashboardDiv.style.display = 'block';
+                    return true;
+                } else {
+                    loginError.innerText = data.error || "Invalid credentials";
+                    return false;
+                }
+            } catch(e) { loginError.innerText = "Cannot reach auth server"; return false; }
+        }
 
-  if (!data.blacklist || data.blacklist.length === 0) {
-    tbody.innerHTML     = `<tr><td colspan="3"><div class="empty"><div class="icon">⊘</div>No blacklisted IPs — system is clean</div></td></tr>`;
-    badge.style.display = 'none';
-  } else {
-    badge.textContent   = data.blacklist.length;
-    badge.style.display = '';
-    tbody.innerHTML = data.blacklist.map(entry => `<tr>
-      <td><span style="font-family:'JetBrains Mono',monospace;color:var(--red);font-size:12px;cursor:pointer;"
-                onclick="navigator.clipboard.writeText('${escapeHtml(entry.ip)}');toast('Copied!','info')"
-                title="Click to copy">${escapeHtml(entry.ip)}</span></td>
-      <td style="color:var(--muted);font-size:11px;">${escapeHtml(entry.reason)}</td>
-      <td><div class="actions">
-        <button class="btn btn-sm btn-success" onclick="doUnbanIp('${escapeHtml(entry.ip)}')">Unban</button>
-      </div></td>
-    </tr>`).join('');
-  }
-  if (data.total !== undefined) document.getElementById('st-blacklisted').textContent = data.total;
-}
+        async function performSignup(username, email, password, licenseKey) {
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('key', licenseKey || '');
+            formData.append('email', email);
+            try {
+                const response = await fetch(`${API_BASE}/create_account`, { method: 'POST', body: formData });
+                const data = await response.json();
+                if (response.ok) {
+                    regError.style.color = "#a5ffc3";
+                    regError.innerText = "✓ Account created! Please login.";
+                    setTimeout(() => switchAuthTab('login'), 1500);
+                    return true;
+                } else {
+                    regError.innerText = data.error || "Signup failed";
+                    return false;
+                }
+            } catch(e) { regError.innerText = "Connection error"; return false; }
+        }
 
-async function doBanIp() {
-  const ip     = document.getElementById('banIp').value.trim();
-  const reason = document.getElementById('banReason').value.trim() || 'Manual ban';
-  if (!ip) return toast('IP address is required', 'error');
-  const data = await api('/blacklist_ip', 'POST', { ip, reason });
-  if (data.error) return toast(data.error, 'error');
-  toast(`IP ${ip} blacklisted`, 'success');
-  document.getElementById('banIp').value     = '';
-  document.getElementById('banReason').value = 'Manual ban';
-  loadBlacklist(); refreshAll();
-}
+        function switchAuthTab(tab) {
+            if (tab === 'login') {
+                loginFormDiv.style.display = 'block';
+                signupFormDiv.style.display = 'none';
+                document.querySelectorAll('.auth-tab').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-auth="login"]').classList.add('active');
+            } else {
+                loginFormDiv.style.display = 'none';
+                signupFormDiv.style.display = 'block';
+                document.querySelectorAll('.auth-tab').forEach(btn => btn.classList.remove('active'));
+                document.querySelector('[data-auth="signup"]').classList.add('active');
+            }
+        }
 
-async function doUnbanIp(ip) {
-  if (!confirm(`Remove ${ip} from blacklist?`)) return;
-  const data = await api('/unblacklist_ip', 'POST', { ip });
-  if (data.error) return toast(data.error, 'error');
-  toast(`IP ${ip} unbanned`, 'success');
-  loadBlacklist(); refreshAll();
-}
+        function downloadLoader() {
+            if (activeProducts.length === 0) { alert("No active license to download loader."); return; }
+            const firstLic = activationHistory[0];
+            if (!firstLic) { alert("License key not found."); return; }
+            window.open(`${API_BASE}/download?key=${encodeURIComponent(firstLic)}&hwid=${encodeURIComponent(currentHwid)}`, '_blank');
+        }
 
-// ─── Fail tracker ─────────────────────────────────────────────────────────────
+        // Event binding
+        document.querySelectorAll('.auth-tab').forEach(btn => {
+            btn.addEventListener('click', () => switchAuthTab(btn.getAttribute('data-auth')));
+        });
+        document.getElementById('doLoginBtn').addEventListener('click', async () => {
+            const user = document.getElementById('loginUsername').value.trim();
+            const pass = document.getElementById('loginPassword').value;
+            if (!user || !pass) { loginError.innerText = "Enter credentials"; return; }
+            await performLogin(user, pass);
+        });
+        document.getElementById('doSignupBtn').addEventListener('click', async () => {
+            const user = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPassword').value;
+            const lic = document.getElementById('regLicense').value.trim();
+            if (!user || !email || !pass) { regError.innerText = "All fields required"; return; }
+            await performSignup(user, email, pass, lic);
+        });
+        document.getElementById('dashboardLogoutBtn').addEventListener('click', () => {
+            currentUser = null; activeProducts = []; activationHistory = [];
+            authPanel.style.display = 'block';
+            dashboardDiv.style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        });
+        activateBtn.addEventListener('click', async () => {
+            const key = licenseKeyInput.value.trim();
+            if (!key) { licenseStatusSpan.innerHTML = "Enter a license key"; return; }
+            await activateLicense(key);
+        });
+        requestHwidBtn.addEventListener('click', () => sendHwidResetRequest(hwidReason.value));
+        downloadBtnDash.addEventListener('click', downloadLoader);
+        openWebBtn.addEventListener('click', () => alert("Web menu: external panel (simulated - integrate your loader menu)"));
 
-let _autoBanEnabled   = false;
-let _autoBanThreshold = 10;
-
-function applyAutoBanUI(enabled, threshold) {
-  _autoBanEnabled   = enabled;
-  _autoBanThreshold = threshold;
-
-  const wrap  = document.getElementById('autoBanToggleWrap');
-  const thumb = document.getElementById('autoBanThumb');
-  const label = document.getElementById('autoBanLabel');
-  const tRow  = document.getElementById('thresholdRow');
-
-  if (enabled) {
-    wrap.style.background    = 'var(--green)';
-    thumb.style.transform    = 'translateX(20px)';
-    label.textContent        = 'ON';
-    label.style.color        = 'var(--green)';
-    tRow.style.opacity       = '1';
-    tRow.style.pointerEvents = '';
-  } else {
-    wrap.style.background    = 'var(--border)';
-    thumb.style.transform    = 'translateX(0)';
-    label.textContent        = 'OFF';
-    label.style.color        = 'var(--muted)';
-    tRow.style.opacity       = '0.45';
-    tRow.style.pointerEvents = 'none';
-  }
-  document.getElementById('autoBanThresholdInput').value = threshold;
-}
-
-async function toggleAutoBan() {
-  const newEnabled = !_autoBanEnabled;
-  const data = await api('/set_autoban_config', 'POST', {
-    enabled:   newEnabled ? 'true' : 'false',
-    threshold: _autoBanThreshold
-  });
-  if (data.error) return toast(data.error, 'error');
-  applyAutoBanUI(newEnabled, _autoBanThreshold);
-  toast(`Auto-ban ${newEnabled ? 'enabled' : 'disabled'}`, newEnabled ? 'success' : 'info');
-}
-
-async function saveAutoBanConfig() {
-  const threshold = parseInt(document.getElementById('autoBanThresholdInput').value) || 10;
-  const data = await api('/set_autoban_config', 'POST', {
-    enabled:   _autoBanEnabled ? 'true' : 'false',
-    threshold: threshold
-  });
-  if (data.error) return toast(data.error, 'error');
-  applyAutoBanUI(_autoBanEnabled, threshold);
-  toast(`Threshold set to ${threshold} failures`, 'success');
-}
-
-async function loadFailTracker() {
-  const data  = await api('/list_fail_tracker');
-  const tbody = document.getElementById('failTrackerTable');
-  applyAutoBanUI(data.enabled, data.threshold);
-
-  if (!data.entries || data.entries.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4"><div class="empty"><div class="icon">⚡</div>No failure data</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = data.entries.map(entry => {
-    const pct  = data.threshold > 0 ? Math.min(100, Math.round((entry.failures / data.threshold) * 100)) : 0;
-    const risk = pct >= 90 ? `<span class="badge badge-red">Critical (${pct}%)</span>`
-               : pct >= 60 ? `<span class="badge badge-orange">High (${pct}%)</span>`
-               : pct >= 30 ? `<span class="badge badge-yellow">Medium (${pct}%)</span>`
-               :              `<span class="badge badge-cyan">Low (${pct}%)</span>`;
-    return `<tr>
-      <td style="font-family:'JetBrains Mono',monospace;color:var(--orange);font-size:12px;">${escapeHtml(entry.ip)}</td>
-      <td style="color:var(--text);font-size:13px;font-weight:600;">${entry.failures}</td>
-      <td>${data.enabled ? risk : '<span class="badge badge-cyan">Auto-ban off</span>'}</td>
-      <td><div class="actions">
-        <button class="btn btn-sm btn-secondary" onclick="doResetFailCount('${escapeHtml(entry.ip)}')">Reset</button>
-        <button class="btn btn-sm btn-danger"    onclick="doBanFromTracker('${escapeHtml(entry.ip)}')">Ban Now</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-async function doResetFailCount(ip) {
-  const data = await api('/reset_fail_count', 'POST', { ip });
-  if (data.error) return toast(data.error, 'error');
-  toast(`Failure count reset for ${ip}`, 'success');
-  loadFailTracker();
-}
-
-async function doBanFromTracker(ip) {
-  if (!confirm(`Manually blacklist ${ip}?`)) return;
-  const data = await api('/blacklist_ip', 'POST', { ip, reason: 'Manually banned from fail tracker' });
-  if (data.error) return toast(data.error, 'error');
-  toast(`IP ${ip} blacklisted`, 'success');
-  loadBlacklist(); loadFailTracker(); refreshAll();
-}
-
-async function clearFailTracker() {
-  if (!confirm('Clear all failure tracking data?')) return;
-  await api('/clear_fail_tracker', 'POST');
-  toast('Fail tracker cleared', 'success');
-  loadFailTracker();
-}
-
-// ─── Logs ─────────────────────────────────────────────────────────────────────
-
-async function loadLogs() {
-  const data      = await api('/get_logs?limit=200');
-  const container = document.getElementById('logContainer');
-  if (!data.logs || data.logs.length === 0) {
-    container.innerHTML = '<div class="log-line">No logs found.</div>';
-    return;
-  }
-  container.innerHTML = data.logs.reverse().map(line => {
-    const isValid   = line.includes('Valid=True');
-    const isInvalid = line.includes('Valid=False');
-    return `<div class="log-line ${isValid ? 'valid' : isInvalid ? 'invalid' : ''}">${escapeHtml(line)}</div>`;
-  }).join('');
-}
-
-async function clearLogs() {
-  if (!confirm('Clear all logs?')) return;
-  await api('/clear_logs', 'POST');
-  toast('Logs cleared', 'success');
-  loadLogs();
-}
-
-// ─── Accounts ─────────────────────────────────────────────────────────────────
-
-async function createAccount() {
-  const username = document.getElementById('createUsername').value.trim();
-  const password = document.getElementById('createPassword').value.trim();
-  const key      = document.getElementById('createKey').value.trim();
-  if (!username || !password || !key) return toast('All fields are required', 'error');
-  const data = await api('/create_account', 'POST', { username, password, key });
-  if (data.error) return toast(data.error, 'error');
-  toast(`Account @${username} created`, 'success');
-  document.getElementById('createUsername').value = '';
-  document.getElementById('createPassword').value = '';
-  document.getElementById('createKey').value      = '';
-  loadAccounts(); refreshAll();
-}
-
-async function loadAccounts() {
-  const data  = await api('/list_accounts');
-  const tbody = document.getElementById('accountsTable');
-  if (!data.accounts || data.accounts.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="icon">👤</div>No accounts found</div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = data.accounts.map(a => {
-    const exp = a.expiration
-      ? `<span class="badge badge-yellow" title="${a.expiration}">${a.expiration.substring(0,10)}</span>`
-      : `<span class="badge badge-purple">Permanent</span>`;
-    const prod = a.product_name
-      ? `<span class="badge badge-pink">${escapeHtml(a.product_name)}</span>`
-      : `<span style="color:var(--muted);font-size:11px;">—</span>`;
-    return `<tr>
-      <td style="color:var(--accent2);font-size:12px;">@${escapeHtml(a.username)}</td>
-      <td><span class="key-val" onclick="navigator.clipboard.writeText('${a.key}');toast('Copied!','info')">${a.key}</span></td>
-      <td>${prod}</td>
-      <td>${exp}</td>
-      <td><div class="actions">
-        <button class="btn btn-sm btn-secondary" onclick="resetAccountHwid('${escapeHtml(a.username)}')">Reset HWID</button>
-        <button class="btn btn-sm btn-danger"    onclick="removeAccount('${escapeHtml(a.username)}')">Remove</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-async function removeAccount(username) {
-  if (!confirm(`Remove account: @${username}?`)) return;
-  const data = await api('/remove_account', 'POST', { username });
-  if (data.error) return toast(data.error, 'error');
-  toast('Account removed', 'success');
-  loadAccounts(); refreshAll();
-}
-
-async function resetAccountHwid(username) {
-  const data = await api('/reset_account_hwid', 'POST', { username });
-  if (data.error) return toast(data.error, 'error');
-  toast('HWID reset for account', 'success');
-  loadAccounts();
-}
-
-// ─── Generator ────────────────────────────────────────────────────────────────
-
-function makeKey() {
-  const groups = parseInt(document.getElementById('genGroups').value) || 3;
-  const chars  = parseInt(document.getElementById('genChars').value)  || 5;
-  const prefix = (document.getElementById('genPrefix').value.trim() || 'TLINE').toUpperCase();
-  const seg    = () => Array.from({length: chars}, () => SAFE_CHARS[Math.floor(Math.random() * SAFE_CHARS.length)]).join('');
-  return `${prefix}-${Array.from({length: groups}, seg).join('-')}`;
-}
-
-function updateGenPreview() {
-  const el = document.getElementById('genPreview');
-  if (el) el.textContent = makeKey();
-}
-
-function toggleExpiryDuration() {
-  const unit = document.getElementById('genExpiryUnit').value;
-  document.getElementById('genExpiryDurationWrapper').style.display = unit === 'lifetime' ? 'none' : '';
-}
-
-function buildExpiryISO() {
-  return buildExpiryISOFrom('genExpiryUnit', 'genExpiryDuration');
-}
-
-function runGenerator() {
-  const n = Math.min(parseInt(document.getElementById('genQty').value) || 1, 1000);
-  document.getElementById('generatedKeys').value = Array.from({length: n}, makeKey).join('\n');
-  toast(`Generated ${n} key(s)`, 'success');
-}
-
-async function copyGeneratedKeys() {
-  const val = document.getElementById('generatedKeys').value;
-  if (!val) return;
-  await navigator.clipboard.writeText(val);
-  toast('Copied to clipboard!', 'success');
-}
-
-async function addGeneratedToSystem() {
-  const val = document.getElementById('generatedKeys').value.trim();
-  if (!val) return toast('No keys to add', 'error');
-  const exp  = buildExpiryISO();
-  const keys = val.split('\n').map(k => k.trim()).filter(Boolean);
-  let ok = 0, fail = 0;
-  for (const key of keys) {
-    const body = { key };
-    if (exp) body.expiration = exp;
-    const d = await api('/add_key', 'POST', body);
-    d.error ? fail++ : ok++;
-  }
-  toast(`Added ${ok} key(s).${fail ? ` ${fail} failed.` : ''}`, ok ? 'success' : 'error');
-  document.getElementById('generatedKeys').value = '';
-  showTab('keys'); refreshAll();
-}
-
-// ─── Validate ─────────────────────────────────────────────────────────────────
-
-function setValidateMode(mode) {
-  const isKey = mode === 'key';
-  document.getElementById('validateModeKey').style.display     = isKey ? '' : 'none';
-  document.getElementById('validateModeAccount').style.display = isKey ? 'none' : '';
-  document.getElementById('modeKeyBtn').className     = isKey ? 'btn btn-sm' : 'btn btn-sm btn-secondary';
-  document.getElementById('modeAccountBtn').className = isKey ? 'btn btn-sm btn-secondary' : 'btn btn-sm';
-  document.getElementById('validateResult').style.display = 'none';
-}
-
-function showValidateResult(data) {
-  const el = document.getElementById('validateResult');
-  el.style.display = 'block';
-  if (data.valid) {
-    el.innerHTML = `<div style="padding:16px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;font-size:12px;">
-      <div style="color:var(--green);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">✓ Valid</div>
-      <pre style="color:var(--muted);font-size:11px;">${JSON.stringify(data, null, 2)}</pre>
-    </div>`;
-  } else {
-    el.innerHTML = `<div style="padding:16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:12px;">
-      <div style="color:var(--red);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">✕ Failed</div>
-      <pre style="color:var(--muted);font-size:11px;">${JSON.stringify(data, null, 2)}</pre>
-    </div>`;
-  }
-}
-
-async function doValidateKey() {
-  const key  = document.getElementById('validateKey').value.trim();
-  const hwid = document.getElementById('validateHwid').value.trim();
-  if (!key || !hwid) return toast('Key and HWID required', 'error');
-  const res = await fetch(`${API_BASE}/validate?key=${encodeURIComponent(key)}&hwid=${encodeURIComponent(hwid)}`);
-  showValidateResult(await res.json());
-}
-
-async function doValidateAccount() {
-  const username = document.getElementById('validateUsername').value.trim();
-  const password = document.getElementById('validatePassword').value.trim();
-  const hwid     = document.getElementById('validateAccountHwid').value.trim();
-  if (!username || !password) return toast('Username and password required', 'error');
-  const body = new URLSearchParams({ username, password });
-  if (hwid) body.append('hwid', hwid);
-  const res = await fetch(`${API_BASE}/login`, { method: 'POST', body });
-  showValidateResult(await res.json());
-}
-
-// ─── Util ─────────────────────────────────────────────────────────────────────
-
-function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-</script>
+        // Enhanced Particle System (smooth, glow, mouse interaction)
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [], mouseX = 0, mouseY = 0;
+        const PARTICLE_COUNT = 140;
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        function createParticle() {
+            return {
+                x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                size: Math.random() * 2.8 + 0.8,
+                speedX: (Math.random() - 0.5) * 0.25,
+                speedY: (Math.random() - 0.5) * 0.25,
+                baseOpacity: Math.random() * 0.5 + 0.2,
+                pulseSpeed: 0.008 + Math.random() * 0.025,
+                angle: Math.random() * Math.PI * 2
+            };
+        }
+        for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(createParticle());
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let p of particles) {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                p.angle += p.pulseSpeed;
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+                const dx = p.x - mouseX, dy = p.y - mouseY;
+                const dist = Math.hypot(dx, dy);
+                const influence = Math.max(0, 1 - dist / 180);
+                const pulse = 0.6 + 0.4 * Math.sin(p.angle);
+                const finalOpacity = p.baseOpacity * pulse * (0.7 + influence * 0.8);
+                const finalSize = p.size * (1 + influence * 1.2);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, finalSize, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 110, 140, ${finalOpacity * 0.8})`;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, finalSize * 1.6, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 70, 100, ${finalOpacity * 0.4})`;
+                ctx.fill();
+            }
+            requestAnimationFrame(drawParticles);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+        resizeCanvas();
+        drawParticles();
+        hwidDisplaySpan.innerText = currentHwid.substring(0, 22) + "...";
+    </script>
 </body>
 </html>
