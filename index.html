@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>IMMORTAL | DASHBOARD</title>
+    <title>IMMORTAL | DASHBOARD CORE</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -26,6 +26,7 @@
             position: relative;
         }
 
+        /* Glow & particles */
         #particleCanvas {
             position: fixed;
             top: 0;
@@ -41,7 +42,17 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(ellipse at center, transparent 0%, rgba(5,6,10,0.4) 60%, #05060a 100%);
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(5,6,10,0.5) 60%, #05060a 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .glow-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(255,80,120,0.08) 0%, transparent 70%);
             pointer-events: none;
             z-index: 1;
         }
@@ -60,16 +71,16 @@
             to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
 
-        /* ---------- AUTH CARD (GLASS + CUSTOM IMAGE URL) ---------- */
+        /* ---------- AUTH CARD (GLASS) ---------- */
         .auth-card {
             max-width: 540px;
             margin: 2rem auto;
-            background: rgba(10, 12, 22, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 100, 120, 0.35);
+            background: rgba(8, 10, 20, 0.75);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 80, 120, 0.4);
             border-radius: 2.5rem;
-            padding: 2rem 2rem 2rem;
-            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 100, 100, 0.15) inset;
+            padding: 2rem;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 100, 100, 0.2) inset;
         }
         .auth-header {
             display: flex;
@@ -85,10 +96,12 @@
             padding: 3px;
             margin-bottom: 0.6rem;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 12px rgba(255,77,109,0.4);
         }
         .auth-avatar:hover {
             transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255,77,109,0.7);
         }
         .auth-avatar-inner {
             width: 100%;
@@ -97,31 +110,15 @@
             object-fit: cover;
             background: #1a1e2c;
         }
-        .auth-title {
-            font-size: 1.9rem;
-            font-weight: 800;
-            letter-spacing: 5px;
-            background: linear-gradient(135deg, #ffffff, #ffa0b0);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-align: center;
-        }
-        .auth-sub {
-            font-size: 0.7rem;
-            letter-spacing: 3px;
-            color: #ffb7c4;
-            text-transform: uppercase;
-            margin-top: 0.2rem;
-        }
         .image-url-row {
             display: flex;
             gap: 0.5rem;
             margin: 0.8rem 0 1rem 0;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.5);
             border-radius: 2rem;
             padding: 0.3rem 0.3rem 0.3rem 1rem;
             align-items: center;
+            border: 1px solid rgba(255,80,120,0.2);
         }
         .image-url-input {
             flex: 1;
@@ -147,12 +144,30 @@
         }
         .set-image-btn:hover {
             background: #ff4d6d;
+            box-shadow: 0 0 8px #ff4d6d;
+        }
+        .auth-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 5px;
+            background: linear-gradient(135deg, #ffffff, #ff7a8f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+        }
+        .auth-sub {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: #ffb7c4;
+            text-transform: uppercase;
+            margin-top: 0.2rem;
         }
         .auth-tabs {
             display: flex;
             gap: 1rem;
             margin-bottom: 1.8rem;
-            background: rgba(0, 0, 0, 0.45);
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 60px;
             padding: 0.25rem;
         }
@@ -170,24 +185,23 @@
         .auth-tab.active {
             background: linear-gradient(135deg, #ff4d6d, #b81c3c);
             color: white;
-            box-shadow: 0 5px 12px rgba(255, 77, 109, 0.3);
+            box-shadow: 0 2px 12px rgba(255, 77, 109, 0.5);
         }
         .auth-input {
             width: 100%;
-            background: #0c1020;
+            background: #0c1022;
             border: 1px solid #2e334f;
             border-radius: 1.2rem;
             padding: 0.85rem 1.2rem;
             color: white;
-            margin-bottom: 1.1rem;
+            margin-bottom: 1rem;
             font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
             transition: 0.2s;
         }
         .auth-input:focus {
             outline: none;
             border-color: #ff4d6d;
-            box-shadow: 0 0 0 2px rgba(255, 77, 109, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 77, 109, 0.3);
         }
         .auth-btn {
             width: 100%;
@@ -204,11 +218,12 @@
             align-items: center;
             justify-content: center;
             gap: 0.6rem;
+            box-shadow: 0 4px 12px rgba(255,77,109,0.3);
         }
-        .auth-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
-        .error-msg { color: #ff8888; font-size: 0.8rem; margin-top: 0.6rem; text-align: center; }
+        .auth-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 8px 20px rgba(255,77,109,0.5); }
+        .error-msg { color: #ff8888; font-size: 0.8rem; margin-top: 0.5rem; text-align: center; }
 
-        /* ---------- DASHBOARD (IMMORTAL / IMMORTAL) ---------- */
+        /* ---------- DASHBOARD ---------- */
         .dashboard {
             display: none;
             animation: fadeInUp 0.5s ease;
@@ -218,18 +233,19 @@
             justify-content: space-between;
             align-items: flex-end;
             margin-bottom: 2rem;
-            border-bottom: 1px solid rgba(255, 100, 130, 0.3);
+            border-bottom: 1px solid rgba(255, 80, 120, 0.4);
             padding-bottom: 1rem;
             flex-wrap: wrap;
         }
         .logo h1 {
-            font-size: 2.6rem;
+            font-size: 2.8rem;
             font-weight: 800;
             letter-spacing: 6px;
-            background: linear-gradient(135deg, #ffffff, #ff8a9f);
+            background: linear-gradient(135deg, #ffffff, #ff7a8f);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            text-shadow: 0 0 15px rgba(255,77,109,0.3);
         }
         .logo p {
             font-size: 0.7rem;
@@ -239,14 +255,14 @@
         }
         .logout-btn {
             background: rgba(255, 70, 100, 0.2);
-            border: 1px solid rgba(255, 100, 130, 0.5);
+            border: 1px solid rgba(255, 100, 130, 0.6);
             padding: 0.5rem 1.3rem;
             border-radius: 40px;
             cursor: pointer;
             font-weight: 600;
             transition: 0.2s;
         }
-        .logout-btn:hover { background: rgba(255, 70, 100, 0.5); transform: scale(0.98); }
+        .logout-btn:hover { background: rgba(255, 70, 100, 0.6); transform: scale(0.98); box-shadow: 0 0 8px rgba(255,70,100,0.5); }
 
         .dashboard-grid {
             display: grid;
@@ -255,17 +271,18 @@
         }
 
         .card {
-            background: rgba(12, 16, 28, 0.65);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(100, 80, 140, 0.35);
+            background: rgba(12, 16, 28, 0.7);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(100, 80, 140, 0.4);
             border-radius: 2rem;
             padding: 1.5rem;
-            transition: all 0.2s;
+            transition: all 0.25s;
             box-shadow: 0 12px 28px rgba(0,0,0,0.3);
         }
         .card:hover {
-            border-color: rgba(255, 100, 120, 0.4);
-            background: rgba(18, 22, 36, 0.7);
+            border-color: rgba(255, 100, 120, 0.5);
+            background: rgba(20, 24, 38, 0.8);
+            box-shadow: 0 15px 32px rgba(0,0,0,0.4);
         }
         .card-title {
             font-size: 0.9rem;
@@ -323,7 +340,7 @@
             align-items: center;
             gap: 0.5rem;
         }
-        .btn-action.primary { background: linear-gradient(135deg, #ff4d6d, #b81c3c); }
+        .btn-action.primary { background: linear-gradient(135deg, #ff4d6d, #b81c3c); box-shadow: 0 2px 8px rgba(255,77,109,0.3); }
         .btn-action.primary:hover, .btn-action:hover { transform: translateY(-2px); filter: brightness(1.05); }
 
         .hwid-box {
@@ -340,20 +357,20 @@
             display: inline-flex;
             align-items: center;
             gap: 0.7rem;
-            background: rgba(255, 77, 109, 0.1);
+            background: rgba(255, 77, 109, 0.15);
             padding: 0.6rem 1.3rem;
             border-radius: 2rem;
             cursor: pointer;
             transition: 0.2s;
             font-weight: 500;
         }
-        .open-web-menu:hover { background: rgba(255, 77, 109, 0.3); color: #ffc0cd; }
+        .open-web-menu:hover { background: rgba(255, 77, 109, 0.4); color: #ffc0cd; box-shadow: 0 0 10px rgba(255,77,109,0.3); }
 
         .subscription-list {
             margin-top: 1rem;
         }
         .sub-item {
-            background: rgba(255, 77, 109, 0.08);
+            background: rgba(255, 77, 109, 0.1);
             border-left: 3px solid #ff4d6d;
             padding: 0.8rem 1rem;
             border-radius: 1.2rem;
@@ -361,7 +378,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(2px);
         }
         .sub-name { font-weight: 600; color: #ffccd5; }
         .sub-tier { font-size: 0.7rem; background: #1e243f; padding: 0.2rem 0.7rem; border-radius: 20px; }
@@ -388,16 +404,17 @@
 <body>
     <canvas id="particleCanvas"></canvas>
     <div class="vignette"></div>
+    <div class="glow-overlay"></div>
 
     <div class="main-container">
-        <!-- AUTHENTICATION CARD WITH CUSTOM IMAGE URL INPUT (no extra text) -->
+        <!-- AUTH CARD - FULLY OPTIONAL LICENSE -->
         <div id="authPanel" class="auth-card">
             <div class="auth-header">
                 <div class="auth-avatar" id="authAvatarBtn">
                     <img id="avatarImg" class="auth-avatar-inner" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="avatar">
                 </div>
                 <div class="image-url-row">
-                    <input type="text" id="avatarUrlInput" class="image-url-input" placeholder="Image URL">
+                    <input type="text" id="avatarUrlInput" class="image-url-input" placeholder="Image URL (jpg/png)">
                     <button id="setAvatarUrlBtn" class="set-image-btn"><i class="fas fa-link"></i> Set</button>
                 </div>
                 <div class="auth-title">IMMORTAL</div>
@@ -423,12 +440,12 @@
             </div>
         </div>
 
-        <!-- IMMORTAL DASHBOARD (IMMORTAL STYLE) -->
+        <!-- IMMORTAL DASHBOARD -->
         <div id="dashboard" class="dashboard">
             <div class="brand-header">
                 <div class="logo">
                     <h1>IMMORTAL</h1>
-                    <p>IMMORTAL DASHBOARD CONTROL CORE</p>
+                    <p>DASHBOARD CONTROL CORE</p>
                 </div>
                 <button id="dashboardLogoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> EXIT</button>
             </div>
@@ -500,10 +517,8 @@
     <script>
         // ---------- CONFIG ----------
         const API_BASE = 'https://immortal1234.pythonanywhere.com';
-        // ⚠️ REPLACE WITH YOUR ACTUAL DISCORD WEBHOOK URL FOR HWID RESET REQUESTS
-        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/your_webhook_id/your_webhook_token';
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/your_webhook_id/your_webhook_token'; // REPLACE
 
-        // HWID persistent
         function getOrCreateHWID() {
             let hwid = localStorage.getItem('immortal_hwid');
             if (!hwid) {
@@ -543,7 +558,7 @@
         const hwidReason = document.getElementById('hwidResetReason');
         const openWebBtn = document.getElementById('openWebMenuBtn');
 
-        // Avatar URL handling
+        // Avatar URL
         const avatarImg = document.getElementById('avatarImg');
         const avatarUrlInput = document.getElementById('avatarUrlInput');
         const setAvatarBtn = document.getElementById('setAvatarUrlBtn');
@@ -576,16 +591,16 @@
 
         function saveUserData() {
             if (!currentUser) return;
-            localStorage.setItem(`IMMORTAL_subs_${currentUser.username}`, JSON.stringify(activeProducts));
-            localStorage.setItem(`IMMORTAL_keys_used_${currentUser.username}`, activationHistory.length);
-            localStorage.setItem(`IMMORTAL_licenses_${currentUser.username}`, JSON.stringify(activationHistory));
+            localStorage.setItem(`immortal_subs_${currentUser.username}`, JSON.stringify(activeProducts));
+            localStorage.setItem(`immortal_keys_used_${currentUser.username}`, activationHistory.length);
+            localStorage.setItem(`immortal_licenses_${currentUser.username}`, JSON.stringify(activationHistory));
         }
 
         function loadUserData() {
             if (!currentUser) return;
-            const storedSubs = localStorage.getItem(`IMMORTAL_subs_${currentUser.username}`);
+            const storedSubs = localStorage.getItem(`immortal_subs_${currentUser.username}`);
             activeProducts = storedSubs ? JSON.parse(storedSubs) : [];
-            const storedLicenses = localStorage.getItem(`IMMORTAL_licenses_${currentUser.username}`);
+            const storedLicenses = localStorage.getItem(`immortal_licenses_${currentUser.username}`);
             activationHistory = storedLicenses ? JSON.parse(storedLicenses) : [];
             refreshUI();
         }
@@ -659,7 +674,7 @@
             if (!currentUser) { alert("Not logged in"); return; }
             if (!reason.trim()) { alert("Provide a reason for HWID reset"); return; }
             if (!DISCORD_WEBHOOK_URL.includes("discord.com")) {
-                alert("[DEMO] Set real Discord webhook URL in the code to send requests.\nCheck DISCORD_WEBHOOK_URL variable.");
+                alert("[DEMO] Set real Discord webhook URL.");
                 console.log("WEBHOOK MOCK:", { user: currentUser.username, hwid: currentHwid, reason });
                 licenseStatusSpan.innerHTML = "<i class='fab fa-discord'></i> Request sent (webhook not configured)";
                 hwidReason.value = "";
@@ -669,10 +684,10 @@
             try {
                 const res = await fetch(DISCORD_WEBHOOK_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
                 if (res.ok) {
-                    licenseStatusSpan.innerHTML = "<i class='fas fa-check'></i> HWID reset request sent to staff.";
+                    licenseStatusSpan.innerHTML = "<i class='fas fa-check'></i> HWID reset request sent.";
                     hwidReason.value = "";
-                } else alert("Webhook error, check URL");
-            } catch(e) { alert("Webhook failed: " + e.message); }
+                } else alert("Webhook error");
+            } catch(e) { alert("Webhook failed"); }
         }
 
         async function performLogin(username, password) {
@@ -705,7 +720,7 @@
             const formData = new FormData();
             formData.append('username', username);
             formData.append('password', password);
-            formData.append('key', licenseKey || '');  // empty string allowed
+            formData.append('key', licenseKey || '');   // empty string = optional
             formData.append('email', email);
             try {
                 const response = await fetch(`${API_BASE}/create_account`, { method: 'POST', body: formData });
@@ -716,7 +731,7 @@
                     setTimeout(() => switchAuthTab('login'), 1500);
                     return true;
                 } else {
-                    regError.innerText = data.error || "Signup failed (server may require license?)";
+                    regError.innerText = data.error || "Signup failed (check fields)";
                     return false;
                 }
             } catch(e) { regError.innerText = "Connection error"; return false; }
@@ -750,7 +765,7 @@
         document.getElementById('doLoginBtn').addEventListener('click', async () => {
             const user = document.getElementById('loginUsername').value.trim();
             const pass = document.getElementById('loginPassword').value;
-            if (!user || !pass) { loginError.innerText = "Enter credentials"; return; }
+            if (!user || !pass) { loginError.innerText = "Enter username/password"; return; }
             await performLogin(user, pass);
         });
         document.getElementById('doSignupBtn').addEventListener('click', async () => {
@@ -758,7 +773,7 @@
             const email = document.getElementById('regEmail').value.trim();
             const pass = document.getElementById('regPassword').value;
             const lic = document.getElementById('regLicense').value.trim();
-            if (!user || !email || !pass) { regError.innerText = "All fields required"; return; }
+            if (!user || !email || !pass) { regError.innerText = "Username, email and password required. License key is optional."; return; }
             await performSignup(user, email, pass, lic);
         });
         document.getElementById('dashboardLogoutBtn').addEventListener('click', () => {
@@ -777,21 +792,22 @@
         downloadBtnDash.addEventListener('click', downloadLoader);
         openWebBtn.addEventListener('click', () => alert("Web menu: external panel (simulated)"));
 
-        // Enhanced Particle System
+        // Enhanced particle system with more glow
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [], mouseX = 0, mouseY = 0;
-        const PARTICLE_COUNT = 140;
+        const PARTICLE_COUNT = 180;
         function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         function createParticle() {
             return {
                 x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-                size: Math.random() * 2.8 + 0.8,
-                speedX: (Math.random() - 0.5) * 0.25,
-                speedY: (Math.random() - 0.5) * 0.25,
-                baseOpacity: Math.random() * 0.5 + 0.2,
-                pulseSpeed: 0.008 + Math.random() * 0.025,
-                angle: Math.random() * Math.PI * 2
+                size: Math.random() * 3.2 + 0.8,
+                speedX: (Math.random() - 0.5) * 0.28,
+                speedY: (Math.random() - 0.5) * 0.28,
+                baseOpacity: Math.random() * 0.6 + 0.2,
+                pulseSpeed: 0.006 + Math.random() * 0.028,
+                angle: Math.random() * Math.PI * 2,
+                colorHue: 340 + Math.random() * 30
             };
         }
         for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(createParticle());
@@ -807,17 +823,22 @@
                 if (p.y > canvas.height) p.y = 0;
                 const dx = p.x - mouseX, dy = p.y - mouseY;
                 const dist = Math.hypot(dx, dy);
-                const influence = Math.max(0, 1 - dist / 180);
-                const pulse = 0.6 + 0.4 * Math.sin(p.angle);
-                const finalOpacity = p.baseOpacity * pulse * (0.7 + influence * 0.8);
-                const finalSize = p.size * (1 + influence * 1.2);
+                const influence = Math.max(0, 1 - dist / 160);
+                const pulse = 0.55 + 0.45 * Math.sin(p.angle);
+                const finalOpacity = p.baseOpacity * pulse * (0.7 + influence * 0.9);
+                const finalSize = p.size * (1 + influence * 1.3);
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, finalSize, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 110, 140, ${finalOpacity * 0.8})`;
+                ctx.fillStyle = `rgba(255, 100, 140, ${finalOpacity * 0.85})`;
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, finalSize * 1.6, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 70, 100, ${finalOpacity * 0.4})`;
+                ctx.arc(p.x, p.y, finalSize * 1.8, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 70, 100, ${finalOpacity * 0.45})`;
+                ctx.fill();
+                // extra glow
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, finalSize * 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 50, 80, ${finalOpacity * 0.2})`;
                 ctx.fill();
             }
             requestAnimationFrame(drawParticles);
