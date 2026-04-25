@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>IMMORTAL | MPOSED CONTROL CORE</title>
+    <title>IMMORTAL | IMMORTAL CONTROL CORE</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -405,7 +405,7 @@
                     <input type="text" id="avatarUrlInput" class="image-url-input" placeholder="Paste image URL (jpg/png)" value="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
                     <button id="setAvatarUrlBtn" class="set-image-btn"><i class="fas fa-link"></i> Set</button>
                 </div>
-                <div class="auth-title">MPOSED</div>
+                <div class="auth-title">IMMORTAL</div>
                 <div class="auth-sub">AUTHENTICATION CORE • THE STANDARD</div>
             </div>
             <div class="auth-tabs">
@@ -434,7 +434,7 @@
             <div class="brand-header">
                 <div class="logo">
                     <h1>IMMORTAL</h1>
-                    <p>MPOSED DASHBOARD CONTROL CORE</p>
+                    <p>IMMORTAL DASHBOARD</p>
                 </div>
                 <button id="dashboardLogoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> EXIT</button>
             </div>
@@ -470,7 +470,7 @@
                         <div class="quick-action-group">
                             <div class="info-label"><i class="fas fa-redo-alt"></i> HWID reset reason</div>
                             <textarea id="hwidResetReason" class="action-input" rows="2" placeholder="Explain why you need HWID reset..."></textarea>
-                            <button id="requestHwidResetBtn" class="btn-action" style="margin-top: 0.5rem; width:100%; justify-content:center;"><i class="fab fa-discord"></i> Request HWID Reset → Webhook</button>
+                            <button id="requestHwidResetBtn" class="btn-action" style="margin-top: 0.5rem; width:100%; justify-content:center;"><i class="fab fa-discord"></i> Request HWID Reset ? Webhook</button>
                         </div>
                         <div class="quick-action-group">
                             <button id="downloadLoaderBtnDash" class="btn-action download-btn" style="width:100%;" disabled><i class="fas fa-download"></i> DOWNLOAD LOADER</button>
@@ -485,7 +485,7 @@
                     <div class="card">
                         <div class="card-title"><i class="fas fa-star"></i> STATUS / REVIEWS</div>
                         <div class="info-row"><span class="info-label">Keys Used</span><span class="info-value" id="keysUsedCount">0</span></div>
-                        <div class="info-row"><span class="info-label">License Status</span><span class="info-value" id="licenseStatusInfo">✖ No active license</span></div>
+                        <div class="info-row"><span class="info-label">License Status</span><span class="info-value" id="licenseStatusInfo">? No active license</span></div>
                     </div>
 
                     <!-- HWID + OPEN WEB MENU (combined) -->
@@ -501,7 +501,7 @@
                     <div class="card" style="margin-top: 1.5rem;">
                         <div class="card-title"><i class="fas fa-gem"></i> ACTIVATE SUBSCRIPTIONS</div>
                         <div id="subscriptionsList" class="subscription-list">
-                            <div style="color:#8f9bb3; text-align:center; padding:1rem;">✨ No active subscriptions ✨</div>
+                            <div style="color:#8f9bb3; text-align:center; padding:1rem;">? No active subscriptions ?</div>
                         </div>
                     </div>
                 </div>
@@ -512,7 +512,7 @@
     <script>
         // ---------- CONFIG ----------
         const API_BASE = 'https://immortal1234.pythonanywhere.com';
-        // ⚠️ REPLACE WITH YOUR ACTUAL DISCORD WEBHOOK URL FOR HWID RESET REQUESTS
+        // ?? REPLACE WITH YOUR ACTUAL DISCORD WEBHOOK URL FOR HWID RESET REQUESTS
         const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/your_webhook_id/your_webhook_token';
 
         // HWID persistent
@@ -604,7 +604,7 @@
         function refreshUI() {
             activeSubsSpan.innerText = activeProducts.length;
             if (activeProducts.length === 0) {
-                subsContainer.innerHTML = '<div style="color:#8f9bb3; text-align:center; padding:1rem;">✨ No active subscriptions ✨<br>Activate a license key</div>';
+                subsContainer.innerHTML = '<div style="color:#8f9bb3; text-align:center; padding:1rem;">? No active subscriptions ?<br>Activate a license key</div>';
             } else {
                 let html = '';
                 activeProducts.forEach(prod => {
@@ -616,11 +616,11 @@
             const hasActive = activeProducts.length > 0;
             if (hasActive) {
                 downloadBtnDash.disabled = false;
-                downloadMsgSpan.innerText = "✓ Ready to download loader";
+                downloadMsgSpan.innerText = "? Ready to download loader";
                 downloadBtnDash.style.opacity = "1";
             } else {
                 downloadBtnDash.disabled = true;
-                downloadMsgSpan.innerText = "🔒 Activate a license to unlock";
+                downloadMsgSpan.innerText = "?? Activate a license to unlock";
                 downloadBtnDash.style.opacity = "0.5";
             }
             if (activeProducts.length > 0) {
@@ -676,7 +676,7 @@
                 hwidReason.value = "";
                 return;
             }
-            const payload = { content: `**🔁 HWID RESET REQUEST**\n**User:** ${currentUser.username}\n**Email:** ${currentUser.email}\n**HWID:** \`${currentHwid}\`\n**Reason:** ${reason}\n**Time:** ${new Date().toISOString()}` };
+            const payload = { content: `**?? HWID RESET REQUEST**\n**User:** ${currentUser.username}\n**Email:** ${currentUser.email}\n**HWID:** \`${currentHwid}\`\n**Reason:** ${reason}\n**Time:** ${new Date().toISOString()}` };
             try {
                 const res = await fetch(DISCORD_WEBHOOK_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
                 if (res.ok) {
@@ -723,7 +723,7 @@
                 const data = await response.json();
                 if (response.ok) {
                     regError.style.color = "#a5ffc3";
-                    regError.innerText = "✓ Account created! Please login.";
+                    regError.innerText = "? Account created! Please login.";
                     setTimeout(() => switchAuthTab('login'), 1500);
                     return true;
                 } else {
