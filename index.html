@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>IMMORTAL | IMMORTAL CONTROL CORE</title>
+    <title>IMMORTAL | IMMORTAL CORE</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -26,7 +26,7 @@
             position: relative;
         }
 
-        /* Particle canvas & glow */
+        /* Particle canvas - smooth glowing */
         #particleCanvas {
             position: fixed;
             top: 0;
@@ -61,9 +61,9 @@
             to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
 
-        /* ---------- AUTH CARD (GLASS + CUSTOM IMAGE VIA URL) ---------- */
+        /* ---------- AUTH CARD (GLASS + CUSTOM IMAGE) ---------- */
         .auth-card {
-            max-width: 540px;
+            max-width: 520px;
             margin: 2rem auto;
             background: rgba(10, 12, 22, 0.7);
             backdrop-filter: blur(16px);
@@ -71,12 +71,13 @@
             border-radius: 2.5rem;
             padding: 2rem 2rem 2.2rem;
             box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 100, 100, 0.15) inset;
+            transition: all 0.3s;
         }
         .auth-header {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.8rem;
         }
         .auth-avatar {
             width: 90px;
@@ -84,7 +85,7 @@
             border-radius: 50%;
             background: linear-gradient(135deg, #ff4d6d, #b81c3c);
             padding: 3px;
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.8rem;
             cursor: pointer;
             transition: transform 0.2s;
         }
@@ -97,6 +98,11 @@
             border-radius: 50%;
             object-fit: cover;
             background: #1a1e2c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.2rem;
         }
         .auth-title {
             font-size: 1.9rem;
@@ -114,40 +120,6 @@
             color: #ffb7c4;
             text-transform: uppercase;
             margin-top: 0.2rem;
-        }
-        .image-url-row {
-            display: flex;
-            gap: 0.5rem;
-            margin: 0.8rem 0 1rem 0;
-            background: rgba(0,0,0,0.4);
-            border-radius: 2rem;
-            padding: 0.3rem 0.3rem 0.3rem 1rem;
-            align-items: center;
-        }
-        .image-url-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #ffb7c4;
-            font-size: 0.7rem;
-            outline: none;
-            font-family: monospace;
-        }
-        .image-url-input::placeholder {
-            color: #6a6f8a;
-        }
-        .set-image-btn {
-            background: #ff4d6d30;
-            border: none;
-            padding: 0.3rem 1rem;
-            border-radius: 2rem;
-            color: white;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .set-image-btn:hover {
-            background: #ff4d6d;
         }
         .auth-tabs {
             display: flex;
@@ -209,7 +181,7 @@
         .auth-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
         .error-msg { color: #ff8888; font-size: 0.8rem; margin-top: 0.6rem; text-align: center; }
 
-        /* ---------- DASHBOARD (MPOSED / IMMORTAL) ---------- */
+        /* ---------- DASHBOARD (IMMORTAL / IMMORTAL) ---------- */
         .dashboard {
             display: none;
             animation: fadeInUp 0.5s ease;
@@ -387,7 +359,8 @@
             .main-container { padding: 1rem; }
         }
         .hidden { display: none; }
-        .note-text { font-size: 0.65rem; text-align: center; margin-top: 0.5rem; opacity: 0.6; }
+        .crown-icon { margin-right: 5px; }
+        .ip-row i { width: 20px; }
     </style>
 </head>
 <body>
@@ -395,15 +368,13 @@
     <div class="vignette"></div>
 
     <div class="main-container">
-        <!-- AUTHENTICATION CARD WITH CUSTOM IMAGE URL INPUT -->
+        <!-- AUTHENTICATION CARD WITH CUSTOMIZABLE IMAGE -->
         <div id="authPanel" class="auth-card">
             <div class="auth-header">
                 <div class="auth-avatar" id="authAvatarBtn">
-                    <img id="avatarImg" class="auth-avatar-inner" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="avatar">
-                </div>
-                <div class="image-url-row">
-                    <input type="text" id="avatarUrlInput" class="image-url-input" placeholder="Paste image URL (jpg/png)" value="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                    <button id="setAvatarUrlBtn" class="set-image-btn"><i class="fas fa-link"></i> Set</button>
+                    <div class="auth-avatar-inner" id="avatarInner">
+                        <img id="avatarImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffccd5' width='48' height='48'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                    </div>
                 </div>
                 <div class="auth-title">IMMORTAL</div>
                 <div class="auth-sub">AUTHENTICATION CORE • THE STANDARD</div>
@@ -426,15 +397,15 @@
                 <button id="doSignupBtn" class="auth-btn"><i class="fas fa-user-plus"></i> CREATE ACCOUNT</button>
                 <div id="regError" class="error-msg"></div>
             </div>
-            <div class="note-text"><i class="fas fa-image"></i> Click avatar or use URL to set your photo</div>
+            <div style="font-size:0.7rem; text-align:center; margin-top:1rem; opacity:0.6;">click avatar to upload your photo</div>
         </div>
 
-        <!-- IMMORTAL DASHBOARD (MPOSED STYLE) -->
+        <!-- IMMORTAL DASHBOARD (IMMORTAL STYLE) -->
         <div id="dashboard" class="dashboard">
             <div class="brand-header">
                 <div class="logo">
                     <h1>IMMORTAL</h1>
-                    <p>IMMORTAL DASHBOARD</p>
+                    <p>IMMORTAL DASHBOARD CONTROL CORE</p>
                 </div>
                 <button id="dashboardLogoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> EXIT</button>
             </div>
@@ -464,13 +435,13 @@
                             <div class="info-label"><i class="fas fa-ticket-alt"></i> License Key</div>
                             <div class="flex-input">
                                 <input type="text" id="licenseKeyInput" class="action-input" placeholder="XXXX-XXXX-XXXX">
-                                <button id="activateKeyBtn" class="btn-action primary"><i class="fas fa-check"></i> Activate Key</button>
+                                <button id="activateKeyBtn" class="btn-action primary"><i class="fas fa-check"></i> Activate</button>
                             </div>
                         </div>
                         <div class="quick-action-group">
                             <div class="info-label"><i class="fas fa-redo-alt"></i> HWID reset reason</div>
                             <textarea id="hwidResetReason" class="action-input" rows="2" placeholder="Explain why you need HWID reset..."></textarea>
-                            <button id="requestHwidResetBtn" class="btn-action" style="margin-top: 0.5rem; width:100%; justify-content:center;"><i class="fab fa-discord"></i> Request HWID Reset ? Webhook</button>
+                            <button id="requestHwidResetBtn" class="btn-action" style="margin-top: 0.5rem; width:100%; justify-content:center;"><i class="fab fa-discord"></i> Request HWID Reset → Webhook</button>
                         </div>
                         <div class="quick-action-group">
                             <button id="downloadLoaderBtnDash" class="btn-action download-btn" style="width:100%;" disabled><i class="fas fa-download"></i> DOWNLOAD LOADER</button>
@@ -485,7 +456,7 @@
                     <div class="card">
                         <div class="card-title"><i class="fas fa-star"></i> STATUS / REVIEWS</div>
                         <div class="info-row"><span class="info-label">Keys Used</span><span class="info-value" id="keysUsedCount">0</span></div>
-                        <div class="info-row"><span class="info-label">License Status</span><span class="info-value" id="licenseStatusInfo">? No active license</span></div>
+                        <div class="info-row"><span class="info-label">License Status</span><span class="info-value" id="licenseStatusInfo">✖ No active license</span></div>
                     </div>
 
                     <!-- HWID + OPEN WEB MENU (combined) -->
@@ -501,7 +472,7 @@
                     <div class="card" style="margin-top: 1.5rem;">
                         <div class="card-title"><i class="fas fa-gem"></i> ACTIVATE SUBSCRIPTIONS</div>
                         <div id="subscriptionsList" class="subscription-list">
-                            <div style="color:#8f9bb3; text-align:center; padding:1rem;">? No active subscriptions ?</div>
+                            <div style="color:#8f9bb3; text-align:center; padding:1rem;">✨ No active subscriptions ✨</div>
                         </div>
                     </div>
                 </div>
@@ -512,8 +483,7 @@
     <script>
         // ---------- CONFIG ----------
         const API_BASE = 'https://immortal1234.pythonanywhere.com';
-        // ?? REPLACE WITH YOUR ACTUAL DISCORD WEBHOOK URL FOR HWID RESET REQUESTS
-        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/your_webhook_id/your_webhook_token';
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/your_webhook_id/your_webhook_token'; // REPLACE!
 
         // HWID persistent
         function getOrCreateHWID() {
@@ -555,27 +525,6 @@
         const hwidReason = document.getElementById('hwidResetReason');
         const openWebBtn = document.getElementById('openWebMenuBtn');
 
-        // Avatar URL handling
-        const avatarImg = document.getElementById('avatarImg');
-        const avatarUrlInput = document.getElementById('avatarUrlInput');
-        const setAvatarBtn = document.getElementById('setAvatarUrlBtn');
-        const authAvatarBtn = document.getElementById('authAvatarBtn');
-
-        function setAvatarFromUrl(url) {
-            if (url && url.trim() !== '') {
-                avatarImg.src = url.trim();
-                localStorage.setItem('user_avatar_url', url.trim());
-            }
-        }
-        setAvatarBtn.addEventListener('click', () => setAvatarFromUrl(avatarUrlInput.value));
-        authAvatarBtn.addEventListener('click', () => {
-            const newUrl = prompt('Enter image URL for your avatar:', avatarUrlInput.value);
-            if (newUrl) setAvatarFromUrl(newUrl);
-        });
-        // Load saved avatar
-        const savedAvatar = localStorage.getItem('user_avatar_url');
-        if (savedAvatar) setAvatarFromUrl(savedAvatar);
-
         // Fetch public IP
         async function fetchUserIP() {
             try {
@@ -587,16 +536,16 @@
 
         function saveUserData() {
             if (!currentUser) return;
-            localStorage.setItem(`mposed_subs_${currentUser.username}`, JSON.stringify(activeProducts));
-            localStorage.setItem(`mposed_keys_used_${currentUser.username}`, activationHistory.length);
-            localStorage.setItem(`mposed_licenses_${currentUser.username}`, JSON.stringify(activationHistory));
+            localStorage.setItem(`IMMORTAL_subs_${currentUser.username}`, JSON.stringify(activeProducts));
+            localStorage.setItem(`IMMORTAL_keys_used_${currentUser.username}`, activationHistory.length);
+            localStorage.setItem(`IMMORTAL_licenses_${currentUser.username}`, JSON.stringify(activationHistory));
         }
 
         function loadUserData() {
             if (!currentUser) return;
-            const storedSubs = localStorage.getItem(`mposed_subs_${currentUser.username}`);
+            const storedSubs = localStorage.getItem(`IMMORTAL_subs_${currentUser.username}`);
             activeProducts = storedSubs ? JSON.parse(storedSubs) : [];
-            const storedLicenses = localStorage.getItem(`mposed_licenses_${currentUser.username}`);
+            const storedLicenses = localStorage.getItem(`IMMORTAL_licenses_${currentUser.username}`);
             activationHistory = storedLicenses ? JSON.parse(storedLicenses) : [];
             refreshUI();
         }
@@ -604,7 +553,7 @@
         function refreshUI() {
             activeSubsSpan.innerText = activeProducts.length;
             if (activeProducts.length === 0) {
-                subsContainer.innerHTML = '<div style="color:#8f9bb3; text-align:center; padding:1rem;">? No active subscriptions ?<br>Activate a license key</div>';
+                subsContainer.innerHTML = '<div style="color:#8f9bb3; text-align:center; padding:1rem;">✨ No active subscriptions ✨<br>Activate a license key</div>';
             } else {
                 let html = '';
                 activeProducts.forEach(prod => {
@@ -616,11 +565,11 @@
             const hasActive = activeProducts.length > 0;
             if (hasActive) {
                 downloadBtnDash.disabled = false;
-                downloadMsgSpan.innerText = "? Ready to download loader";
+                downloadMsgSpan.innerText = "✓ Ready to download loader";
                 downloadBtnDash.style.opacity = "1";
             } else {
                 downloadBtnDash.disabled = true;
-                downloadMsgSpan.innerText = "?? Activate a license to unlock";
+                downloadMsgSpan.innerText = "🔒 Activate a license to unlock";
                 downloadBtnDash.style.opacity = "0.5";
             }
             if (activeProducts.length > 0) {
@@ -670,20 +619,20 @@
             if (!currentUser) { alert("Not logged in"); return; }
             if (!reason.trim()) { alert("Provide a reason for HWID reset"); return; }
             if (!DISCORD_WEBHOOK_URL.includes("discord.com")) {
-                alert("[DEMO] Set real Discord webhook URL in the code to send requests.\nCheck DISCORD_WEBHOOK_URL variable.");
+                alert("[DEMO] Set real Discord webhook URL to send requests.");
                 console.log("WEBHOOK MOCK:", { user: currentUser.username, hwid: currentHwid, reason });
                 licenseStatusSpan.innerHTML = "<i class='fab fa-discord'></i> Request sent (webhook not configured)";
                 hwidReason.value = "";
                 return;
             }
-            const payload = { content: `**?? HWID RESET REQUEST**\n**User:** ${currentUser.username}\n**Email:** ${currentUser.email}\n**HWID:** \`${currentHwid}\`\n**Reason:** ${reason}\n**Time:** ${new Date().toISOString()}` };
+            const payload = { content: `**🔁 HWID RESET REQUEST**\n**User:** ${currentUser.username}\n**Email:** ${currentUser.email}\n**HWID:** \`${currentHwid}\`\n**Reason:** ${reason}\n**Time:** ${new Date().toISOString()}` };
             try {
                 const res = await fetch(DISCORD_WEBHOOK_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
                 if (res.ok) {
                     licenseStatusSpan.innerHTML = "<i class='fas fa-check'></i> HWID reset request sent to staff.";
                     hwidReason.value = "";
-                } else alert("Webhook error, check URL");
-            } catch(e) { alert("Webhook failed: " + e.message); }
+                } else alert("Webhook error");
+            } catch(e) { alert("Webhook failed"); }
         }
 
         async function performLogin(username, password) {
@@ -723,7 +672,7 @@
                 const data = await response.json();
                 if (response.ok) {
                     regError.style.color = "#a5ffc3";
-                    regError.innerText = "? Account created! Please login.";
+                    regError.innerText = "✓ Account created! Please login.";
                     setTimeout(() => switchAuthTab('login'), 1500);
                     return true;
                 } else {
@@ -753,6 +702,24 @@
             if (!firstLic) { alert("License key not found."); return; }
             window.open(`${API_BASE}/download?key=${encodeURIComponent(firstLic)}&hwid=${encodeURIComponent(currentHwid)}`, '_blank');
         }
+
+        // ----- Custom avatar upload -----
+        const avatarBtn = document.getElementById('authAvatarBtn');
+        const avatarImg = document.getElementById('avatarImg');
+        avatarBtn.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { avatarImg.src = ev.target.result; };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        });
 
         // Event binding
         document.querySelectorAll('.auth-tab').forEach(btn => {
@@ -786,58 +753,43 @@
         });
         requestHwidBtn.addEventListener('click', () => sendHwidResetRequest(hwidReason.value));
         downloadBtnDash.addEventListener('click', downloadLoader);
-        openWebBtn.addEventListener('click', () => alert("Web menu: external panel (simulated - integrate your loader menu)"));
+        openWebBtn.addEventListener('click', () => alert("Web menu: external client panel (simulated)"));
 
-        // Enhanced Particle System (smooth, glow, mouse interaction)
+        // Particles (enhanced)
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
-        let particles = [], mouseX = 0, mouseY = 0;
-        const PARTICLE_COUNT = 140;
+        let particles = [], mouseX=0, mouseY=0;
         function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         function createParticle() {
             return {
                 x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-                size: Math.random() * 2.8 + 0.8,
-                speedX: (Math.random() - 0.5) * 0.25,
-                speedY: (Math.random() - 0.5) * 0.25,
-                baseOpacity: Math.random() * 0.5 + 0.2,
-                pulseSpeed: 0.008 + Math.random() * 0.025,
-                angle: Math.random() * Math.PI * 2
+                size: Math.random() * 2.5 + 0.7, speedX: (Math.random() - 0.5) * 0.25, speedY: (Math.random() - 0.5) * 0.25,
+                baseOpacity: Math.random() * 0.5 + 0.2, pulseSpeed: 0.008 + Math.random() * 0.02, angle: Math.random() * Math.PI * 2
             };
         }
-        for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(createParticle());
-        function drawParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let p of particles) {
-                p.x += p.speedX;
-                p.y += p.speedY;
-                p.angle += p.pulseSpeed;
-                if (p.x < 0) p.x = canvas.width;
-                if (p.x > canvas.width) p.x = 0;
-                if (p.y < 0) p.y = canvas.height;
-                if (p.y > canvas.height) p.y = 0;
-                const dx = p.x - mouseX, dy = p.y - mouseY;
-                const dist = Math.hypot(dx, dy);
-                const influence = Math.max(0, 1 - dist / 180);
-                const pulse = 0.6 + 0.4 * Math.sin(p.angle);
-                const finalOpacity = p.baseOpacity * pulse * (0.7 + influence * 0.8);
-                const finalSize = p.size * (1 + influence * 1.2);
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, finalSize, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 110, 140, ${finalOpacity * 0.8})`;
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, finalSize * 1.6, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 70, 100, ${finalOpacity * 0.4})`;
-                ctx.fill();
+        for(let i=0;i<130;i++) particles.push(createParticle());
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            for(let p of particles) {
+                p.x += p.speedX; p.y += p.speedY; p.angle += p.pulseSpeed;
+                if(p.x<0) p.x=canvas.width; if(p.x>canvas.width) p.x=0;
+                if(p.y<0) p.y=canvas.height; if(p.y>canvas.height) p.y=0;
+                const dx=p.x-mouseX, dy=p.y-mouseY, dist=Math.hypot(dx,dy);
+                const influence = Math.max(0,1-dist/180);
+                const pulse = 0.6+0.4*Math.sin(p.angle);
+                const finalOpacity = p.baseOpacity * pulse * (0.7+influence*0.8);
+                const finalSize = p.size * (1+influence*1.2);
+                ctx.beginPath(); ctx.arc(p.x,p.y,finalSize,0,Math.PI*2);
+                ctx.fillStyle = `rgba(255, 110, 140, ${finalOpacity*0.8})`; ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x,p.y,finalSize*1.6,0,Math.PI*2);
+                ctx.fillStyle = `rgba(255, 70, 100, ${finalOpacity*0.4})`; ctx.fill();
             }
-            requestAnimationFrame(drawParticles);
+            requestAnimationFrame(draw);
         }
         window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
-        resizeCanvas();
-        drawParticles();
-        hwidDisplaySpan.innerText = currentHwid.substring(0, 22) + "...";
+        window.addEventListener('mousemove', (e) => { mouseX=e.clientX; mouseY=e.clientY; });
+        resizeCanvas(); draw();
+        hwidDisplaySpan.innerText = currentHwid.substring(0,22)+"...";
     </script>
 </body>
 </html>
