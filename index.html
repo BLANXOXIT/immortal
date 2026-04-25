@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>IMMORTAL | DASHBOARD </title>
+    <title>IMMORTAL | DASHBOARD</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -68,7 +68,7 @@
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 100, 120, 0.35);
             border-radius: 2.5rem;
-            padding: 2rem 2rem 2.2rem;
+            padding: 2rem 2rem 2rem;
             box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 100, 100, 0.15) inset;
         }
         .auth-header {
@@ -383,8 +383,6 @@
             .dashboard-grid { grid-template-columns: 1fr; }
             .main-container { padding: 1rem; }
         }
-        .note-text { font-size: 0.65rem; text-align: center; margin-top: 0.5rem; opacity: 0.6; }
-        .optional-badge { font-size: 0.65rem; margin-left: 0.5rem; color: #9aa4c0; }
     </style>
 </head>
 <body>
@@ -392,14 +390,14 @@
     <div class="vignette"></div>
 
     <div class="main-container">
-        <!-- AUTHENTICATION CARD WITH CUSTOM IMAGE URL INPUT -->
+        <!-- AUTHENTICATION CARD WITH CUSTOM IMAGE URL INPUT (no extra text) -->
         <div id="authPanel" class="auth-card">
             <div class="auth-header">
                 <div class="auth-avatar" id="authAvatarBtn">
                     <img id="avatarImg" class="auth-avatar-inner" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="avatar">
                 </div>
                 <div class="image-url-row">
-                    <input type="text" id="avatarUrlInput" class="image-url-input" placeholder="Paste image URL (jpg/png)" value="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+                    <input type="text" id="avatarUrlInput" class="image-url-input" placeholder="Image URL">
                     <button id="setAvatarUrlBtn" class="set-image-btn"><i class="fas fa-link"></i> Set</button>
                 </div>
                 <div class="auth-title">IMMORTAL</div>
@@ -419,14 +417,10 @@
                 <input type="text" id="regUsername" class="auth-input" placeholder="Username">
                 <input type="email" id="regEmail" class="auth-input" placeholder="Email">
                 <input type="password" id="regPassword" class="auth-input" placeholder="Password">
-                <div style="position: relative;">
-                    <input type="text" id="regLicense" class="auth-input" placeholder="License Key (optional)">
-                    <span class="optional-badge"><i class="fas fa-check-circle"></i> completely optional</span>
-                </div>
+                <input type="text" id="regLicense" class="auth-input" placeholder="License Key (optional)">
                 <button id="doSignupBtn" class="auth-btn"><i class="fas fa-user-plus"></i> CREATE ACCOUNT</button>
                 <div id="regError" class="error-msg"></div>
             </div>
-            <div class="note-text"><i class="fas fa-image"></i> Click avatar or use URL to set your photo | License key is <strong>optional</strong> for registration</div>
         </div>
 
         <!-- IMMORTAL DASHBOARD (IMMORTAL STYLE) -->
@@ -561,9 +555,12 @@
                 localStorage.setItem('user_avatar_url', url.trim());
             }
         }
-        setAvatarBtn.addEventListener('click', () => setAvatarFromUrl(avatarUrlInput.value));
+        setAvatarBtn.addEventListener('click', () => {
+            const url = avatarUrlInput.value.trim();
+            if (url) setAvatarFromUrl(url);
+        });
         authAvatarBtn.addEventListener('click', () => {
-            const newUrl = prompt('Enter image URL for your avatar:', avatarUrlInput.value);
+            const newUrl = prompt('Enter image URL for your avatar:');
             if (newUrl) setAvatarFromUrl(newUrl);
         });
         const savedAvatar = localStorage.getItem('user_avatar_url');
