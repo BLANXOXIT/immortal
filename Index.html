@@ -1,0 +1,2228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TLine Key System</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #252535;
+    --accent: #7c3aed;
+    --accent2: #a855f7;
+    --accent3: #06b6d4;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --orange: #f97316;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --glow: rgba(124, 58, 237, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,58,237,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(6,182,212,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Login ── */
+  #loginScreen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(2px);
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 420px;
+    position: relative;
+    box-shadow: 0 0 80px rgba(124,58,237,0.15), 0 32px 64px rgba(0,0,0,0.5);
+    animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+  }
+
+  .login-logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .login-logo::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent2);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  .login-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+
+  .login-title span { color: var(--accent2); }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .input-group label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .input-row { display: flex; gap: 8px; }
+
+  input[type="text"], input[type="password"], input[type="number"], select {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { filter: invert(1) brightness(0.5); }
+
+  select option { background: var(--surface2); color: var(--text); }
+
+  .select-wrapper { position: relative; flex: 1; }
+  .select-wrapper::after {
+    content: '▾';
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 12px;
+    pointer-events: none;
+  }
+  .select-wrapper select { width: 100%; padding-right: 32px; cursor: pointer; }
+
+  /* ── Buttons ── */
+  .btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+    white-space: nowrap;
+  }
+  .btn:hover { opacity: 0.9; box-shadow: 0 0 20px rgba(124,58,237,0.3); }
+  .btn:active { transform: scale(0.98); }
+  .btn-sm { padding: 8px 14px; font-size: 11px; border-radius: 6px; }
+  .btn-danger   { background: linear-gradient(135deg, #dc2626, #ef4444); }
+  .btn-success  { background: linear-gradient(135deg, #059669, #10b981); }
+  .btn-warning  { background: linear-gradient(135deg, #d97706, #f59e0b); }
+  .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+  .btn-secondary:hover { color: var(--text); border-color: var(--accent); }
+  .btn-orange { background: linear-gradient(135deg, #ea580c, #f97316); }
+  .btn-cyan   { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+  .btn-pink   { background: linear-gradient(135deg, #be185d, #ec4899); }
+
+  .login-error {
+    color: var(--red);
+    font-size: 12px;
+    margin-top: 12px;
+    display: none;
+    padding: 10px 14px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 6px;
+  }
+
+  /* ── App shell ── */
+  #app { display: none; position: relative; z-index: 1; }
+
+  .header {
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.8);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-brand {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header-brand::before { content: '◆'; color: var(--accent2); font-size: 10px; }
+
+  .header-meta { display: flex; align-items: center; gap: 16px; font-size: 11px; color: var(--muted); }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+    display: inline-block;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .sidebar { position: sticky; top: 84px; }
+
+  .nav-section { margin-bottom: 24px; }
+  .nav-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0 12px;
+    margin-bottom: 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--glow); color: var(--accent2); border-color: rgba(124,58,237,0.2); }
+  .nav-item.danger-nav.active { background: rgba(239,68,68,0.08); color: var(--red); border-color: rgba(239,68,68,0.2); }
+  .nav-item.danger-nav:hover  { color: var(--red); }
+  .nav-item .icon { font-size: 14px; width: 18px; text-align: center; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: rgba(239,68,68,0.15);
+    color: var(--red);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 10px;
+    font-size: 10px;
+    padding: 1px 6px;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* ── Stats ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--accent); }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .stat-card:hover::after { opacity: 1; }
+
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: #fff; }
+  .stat-value.green  { color: var(--green); }
+  .stat-value.red    { color: var(--red); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.cyan   { color: var(--accent3); }
+  .stat-value.orange { color: var(--orange); }
+  .stat-value.pink   { color: #ec4899; }
+
+  /* ── Panels ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .panel.visible { display: block; }
+
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.01);
+  }
+
+  .panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-title span { color: var(--accent2); }
+  .panel-title.danger span { color: var(--red); }
+
+  .panel-body { padding: 20px; }
+
+  /* ── Forms ── */
+  .form-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 160px;
+  }
+  .form-field label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.01);
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(37,37,53,0.5); transition: background 0.1s; }
+  tbody tr:hover { background: rgba(124,58,237,0.04); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td { padding: 12px 16px; font-size: 12px; vertical-align: middle; }
+
+  .key-val {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent3);
+    font-size: 11px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .key-val:hover { color: #fff; }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+  .badge-green  { background: rgba(16,185,129,0.15);  color: var(--green);   border: 1px solid rgba(16,185,129,0.2); }
+  .badge-red    { background: rgba(239,68,68,0.15);   color: var(--red);     border: 1px solid rgba(239,68,68,0.2); }
+  .badge-yellow { background: rgba(245,158,11,0.15);  color: var(--yellow);  border: 1px solid rgba(245,158,11,0.2); }
+  .badge-purple { background: rgba(168,85,247,0.15);  color: var(--accent2); border: 1px solid rgba(168,85,247,0.2); }
+  .badge-cyan   { background: rgba(6,182,212,0.15);   color: var(--accent3); border: 1px solid rgba(6,182,212,0.2); }
+  .badge-orange { background: rgba(249,115,22,0.15);  color: var(--orange);  border: 1px solid rgba(249,115,22,0.2); }
+  .badge-pink   { background: rgba(236,72,153,0.15);  color: #ec4899;        border: 1px solid rgba(236,72,153,0.2); }
+
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* ── Logs ── */
+  .log-container {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .log-line         { color: var(--muted); }
+  .log-line.valid   { color: var(--green); }
+  .log-line.invalid { color: var(--red); }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 12px;
+    color: var(--text);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    z-index: 200;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    pointer-events: none;
+    max-width: 320px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.success::before { content: '✓'; color: var(--green);   font-weight: bold; }
+  #toast.error::before   { content: '✕'; color: var(--red);     font-weight: bold; }
+  #toast.info::before    { content: '◆'; color: var(--accent2); font-weight: bold; }
+
+  .empty { padding: 40px; text-align: center; color: var(--muted); font-size: 12px; }
+  .empty .icon { font-size: 32px; margin-bottom: 12px; opacity: 0.3; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  /* ── Auth mode toggle ── */
+  .auth-mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 24px; }
+
+  .auth-mode-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    color: var(--muted);
+  }
+  .auth-mode-btn:hover { border-color: var(--accent); color: var(--text); }
+  .auth-mode-btn.active { background: rgba(124,58,237,0.12); border-color: var(--accent2); color: var(--text); }
+  .auth-mode-btn .mode-icon  { font-size: 20px; margin-bottom: 6px; }
+  .auth-mode-btn .mode-label { font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+  .auth-mode-btn .mode-desc  { font-size: 10px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+  .auth-mode-btn.active .mode-desc { color: var(--accent2); opacity: 0.8; }
+
+  /* ── API bar ── */
+  .api-bar {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .api-bar input { flex: 1; font-size: 11px; padding: 6px 10px; }
+
+  .separator { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* ── Shared box styles ── */
+  .create-account-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .create-account-box-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .create-account-box-title::before { content: '+'; font-size: 14px; }
+
+  /* ── Blacklist ── */
+  .blacklist-add-box {
+    background: rgba(239,68,68,0.04);
+    border: 1px solid rgba(239,68,68,0.15);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .blacklist-add-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .blacklist-add-title::before { content: '⊘'; font-size: 14px; }
+
+  /* ── Fail tracker ── */
+  .fail-tracker-box {
+    background: rgba(249,115,22,0.04);
+    border: 1px solid rgba(249,115,22,0.15);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .fail-tracker-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--orange);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  /* ── Loader ── */
+  .loader-status-box {
+    padding: 16px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .loader-upload-box {
+    background: rgba(124,58,237,0.05);
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .loader-upload-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .loader-download-box {
+    background: rgba(6,182,212,0.04);
+    border: 1px solid rgba(6,182,212,0.15);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .loader-download-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 2px dashed rgba(124,58,237,0.3);
+    border-radius: 10px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent2);
+    background: rgba(124,58,237,0.05);
+  }
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .drop-zone .dz-icon  { font-size: 28px; margin-bottom: 8px; opacity: 0.5; }
+  .drop-zone .dz-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .drop-zone .dz-sub   { font-size: 10px; color: var(--muted); opacity: 0.6; }
+  .drop-zone .dz-file  { font-size: 12px; color: var(--accent2); font-weight: 600; }
+
+  .upload-progress-wrap { display: none; margin-top: 12px; }
+  .upload-progress-bar-bg {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .upload-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.2s;
+  }
+  .upload-progress-label { font-size: 11px; color: var(--accent2); }
+
+  .dl-link-box {
+    display: none;
+    background: var(--bg);
+    border: 1px solid rgba(6,182,212,0.25);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent3);
+    word-break: break-all;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-top: 12px;
+  }
+  .dl-link-box:hover { background: rgba(6,182,212,0.05); }
+
+  /* ── Products ── */
+  .products-add-box {
+    background: rgba(236,72,153,0.04);
+    border: 1px solid rgba(236,72,153,0.2);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .products-add-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ec4899;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .products-assign-box {
+    background: rgba(124,58,237,0.04);
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  .products-assign-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">TLine Systems</div>
+    <div class="login-title">Key Management<br><span>Admin Panel</span></div>
+
+    <div class="auth-mode-toggle">
+      <div class="auth-mode-btn active" id="modeToggleKey" onclick="selectAuthMode('key')">
+        <div class="mode-icon">🔑</div>
+        <div class="mode-label">Key Only</div>
+        <div class="mode-desc">License key<br>authentication</div>
+      </div>
+      <div class="auth-mode-btn" id="modeToggleAccount" onclick="selectAuthMode('account')">
+        <div class="mode-icon">👤</div>
+        <div class="mode-label">Account + Key</div>
+        <div class="mode-desc">Username, password<br>&amp; license key</div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>API Base URL</label>
+      <input type="text" id="loginUrl" placeholder="https://your-api.pythonanywhere.com" />
+    </div>
+    <div class="input-group">
+      <label>Admin Secret Key</label>
+      <div class="input-row">
+        <input type="password" id="loginKey" placeholder="Enter admin key..." />
+        <button class="btn" onclick="attemptLogin()">Enter</button>
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);cursor:pointer;margin-bottom:4px;">
+      <input type="checkbox" id="rememberMe" checked style="accent-color:var(--accent2);width:13px;height:13px;" />
+      Remember me on this device
+    </label>
+    <div class="login-error" id="loginError">Connection failed. Check URL and admin key.</div>
+    <div id="savedNote" style="display:none;font-size:11px;color:var(--muted);margin-top:10px;text-align:center;">
+      Saved credentials loaded. <span onclick="clearSaved()" style="color:var(--accent2);cursor:pointer;text-decoration:underline;">Clear saved login</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════════════════════════════════════ -->
+<div id="app">
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-brand">TLine Key System</div>
+      <div class="header-meta">
+        <span class="status-dot"></span>
+        <span id="apiUrlDisplay"></span>
+        <button class="btn btn-sm btn-secondary" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- ── Sidebar ── -->
+    <nav class="sidebar">
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" onclick="showTab('dashboard')" id="nav-dashboard">
+          <span class="icon">◈</span> Dashboard
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Keys</div>
+        <div class="nav-item" onclick="showTab('keys')"      id="nav-keys">      <span class="icon">⌗</span> Regular Keys</div>
+        <div class="nav-item" onclick="showTab('special')"   id="nav-special">   <span class="icon">★</span> Special Keys</div>
+        <div class="nav-item" onclick="showTab('accounts')"  id="nav-accounts">  <span class="icon">👤</span> Accounts</div>
+        <div class="nav-item" onclick="showTab('generator')" id="nav-generator"> <span class="icon">⚡</span> Key Generator</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Products</div>
+        <div class="nav-item" onclick="showTab('products')" id="nav-products">
+          <span class="icon">📦</span> Products
+          <span class="nav-badge" id="navProductsCount" style="display:none;background:rgba(236,72,153,0.15);color:#ec4899;border-color:rgba(236,72,153,0.25);">0</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Distribution</div>
+        <div class="nav-item" onclick="showTab('loader')" id="nav-loader">
+          <span class="icon">⬇</span> Loader
+          <span class="nav-badge" id="navLoaderBadge" style="display:none;background:rgba(16,185,129,0.15);color:var(--green);border-color:rgba(16,185,129,0.25);">✓</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Security</div>
+        <div class="nav-item danger-nav" onclick="showTab('blacklist')" id="nav-blacklist">
+          <span class="icon">⊘</span> IP Blacklist
+          <span class="nav-badge" id="navBlacklistCount" style="display:none;">0</span>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+        <div class="nav-item" onclick="showTab('logs')"     id="nav-logs">     <span class="icon">▤</span> Logs</div>
+        <div class="nav-item" onclick="showTab('validate')" id="nav-validate"> <span class="icon">✦</span> Validate Key</div>
+      </div>
+    </nav>
+
+    <!-- ── Main ── -->
+    <main class="content">
+
+      <div class="api-bar">
+        <span>API:</span>
+        <span id="apiUrlFull" style="color:var(--accent3);font-family:monospace;"></span>
+        <button class="btn btn-sm btn-secondary" onclick="refreshAll()" style="margin-left:auto;">↻ Refresh</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-label">Total Keys</div><div class="stat-value" id="st-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">Bound</div><div class="stat-value green" id="st-bound">—</div></div>
+        <div class="stat-card"><div class="stat-label">Unbound</div><div class="stat-value cyan" id="st-unbound">—</div></div>
+        <div class="stat-card"><div class="stat-label">Special</div><div class="stat-value" style="color:var(--accent2)" id="st-special">—</div></div>
+        <div class="stat-card"><div class="stat-label">Expired</div><div class="stat-value red" id="st-expired">—</div></div>
+        <div class="stat-card" id="st-accounts-card"><div class="stat-label">Accounts</div><div class="stat-value yellow" id="st-accounts">—</div></div>
+        <div class="stat-card"><div class="stat-label">Products</div><div class="stat-value pink" id="st-products">—</div></div>
+        <div class="stat-card"><div class="stat-label">Blacklisted IPs</div><div class="stat-value orange" id="st-blacklisted">—</div></div>
+        <div class="stat-card"><div class="stat-label">Loader</div><div class="stat-value" id="st-loader" style="font-size:14px;">—</div></div>
+      </div>
+
+      <!-- ── DASHBOARD ── -->
+      <div class="panel visible" id="panel-dashboard">
+        <div class="panel-header">
+          <div class="panel-title">◈ <span>Dashboard</span></div>
+        </div>
+        <div class="panel-body">
+          <p style="color:var(--muted);font-size:12px;line-height:1.8;">
+            Welcome to the TLine Key System admin panel. Use the sidebar to manage keys, accounts, products, view logs, validate licenses, upload the loader, and manage the IP blacklist.
+          </p>
+          <div class="separator"></div>
+          <p style="color:var(--muted);font-size:11px;">Connected as admin · All actions are logged.</p>
+        </div>
+      </div>
+
+      <!-- ── REGULAR KEYS ── -->
+      <div class="panel" id="panel-keys">
+        <div class="panel-header">
+          <div class="panel-title">⌗ <span>Regular Keys</span></div>
+          <button class="btn btn-sm" onclick="loadKeys()">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+          <div class="form-row" style="margin-bottom:16px;">
+            <div class="form-field">
+              <label>New Key</label>
+              <input type="text" id="newKey" placeholder="KEY-XXXX-XXXX-XXXX" />
+            </div>
+            <div class="form-field" style="max-width:160px;">
+              <label>Expiry Unit</label>
+              <div class="select-wrapper">
+                <select id="newKeyExpiryUnit" onchange="toggleNewKeyDuration()">
+                  <option value="seconds">Seconds</option>
+                  <option value="minutes">Minutes</option>
+                  <option value="hours">Hours</option>
+                  <option value="days">Days</option>
+                  <option value="weeks" selected>Weeks</option>
+                  <option value="months">Months</option>
+                  <option value="years">Years</option>
+                  <option value="lifetime">Lifetime</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field" style="max-width:110px;" id="newKeyDurationWrapper">
+              <label>Duration</label>
+              <input type="number" id="newKeyExpiryDuration" value="3" min="1" />
+            </div>
+            <button class="btn btn-sm btn-success" onclick="addKey()" style="align-self:flex-end;">+ Add Key</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Key</th>
+                  <th id="th-account">Account</th>
+                  <th>Product</th>
+                  <th>HWID</th>
+                  <th>Status</th>
+                  <th>Expiration</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="keysTable">
+                <tr><td colspan="7"><div class="empty"><div class="icon">⌗</div>No keys loaded</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SPECIAL KEYS ── -->
+      <div class="panel" id="panel-special">
+        <div class="panel-header">
+          <div class="panel-title">★ <span>Special Keys</span></div>
+          <button class="btn btn-sm" onclick="loadSpecialKeys()">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+          <div class="form-row" style="margin-bottom:16px;">
+            <div class="form-field">
+              <label>New Special Key</label>
+              <input type="text" id="newSpecialKey" placeholder="SPECIAL-KEY-VALUE" />
+            </div>
+            <button class="btn btn-sm btn-success" onclick="addSpecialKey()" style="align-self:flex-end;">+ Add Special Key</button>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-bottom:16px;">Special keys bypass HWID checks and never expire.</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Key</th><th>Type</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="specialTable">
+                <tr><td colspan="3"><div class="empty"><div class="icon">★</div>No special keys loaded</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PRODUCTS ── -->
+      <div class="panel" id="panel-products">
+        <div class="panel-header">
+          <div class="panel-title">📦 <span>Products</span></div>
+          <button class="btn btn-sm" onclick="loadProducts()">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+
+          <div class="products-add-box">
+            <div class="products-add-title">➕ Add Product</div>
+            <div class="form-row">
+              <div class="form-field" style="max-width:180px;">
+                <label>Product ID</label>
+                <input type="text" id="newProductId" placeholder="e.g. AIMBOT" />
+              </div>
+              <div class="form-field">
+                <label>Product Name</label>
+                <input type="text" id="newProductName" placeholder="e.g. AimBot Pro v2" />
+              </div>
+              <button class="btn btn-sm btn-pink" onclick="addProduct()" style="align-self:flex-end;">+ Add Product</button>
+            </div>
+          </div>
+
+          <div class="table-wrap" style="margin-bottom:8px;">
+            <table>
+              <thead>
+                <tr><th>Product ID</th><th>Product Name</th><th>Keys Assigned</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="productsTable">
+                <tr><td colspan="4"><div class="empty"><div class="icon">📦</div>No products found</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="products-assign-box">
+            <div class="products-assign-title">🔗 Assign Product to Key</div>
+            <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">
+              Assign a product to a key so that when a user validates or logs in, the server tells them which product they have access to.
+            </p>
+            <div class="form-row">
+              <div class="form-field">
+                <label>License Key</label>
+                <input type="text" id="assignKey" placeholder="KEY-XXXX-XXXX" />
+              </div>
+              <div class="form-field" style="max-width:240px;">
+                <label>Product</label>
+                <div class="select-wrapper">
+                  <select id="assignProductId">
+                    <option value="">— Select a product —</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-sm" onclick="assignProduct()" style="align-self:flex-end;">Assign →</button>
+              <button class="btn btn-sm btn-secondary" onclick="unassignProduct()" style="align-self:flex-end;">Unassign</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── LOADER ── -->
+      <div class="panel" id="panel-loader">
+        <div class="panel-header">
+          <div class="panel-title">⬇ <span>Loader Management</span></div>
+          <button class="btn btn-sm" onclick="checkLoaderStatus()">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+
+          <div class="loader-status-box" id="loaderStatusBox">
+            <span style="color:var(--muted);">Checking status...</span>
+          </div>
+
+          <div class="loader-upload-box">
+            <div class="loader-upload-title">⬆ Upload Loader EXE</div>
+            <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">
+              Uploading a new file will <strong style="color:var(--yellow);">permanently replace</strong> any existing loader.
+              Only one EXE is stored at a time.
+            </p>
+
+            <div class="drop-zone" id="dropZone">
+              <input type="file" id="loaderFileInput" accept=".exe" onchange="onFileSelected(this)" />
+              <div class="dz-icon">📦</div>
+              <div class="dz-label" id="dzLabel">Drop your .exe here, or click to browse</div>
+              <div class="dz-sub">Only .exe files</div>
+            </div>
+
+            <div class="upload-progress-wrap" id="uploadProgressWrap">
+              <div class="upload-progress-bar-bg">
+                <div class="upload-progress-bar" id="uploadProgressBar"></div>
+              </div>
+              <div class="upload-progress-label" id="uploadProgressLabel">Uploading...</div>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button class="btn btn-sm btn-success" onclick="uploadLoader()">⬆ Upload to Server</button>
+              <button class="btn btn-sm btn-secondary" onclick="clearFileSelection()">✕ Clear</button>
+            </div>
+          </div>
+
+          <div class="loader-download-box">
+            <div class="loader-download-title">⬇ Generate Download Link</div>
+            <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">
+              The <code style="color:var(--accent3);background:var(--surface2);padding:2px 6px;border-radius:4px;">/download</code>
+              endpoint requires a valid license key + HWID. Generate a test link here.
+            </p>
+            <div class="form-row" style="margin-bottom:0;">
+              <div class="form-field">
+                <label>License Key</label>
+                <input type="text" id="dlTestKey" placeholder="KEY-XXXX-XXXX" />
+              </div>
+              <div class="form-field">
+                <label>HWID</label>
+                <input type="text" id="dlTestHwid" placeholder="Hardware ID" />
+              </div>
+              <button class="btn btn-sm btn-cyan" onclick="genDownloadLink()" style="align-self:flex-end;">Generate Link</button>
+            </div>
+            <div class="dl-link-box" id="dlLinkResult" onclick="copyDlLink()" title="Click to copy"></div>
+            <p id="dlLinkHint" style="display:none;font-size:10px;color:var(--muted);margin-top:6px;">Click the link above to copy it.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── ACCOUNTS ── -->
+      <div class="panel" id="panel-accounts">
+        <div class="panel-header">
+          <div class="panel-title">👤 <span>Accounts</span></div>
+          <button class="btn btn-sm" onclick="loadAccounts()">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+          <div class="create-account-box">
+            <div class="create-account-box-title">Create Account</div>
+            <div class="form-row">
+              <div class="form-field">
+                <label>Username</label>
+                <input type="text" id="createUsername" placeholder="username" />
+              </div>
+              <div class="form-field">
+                <label>Password</label>
+                <input type="password" id="createPassword" placeholder="password" />
+              </div>
+              <div class="form-field">
+                <label>License Key</label>
+                <input type="text" id="createKey" placeholder="KEY-XXXX-XXXX" />
+              </div>
+              <button class="btn btn-sm btn-success" onclick="createAccount()" style="align-self:flex-end;">Create Account</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Username</th><th>Bound Key</th><th>Product</th><th>Expiration</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="accountsTable">
+                <tr><td colspan="5"><div class="empty"><div class="icon">👤</div>No accounts loaded</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KEY GENERATOR ── -->
+      <div class="panel" id="panel-generator">
+        <div class="panel-header">
+          <div class="panel-title">⚡ <span>Key Generator</span></div>
+        </div>
+        <div class="panel-body">
+          <div class="form-row" style="margin-bottom:16px;align-items:flex-end;">
+            <div class="form-field" style="max-width:100px;">
+              <label>Quantity</label>
+              <input type="number" id="genQty" value="1" min="1" max="1000" oninput="updateGenPreview()" />
+            </div>
+            <div class="form-field" style="max-width:100px;">
+              <label>Groups</label>
+              <input type="number" id="genGroups" value="3" min="1" max="10" oninput="updateGenPreview()" />
+            </div>
+            <div class="form-field" style="max-width:100px;">
+              <label>Chars/Group</label>
+              <input type="number" id="genChars" value="5" min="3" max="12" oninput="updateGenPreview()" />
+            </div>
+            <div class="form-field">
+              <label>Prefix</label>
+              <input type="text" id="genPrefix" value="TLINE" oninput="updateGenPreview()" />
+            </div>
+            <div class="form-field">
+              <label>Expiry Unit</label>
+              <div class="select-wrapper">
+                <select id="genExpiryUnit" onchange="toggleExpiryDuration()">
+                  <option value="seconds">Seconds</option>
+                  <option value="minutes">Minutes</option>
+                  <option value="hours">Hours</option>
+                  <option value="days">Days</option>
+                  <option value="weeks" selected>Weeks</option>
+                  <option value="months">Months</option>
+                  <option value="years">Years</option>
+                  <option value="lifetime">Lifetime</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field" style="max-width:120px;" id="genExpiryDurationWrapper">
+              <label>Expiry Duration</label>
+              <input type="number" id="genExpiryDuration" value="3" min="1" />
+            </div>
+            <button class="btn btn-sm btn-success" onclick="runGenerator()">Generate</button>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:11px;color:var(--accent3);margin-bottom:16px;letter-spacing:0.05em;" id="genPreview">TLINE-XXXXX-XXXXX-XXXXX</div>
+          <textarea id="generatedKeys" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;padding:12px;outline:none;resize:vertical;min-height:140px;line-height:1.9;" readonly placeholder="Generated keys will appear here..."></textarea>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-sm btn-secondary" onclick="copyGeneratedKeys()">Copy All</button>
+            <button class="btn btn-sm btn-secondary" onclick="document.getElementById('generatedKeys').value=''">Clear</button>
+            <button class="btn btn-sm" style="margin-left:auto;" onclick="addGeneratedToSystem()">Add to System →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── IP BLACKLIST ── -->
+      <div class="panel" id="panel-blacklist">
+        <div class="panel-header">
+          <div class="panel-title danger">⊘ <span style="color:var(--red)">IP Blacklist</span></div>
+          <button class="btn btn-sm" onclick="loadBlacklist()">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+
+          <div class="blacklist-add-box">
+            <div class="blacklist-add-title">Ban an IP Address</div>
+            <div class="form-row">
+              <div class="form-field" style="max-width:220px;">
+                <label>IP Address</label>
+                <input type="text" id="banIp" placeholder="e.g. 192.168.1.1" />
+              </div>
+              <div class="form-field">
+                <label>Reason</label>
+                <input type="text" id="banReason" placeholder="e.g. Brute force attempt" value="Manual ban" />
+              </div>
+              <button class="btn btn-sm btn-danger" onclick="doBanIp()" style="align-self:flex-end;">⊘ Blacklist IP</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>IP Address</th><th>Reason</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="blacklistTable">
+                <tr><td colspan="3"><div class="empty"><div class="icon">⊘</div>No blacklisted IPs</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="fail-tracker-box">
+            <div class="fail-tracker-title">
+              <span>⚡ Auto-Blacklist Tracker</span>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button class="btn btn-sm btn-secondary" onclick="loadFailTracker()">↻</button>
+                <button class="btn btn-sm btn-danger"    onclick="clearFailTracker()">Clear All</button>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;padding:12px 14px;background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;">Auto-Ban</span>
+                <div id="autoBanToggleWrap" onclick="toggleAutoBan()" style="cursor:pointer;width:44px;height:24px;border-radius:12px;background:var(--border);position:relative;transition:background 0.25s;flex-shrink:0;">
+                  <div id="autoBanThumb" style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform 0.25s;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>
+                </div>
+                <span id="autoBanLabel" style="font-size:11px;font-weight:700;color:var(--muted);">OFF</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;" id="thresholdRow">
+                <span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;white-space:nowrap;">Threshold (failures)</span>
+                <input type="number" id="autoBanThresholdInput" value="10" min="1" max="9999"
+                       style="width:72px;padding:6px 10px;font-size:12px;border-radius:6px;"
+                       onkeydown="if(event.key==='Enter')saveAutoBanConfig()" />
+                <button class="btn btn-sm" onclick="saveAutoBanConfig()" style="padding:6px 12px;font-size:11px;">Save</button>
+              </div>
+            </div>
+
+            <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">
+              When enabled, IPs are automatically blacklisted after hitting the failure threshold.
+            </p>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>IP Address</th><th>Failed Attempts</th><th>Risk</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="failTrackerTable">
+                  <tr><td colspan="4"><div class="empty"><div class="icon">⚡</div>No failure data</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── LOGS ── -->
+      <div class="panel" id="panel-logs">
+        <div class="panel-header">
+          <div class="panel-title">▤ <span>Usage Logs</span></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm btn-secondary" onclick="loadLogs()">↻ Refresh</button>
+            <button class="btn btn-sm btn-danger"    onclick="clearLogs()">Clear Logs</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="log-container" id="logContainer">
+            <div class="log-line">No logs loaded. Click Refresh.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VALIDATE ── -->
+      <div class="panel" id="panel-validate">
+        <div class="panel-header">
+          <div class="panel-title">✦ <span>Validate / Test Auth</span></div>
+        </div>
+        <div class="panel-body">
+          <div id="validateModeToggle" style="display:flex;gap:8px;margin-bottom:20px;">
+            <button class="btn btn-sm" id="modeKeyBtn" onclick="setValidateMode('key')">Key Only</button>
+            <button class="btn btn-sm btn-secondary" id="modeAccountBtn" onclick="setValidateMode('account')">Username + Password</button>
+          </div>
+
+          <div id="validateModeKey">
+            <div class="form-row" style="margin-bottom:16px;">
+              <div class="form-field">
+                <label>Key</label>
+                <input type="text" id="validateKey" placeholder="Enter key to test..." />
+              </div>
+              <div class="form-field">
+                <label>HWID</label>
+                <input type="text" id="validateHwid" placeholder="Hardware ID..." />
+              </div>
+              <button class="btn btn-sm" onclick="doValidateKey()" style="align-self:flex-end;">Validate</button>
+            </div>
+          </div>
+
+          <div id="validateModeAccount" style="display:none;">
+            <div class="form-row" style="margin-bottom:16px;">
+              <div class="form-field">
+                <label>Username</label>
+                <input type="text" id="validateUsername" placeholder="Username..." />
+              </div>
+              <div class="form-field">
+                <label>Password</label>
+                <input type="password" id="validatePassword" placeholder="Password..." />
+              </div>
+              <div class="form-field">
+                <label>HWID (optional)</label>
+                <input type="text" id="validateAccountHwid" placeholder="Hardware ID..." />
+              </div>
+              <button class="btn btn-sm" onclick="doValidateAccount()" style="align-self:flex-end;">Test Login</button>
+            </div>
+          </div>
+
+          <div id="validateResult" style="display:none;"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ══ SCRIPT ════════════════════════════════════════════════════════════════ -->
+<script>
+let API_BASE  = '';
+let ADMIN_KEY = '';
+let AUTH_MODE = 'key';
+
+const LS_URL  = 'tline_api_url';
+const LS_KEY  = 'tline_admin_key';
+const LS_MODE = 'tline_auth_mode';
+const SAFE_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedUrl  = localStorage.getItem(LS_URL);
+  const savedKey  = localStorage.getItem(LS_KEY);
+  const savedMode = localStorage.getItem(LS_MODE) || 'key';
+
+  if (savedUrl) document.getElementById('loginUrl').value = savedUrl;
+  if (savedKey) document.getElementById('loginKey').value = savedKey;
+
+  selectAuthMode(savedMode, true);
+
+  if (savedUrl && savedKey) {
+    document.getElementById('savedNote').style.display = 'block';
+    autoLogin(savedUrl, savedKey);
+  }
+
+  document.getElementById('loginKey').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+
+  const dz = document.getElementById('dropZone');
+  dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      document.getElementById('loaderFileInput').files = e.dataTransfer.files;
+      onFileSelected({ files: e.dataTransfer.files });
+    }
+  });
+
+  updateGenPreview();
+});
+
+// ─── Auth mode ────────────────────────────────────────────────────────────────
+
+function selectAuthMode(mode, silent = false) {
+  AUTH_MODE = mode;
+  document.getElementById('modeToggleKey').classList.toggle('active',     mode === 'key');
+  document.getElementById('modeToggleAccount').classList.toggle('active', mode === 'account');
+  if (!silent) localStorage.setItem(LS_MODE, mode);
+}
+
+// ─── Login ────────────────────────────────────────────────────────────────────
+
+async function autoLogin(url, key) {
+  try {
+    const r = await fetch(`${url}/stats?admin_key=${encodeURIComponent(key)}`);
+    const d = await r.json();
+    if (d.error) throw new Error();
+    API_BASE = url; ADMIN_KEY = key;
+    enterApp(d);
+  } catch {}
+}
+
+async function attemptLogin() {
+  const url      = document.getElementById('loginUrl').value.trim().replace(/\/$/, '');
+  const key      = document.getElementById('loginKey').value.trim();
+  const remember = document.getElementById('rememberMe').checked;
+  const errEl    = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!url || !key) {
+    errEl.textContent = 'Please fill in both fields.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const resp = await fetch(`${url}/stats?admin_key=${encodeURIComponent(key)}`);
+    if (!resp.ok) throw new Error('bad');
+    const data = await resp.json();
+    if (data.error) throw new Error('bad');
+    API_BASE = url; ADMIN_KEY = key;
+    if (remember) {
+      localStorage.setItem(LS_URL, url);
+      localStorage.setItem(LS_KEY, key);
+      localStorage.setItem(LS_MODE, AUTH_MODE);
+    } else {
+      localStorage.removeItem(LS_URL);
+      localStorage.removeItem(LS_KEY);
+      localStorage.removeItem(LS_MODE);
+    }
+    enterApp(data);
+  } catch {
+    errEl.textContent = 'Connection failed. Check URL and admin key.';
+    errEl.style.display = 'block';
+  }
+}
+
+function enterApp(statsData) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display         = 'block';
+  document.getElementById('apiUrlDisplay').textContent  = API_BASE.replace('https://', '');
+  document.getElementById('apiUrlFull').textContent     = API_BASE;
+  applyStats(statsData);
+  loadKeys();
+  loadBlacklist();
+  loadFailTracker();
+  checkLoaderStatus();
+  loadProducts();
+
+  const isAccount = AUTH_MODE === 'account';
+  document.getElementById('nav-accounts').style.display     = isAccount ? '' : 'none';
+  document.getElementById('st-accounts-card').style.display = isAccount ? '' : 'none';
+  document.getElementById('th-account').style.display       = isAccount ? '' : 'none';
+
+  setValidateMode(AUTH_MODE);
+  document.getElementById('validateModeToggle').style.display = isAccount ? '' : 'none';
+}
+
+function logout() {
+  API_BASE = ''; ADMIN_KEY = '';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display         = 'none';
+  document.getElementById('loginKey').value = '';
+}
+
+function clearSaved() {
+  localStorage.removeItem(LS_URL);
+  localStorage.removeItem(LS_KEY);
+  localStorage.removeItem(LS_MODE);
+  document.getElementById('loginUrl').value = '';
+  document.getElementById('loginKey').value = '';
+  document.getElementById('savedNote').style.display = 'none';
+}
+
+// ─── API helper ───────────────────────────────────────────────────────────────
+
+async function api(path, method = 'GET', body = null) {
+  const opts = { method, headers: {} };
+  if (body) {
+    opts.body = new URLSearchParams(body);
+    opts.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+  }
+  const sep = path.includes('?') ? '&' : '?';
+  const r   = await fetch(`${API_BASE}${path}${sep}admin_key=${encodeURIComponent(ADMIN_KEY)}`, opts);
+  return r.json();
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+
+function toast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = `show ${type}`;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = '', 3000);
+}
+
+// ─── Tab switching ────────────────────────────────────────────────────────────
+
+function showTab(tab) {
+  document.querySelectorAll('.panel').forEach(p   => p.classList.remove('visible'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`panel-${tab}`).classList.add('visible');
+  document.getElementById(`nav-${tab}`).classList.add('active');
+  if (tab === 'keys')      loadKeys();
+  if (tab === 'special')   loadSpecialKeys();
+  if (tab === 'logs')      loadLogs();
+  if (tab === 'accounts')  loadAccounts();
+  if (tab === 'products')  loadProducts();
+  if (tab === 'blacklist') { loadBlacklist(); loadFailTracker(); }
+  if (tab === 'loader')    checkLoaderStatus();
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+
+function applyStats(data) {
+  document.getElementById('st-total').textContent      = data.total_keys      ?? '—';
+  document.getElementById('st-bound').textContent      = data.bound_keys      ?? '—';
+  document.getElementById('st-unbound').textContent    = data.unbound_keys    ?? '—';
+  document.getElementById('st-special').textContent    = data.special_keys    ?? '—';
+  document.getElementById('st-expired').textContent    = data.expired_keys    ?? '—';
+  document.getElementById('st-accounts').textContent   = data.total_accounts  ?? '—';
+  document.getElementById('st-products').textContent   = data.total_products  ?? '—';
+  document.getElementById('st-blacklisted').textContent = data.blacklisted_ips ?? '—';
+
+  const loaderEl = document.getElementById('st-loader');
+  if (data.loader_present === true) {
+    loaderEl.textContent = '✓ Ready';
+    loaderEl.style.color = 'var(--green)';
+  } else if (data.loader_present === false) {
+    loaderEl.textContent = '✕ Missing';
+    loaderEl.style.color = 'var(--red)';
+  } else {
+    loaderEl.textContent = '—';
+    loaderEl.style.color = '';
+  }
+}
+
+async function refreshAll() {
+  const data = await api('/stats');
+  applyStats(data);
+  toast('Stats refreshed', 'success');
+}
+
+// ─── Keys ─────────────────────────────────────────────────────────────────────
+
+async function loadKeys() {
+  const data  = await api('/list_keys');
+  const tbody = document.getElementById('keysTable');
+  if (!data.keys || data.keys.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="icon">⌗</div>No keys found</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.keys.map(k => {
+    const status   = k.bound
+      ? `<span class="badge badge-green">Bound</span>`
+      : `<span class="badge badge-cyan">Unbound</span>`;
+    const exp      = k.expiration
+      ? `<span class="badge badge-yellow" title="${k.expiration}">${k.expiration.substring(0,10)}</span>`
+      : `<span class="badge badge-purple">Permanent</span>`;
+    const hwid     = k.hwid
+      ? `<span style="color:var(--muted);font-size:11px;max-width:130px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${k.hwid}">${k.hwid}</span>`
+      : `<span style="color:var(--muted);font-size:11px;">—</span>`;
+    const acctCell = AUTH_MODE === 'account'
+      ? `<td>${k.username ? `<span style="color:var(--accent2);font-size:11px;">@${k.username}</span>` : `<span style="color:var(--muted);font-size:11px;">—</span>`}</td>`
+      : '';
+    const productCell = k.product_name
+      ? `<span class="badge badge-pink">${escapeHtml(k.product_name)}</span>`
+      : `<span style="color:var(--muted);font-size:11px;">—</span>`;
+    return `<tr>
+      <td><span class="key-val" onclick="navigator.clipboard.writeText('${k.key}');toast('Copied!','info')">${k.key}</span></td>
+      ${acctCell}
+      <td>${productCell}</td>
+      <td>${hwid}</td>
+      <td>${status}</td>
+      <td>${exp}</td>
+      <td><div class="actions">
+        ${k.bound ? `<button class="btn btn-sm btn-secondary" onclick="resetHwid('${k.key}')">Reset HWID</button>` : ''}
+        <button class="btn btn-sm btn-danger" onclick="removeKey('${k.key}')">Remove</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleNewKeyDuration() {
+  const unit = document.getElementById('newKeyExpiryUnit').value;
+  document.getElementById('newKeyDurationWrapper').style.display = unit === 'lifetime' ? 'none' : '';
+}
+
+function buildExpiryISOFrom(unitId, durationId) {
+  const unit = document.getElementById(unitId).value;
+  if (unit === 'lifetime') return null;
+  const duration = parseInt(document.getElementById(durationId).value) || 1;
+  const now = new Date();
+  ({
+    seconds: () => now.setSeconds(now.getSeconds() + duration),
+    minutes: () => now.setMinutes(now.getMinutes() + duration),
+    hours:   () => now.setHours(now.getHours() + duration),
+    days:    () => now.setDate(now.getDate() + duration),
+    weeks:   () => now.setDate(now.getDate() + duration * 7),
+    months:  () => now.setMonth(now.getMonth() + duration),
+    years:   () => now.setFullYear(now.getFullYear() + duration),
+  })[unit]?.();
+  return now.toISOString();
+}
+
+async function addKey() {
+  const key = document.getElementById('newKey').value.trim();
+  if (!key) return toast('Key cannot be empty', 'error');
+  const exp  = buildExpiryISOFrom('newKeyExpiryUnit', 'newKeyExpiryDuration');
+  const body = { key };
+  if (exp) body.expiration = exp;
+  const data = await api('/add_key', 'POST', body);
+  if (data.error) return toast(data.error, 'error');
+  toast('Key added successfully', 'success');
+  document.getElementById('newKey').value = '';
+  loadKeys(); refreshAll();
+}
+
+async function removeKey(key) {
+  if (!confirm(`Remove key: ${key}?`)) return;
+  const data = await api('/remove_key', 'POST', { key });
+  if (data.error) return toast(data.error, 'error');
+  toast('Key removed', 'success');
+  loadKeys(); refreshAll();
+}
+
+async function resetHwid(key) {
+  const data = await api('/reset_hwid', 'POST', { key });
+  if (data.error) return toast(data.error, 'error');
+  toast('HWID reset', 'success');
+  loadKeys();
+}
+
+// ─── Special keys ─────────────────────────────────────────────────────────────
+
+async function loadSpecialKeys() {
+  const data  = await api('/list_special_keys');
+  const tbody = document.getElementById('specialTable');
+  if (!data.keys || data.keys.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="3"><div class="empty"><div class="icon">★</div>No special keys</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.keys.map(k => `<tr>
+    <td><span class="key-val" onclick="navigator.clipboard.writeText('${k}');toast('Copied!','info')">${k}</span></td>
+    <td><span class="badge badge-purple">Special</span></td>
+    <td><button class="btn btn-sm btn-danger" onclick="removeSpecialKey('${k}')">Remove</button></td>
+  </tr>`).join('');
+}
+
+async function addSpecialKey() {
+  const key = document.getElementById('newSpecialKey').value.trim();
+  if (!key) return toast('Key cannot be empty', 'error');
+  const data = await api('/add_special_key', 'POST', { key });
+  if (data.error) return toast(data.error, 'error');
+  toast('Special key added', 'success');
+  document.getElementById('newSpecialKey').value = '';
+  loadSpecialKeys(); refreshAll();
+}
+
+async function removeSpecialKey(key) {
+  if (!confirm(`Remove special key: ${key}?`)) return;
+  await api('/remove_special_key', 'POST', { key });
+  toast('Special key removed', 'success');
+  loadSpecialKeys(); refreshAll();
+}
+
+// ─── Products ────────────────────────────────────────────────────────────────
+
+async function loadProducts() {
+  const data  = await api('/list_products');
+  const tbody = document.getElementById('productsTable');
+  const sel   = document.getElementById('assignProductId');
+  const badge = document.getElementById('navProductsCount');
+
+  if (!data.products || data.products.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty"><div class="icon">📦</div>No products found</div></td></tr>`;
+    sel.innerHTML   = '<option value="">— No products —</option>';
+    badge.style.display = 'none';
+    return;
+  }
+
+  badge.textContent   = data.products.length;
+  badge.style.display = '';
+
+  tbody.innerHTML = data.products.map(p => `<tr>
+    <td><span class="badge badge-pink">${escapeHtml(p.product_id)}</span></td>
+    <td style="color:var(--text);font-size:12px;font-weight:600;">${escapeHtml(p.product_name)}</td>
+    <td style="color:var(--muted);font-size:12px;">${p.key_count} key${p.key_count !== 1 ? 's' : ''}</td>
+    <td><div class="actions">
+      <button class="btn btn-sm btn-danger" onclick="removeProduct('${escapeHtml(p.product_id)}')">Remove</button>
+    </div></td>
+  </tr>`).join('');
+
+  sel.innerHTML = '<option value="">— Select a product —</option>' + data.products.map(p =>
+    `<option value="${escapeHtml(p.product_id)}">${escapeHtml(p.product_name)}</option>`
+  ).join('');
+}
+
+async function addProduct() {
+  const pid  = document.getElementById('newProductId').value.trim().toUpperCase();
+  const name = document.getElementById('newProductName').value.trim();
+  if (!pid || !name) return toast('Product ID and name are required', 'error');
+  const data = await api('/add_product', 'POST', { product_id: pid, product_name: name });
+  if (data.error) return toast(data.error, 'error');
+  toast(`Product "${name}" added`, 'success');
+  document.getElementById('newProductId').value   = '';
+  document.getElementById('newProductName').value = '';
+  loadProducts(); refreshAll();
+}
+
+async function removeProduct(pid) {
+  if (!confirm(`Remove product "${pid}"? All key assignments will be cleared.`)) return;
+  const data = await api('/remove_product', 'POST', { product_id: pid });
+  if (data.error) return toast(data.error, 'error');
+  toast('Product removed', 'success');
+  loadProducts(); loadKeys(); refreshAll();
+}
+
+async function assignProduct() {
+  const key = document.getElementById('assignKey').value.trim();
+  const pid = document.getElementById('assignProductId').value;
+  if (!key)  return toast('Enter a license key', 'error');
+  if (!pid)  return toast('Select a product', 'error');
+  const data = await api('/assign_product', 'POST', { key, product_id: pid });
+  if (data.error) return toast(data.error, 'error');
+  toast(data.message, 'success');
+  document.getElementById('assignKey').value = '';
+  loadProducts(); loadKeys();
+}
+
+async function unassignProduct() {
+  const key = document.getElementById('assignKey').value.trim();
+  if (!key) return toast('Enter a license key to unassign', 'error');
+  const data = await api('/unassign_product', 'POST', { key });
+  if (data.error) return toast(data.error, 'error');
+  toast('Product unassigned from key', 'success');
+  document.getElementById('assignKey').value = '';
+  loadProducts(); loadKeys();
+}
+
+// ─── Loader ───────────────────────────────────────────────────────────────────
+
+function onFileSelected(input) {
+  const file  = input.files && input.files[0];
+  const label = document.getElementById('dzLabel');
+  if (file) {
+    label.className   = 'dz-file';
+    label.textContent = `${file.name}  (${(file.size / 1048576).toFixed(2)} MB)`;
+  } else {
+    label.className   = 'dz-label';
+    label.textContent = 'Drop your .exe here, or click to browse';
+  }
+}
+
+function clearFileSelection() {
+  document.getElementById('loaderFileInput').value = '';
+  onFileSelected({ files: [] });
+}
+
+async function checkLoaderStatus() {
+  const box   = document.getElementById('loaderStatusBox');
+  const badge = document.getElementById('navLoaderBadge');
+  try {
+    const data = await api('/loader_status');
+    if (data.exists) {
+      const mb  = (data.size_bytes / 1048576).toFixed(2);
+      const mod = data.last_modified ? data.last_modified.substring(0,19).replace('T',' ') : '—';
+      box.innerHTML = `
+        <span style="color:var(--green);font-weight:700;font-family:'Syne',sans-serif;">✓ Loader ready</span>
+        <span style="color:var(--muted);">│</span>
+        <span style="color:var(--text);">${data.filename || 'loader.exe'}</span>
+        <span style="color:var(--muted);">${mb} MB</span>
+        <span style="color:var(--muted);">│ Modified: ${mod}</span>`;
+      badge.style.display = '';
+      document.getElementById('st-loader').textContent = '✓ Ready';
+      document.getElementById('st-loader').style.color = 'var(--green)';
+    } else {
+      box.innerHTML = `
+        <span style="color:var(--red);font-weight:700;font-family:'Syne',sans-serif;">✕ No loader on server</span>
+        <span style="color:var(--muted);">Upload one below to enable downloads.</span>`;
+      badge.style.display = 'none';
+      document.getElementById('st-loader').textContent = '✕ Missing';
+      document.getElementById('st-loader').style.color = 'var(--red)';
+    }
+  } catch {
+    box.innerHTML = `<span style="color:var(--red);">Failed to fetch loader status.</span>`;
+  }
+}
+
+async function uploadLoader() {
+  const fileInput = document.getElementById('loaderFileInput');
+  if (!fileInput.files || !fileInput.files.length) return toast('Select an .exe file first', 'error');
+
+  const file = fileInput.files[0];
+  if (!file.name.toLowerCase().endsWith('.exe')) return toast('Only .exe files are allowed', 'error');
+
+  const progressWrap = document.getElementById('uploadProgressWrap');
+  const progressBar  = document.getElementById('uploadProgressBar');
+  const progressLbl  = document.getElementById('uploadProgressLabel');
+
+  progressWrap.style.display = 'block';
+  progressBar.style.width    = '0%';
+  progressLbl.textContent    = `Uploading ${file.name} (${(file.size / 1048576).toFixed(2)} MB)...`;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${API_BASE}/upload_loader?admin_key=${encodeURIComponent(ADMIN_KEY)}`);
+
+      xhr.upload.addEventListener('progress', e => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = `${pct}%`;
+          progressLbl.textContent = `Uploading... ${pct}%`;
+        }
+      });
+
+      xhr.onload = () => {
+        if (xhr.status === 0) {
+          reject(new Error('Network error — server unreachable or CORS blocked'));
+          return;
+        }
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (data.error) reject(new Error(data.error));
+          else resolve(data);
+        } catch {
+          reject(new Error(`Unexpected response (HTTP ${xhr.status})`));
+        }
+      };
+
+      xhr.onerror   = () => reject(new Error('Network error — check your API URL and server'));
+      xhr.ontimeout = () => reject(new Error('Upload timed out'));
+      xhr.timeout   = 0;
+      xhr.send(formData);
+    });
+
+    progressBar.style.width = '100%';
+    progressLbl.textContent = 'Upload complete!';
+    setTimeout(() => { progressWrap.style.display = 'none'; }, 1500);
+
+    toast('Loader uploaded successfully!', 'success');
+    clearFileSelection();
+    checkLoaderStatus();
+    refreshAll();
+  } catch (err) {
+    progressWrap.style.display = 'none';
+    toast(err.message || 'Upload failed', 'error');
+  }
+}
+
+function genDownloadLink() {
+  const key  = document.getElementById('dlTestKey').value.trim();
+  const hwid = document.getElementById('dlTestHwid').value.trim();
+  if (!key || !hwid) return toast('Key and HWID are required', 'error');
+  const url  = `${API_BASE}/download?key=${encodeURIComponent(key)}&hwid=${encodeURIComponent(hwid)}`;
+  const box  = document.getElementById('dlLinkResult');
+  const hint = document.getElementById('dlLinkHint');
+  box.style.display  = 'block';
+  hint.style.display = 'block';
+  box.textContent    = url;
+  box._url           = url;
+  toast('Link generated — click to copy', 'info');
+}
+
+function copyDlLink() {
+  const el = document.getElementById('dlLinkResult');
+  if (el._url) { navigator.clipboard.writeText(el._url); toast('Link copied!', 'success'); }
+}
+
+// ─── IP Blacklist ─────────────────────────────────────────────────────────────
+
+async function loadBlacklist() {
+  const data  = await api('/list_blacklist');
+  const tbody = document.getElementById('blacklistTable');
+  const badge = document.getElementById('navBlacklistCount');
+
+  if (!data.blacklist || data.blacklist.length === 0) {
+    tbody.innerHTML     = `<tr><td colspan="3"><div class="empty"><div class="icon">⊘</div>No blacklisted IPs — system is clean</div></td></tr>`;
+    badge.style.display = 'none';
+  } else {
+    badge.textContent   = data.blacklist.length;
+    badge.style.display = '';
+    tbody.innerHTML = data.blacklist.map(entry => `<tr>
+      <td><span style="font-family:'JetBrains Mono',monospace;color:var(--red);font-size:12px;cursor:pointer;"
+                onclick="navigator.clipboard.writeText('${escapeHtml(entry.ip)}');toast('Copied!','info')"
+                title="Click to copy">${escapeHtml(entry.ip)}</span></td>
+      <td style="color:var(--muted);font-size:11px;">${escapeHtml(entry.reason)}</td>
+      <td><div class="actions">
+        <button class="btn btn-sm btn-success" onclick="doUnbanIp('${escapeHtml(entry.ip)}')">Unban</button>
+      </div></td>
+    </tr>`).join('');
+  }
+  if (data.total !== undefined) document.getElementById('st-blacklisted').textContent = data.total;
+}
+
+async function doBanIp() {
+  const ip     = document.getElementById('banIp').value.trim();
+  const reason = document.getElementById('banReason').value.trim() || 'Manual ban';
+  if (!ip) return toast('IP address is required', 'error');
+  const data = await api('/blacklist_ip', 'POST', { ip, reason });
+  if (data.error) return toast(data.error, 'error');
+  toast(`IP ${ip} blacklisted`, 'success');
+  document.getElementById('banIp').value     = '';
+  document.getElementById('banReason').value = 'Manual ban';
+  loadBlacklist(); refreshAll();
+}
+
+async function doUnbanIp(ip) {
+  if (!confirm(`Remove ${ip} from blacklist?`)) return;
+  const data = await api('/unblacklist_ip', 'POST', { ip });
+  if (data.error) return toast(data.error, 'error');
+  toast(`IP ${ip} unbanned`, 'success');
+  loadBlacklist(); refreshAll();
+}
+
+// ─── Fail tracker ─────────────────────────────────────────────────────────────
+
+let _autoBanEnabled   = false;
+let _autoBanThreshold = 10;
+
+function applyAutoBanUI(enabled, threshold) {
+  _autoBanEnabled   = enabled;
+  _autoBanThreshold = threshold;
+
+  const wrap  = document.getElementById('autoBanToggleWrap');
+  const thumb = document.getElementById('autoBanThumb');
+  const label = document.getElementById('autoBanLabel');
+  const tRow  = document.getElementById('thresholdRow');
+
+  if (enabled) {
+    wrap.style.background    = 'var(--green)';
+    thumb.style.transform    = 'translateX(20px)';
+    label.textContent        = 'ON';
+    label.style.color        = 'var(--green)';
+    tRow.style.opacity       = '1';
+    tRow.style.pointerEvents = '';
+  } else {
+    wrap.style.background    = 'var(--border)';
+    thumb.style.transform    = 'translateX(0)';
+    label.textContent        = 'OFF';
+    label.style.color        = 'var(--muted)';
+    tRow.style.opacity       = '0.45';
+    tRow.style.pointerEvents = 'none';
+  }
+  document.getElementById('autoBanThresholdInput').value = threshold;
+}
+
+async function toggleAutoBan() {
+  const newEnabled = !_autoBanEnabled;
+  const data = await api('/set_autoban_config', 'POST', {
+    enabled:   newEnabled ? 'true' : 'false',
+    threshold: _autoBanThreshold
+  });
+  if (data.error) return toast(data.error, 'error');
+  applyAutoBanUI(newEnabled, _autoBanThreshold);
+  toast(`Auto-ban ${newEnabled ? 'enabled' : 'disabled'}`, newEnabled ? 'success' : 'info');
+}
+
+async function saveAutoBanConfig() {
+  const threshold = parseInt(document.getElementById('autoBanThresholdInput').value) || 10;
+  const data = await api('/set_autoban_config', 'POST', {
+    enabled:   _autoBanEnabled ? 'true' : 'false',
+    threshold: threshold
+  });
+  if (data.error) return toast(data.error, 'error');
+  applyAutoBanUI(_autoBanEnabled, threshold);
+  toast(`Threshold set to ${threshold} failures`, 'success');
+}
+
+async function loadFailTracker() {
+  const data  = await api('/list_fail_tracker');
+  const tbody = document.getElementById('failTrackerTable');
+  applyAutoBanUI(data.enabled, data.threshold);
+
+  if (!data.entries || data.entries.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4"><div class="empty"><div class="icon">⚡</div>No failure data</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.entries.map(entry => {
+    const pct  = data.threshold > 0 ? Math.min(100, Math.round((entry.failures / data.threshold) * 100)) : 0;
+    const risk = pct >= 90 ? `<span class="badge badge-red">Critical (${pct}%)</span>`
+               : pct >= 60 ? `<span class="badge badge-orange">High (${pct}%)</span>`
+               : pct >= 30 ? `<span class="badge badge-yellow">Medium (${pct}%)</span>`
+               :              `<span class="badge badge-cyan">Low (${pct}%)</span>`;
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--orange);font-size:12px;">${escapeHtml(entry.ip)}</td>
+      <td style="color:var(--text);font-size:13px;font-weight:600;">${entry.failures}</td>
+      <td>${data.enabled ? risk : '<span class="badge badge-cyan">Auto-ban off</span>'}</td>
+      <td><div class="actions">
+        <button class="btn btn-sm btn-secondary" onclick="doResetFailCount('${escapeHtml(entry.ip)}')">Reset</button>
+        <button class="btn btn-sm btn-danger"    onclick="doBanFromTracker('${escapeHtml(entry.ip)}')">Ban Now</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function doResetFailCount(ip) {
+  const data = await api('/reset_fail_count', 'POST', { ip });
+  if (data.error) return toast(data.error, 'error');
+  toast(`Failure count reset for ${ip}`, 'success');
+  loadFailTracker();
+}
+
+async function doBanFromTracker(ip) {
+  if (!confirm(`Manually blacklist ${ip}?`)) return;
+  const data = await api('/blacklist_ip', 'POST', { ip, reason: 'Manually banned from fail tracker' });
+  if (data.error) return toast(data.error, 'error');
+  toast(`IP ${ip} blacklisted`, 'success');
+  loadBlacklist(); loadFailTracker(); refreshAll();
+}
+
+async function clearFailTracker() {
+  if (!confirm('Clear all failure tracking data?')) return;
+  await api('/clear_fail_tracker', 'POST');
+  toast('Fail tracker cleared', 'success');
+  loadFailTracker();
+}
+
+// ─── Logs ─────────────────────────────────────────────────────────────────────
+
+async function loadLogs() {
+  const data      = await api('/get_logs?limit=200');
+  const container = document.getElementById('logContainer');
+  if (!data.logs || data.logs.length === 0) {
+    container.innerHTML = '<div class="log-line">No logs found.</div>';
+    return;
+  }
+  container.innerHTML = data.logs.reverse().map(line => {
+    const isValid   = line.includes('Valid=True');
+    const isInvalid = line.includes('Valid=False');
+    return `<div class="log-line ${isValid ? 'valid' : isInvalid ? 'invalid' : ''}">${escapeHtml(line)}</div>`;
+  }).join('');
+}
+
+async function clearLogs() {
+  if (!confirm('Clear all logs?')) return;
+  await api('/clear_logs', 'POST');
+  toast('Logs cleared', 'success');
+  loadLogs();
+}
+
+// ─── Accounts ─────────────────────────────────────────────────────────────────
+
+async function createAccount() {
+  const username = document.getElementById('createUsername').value.trim();
+  const password = document.getElementById('createPassword').value.trim();
+  const key      = document.getElementById('createKey').value.trim();
+  if (!username || !password || !key) return toast('All fields are required', 'error');
+  const data = await api('/create_account', 'POST', { username, password, key });
+  if (data.error) return toast(data.error, 'error');
+  toast(`Account @${username} created`, 'success');
+  document.getElementById('createUsername').value = '';
+  document.getElementById('createPassword').value = '';
+  document.getElementById('createKey').value      = '';
+  loadAccounts(); refreshAll();
+}
+
+async function loadAccounts() {
+  const data  = await api('/list_accounts');
+  const tbody = document.getElementById('accountsTable');
+  if (!data.accounts || data.accounts.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty"><div class="icon">👤</div>No accounts found</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.accounts.map(a => {
+    const exp = a.expiration
+      ? `<span class="badge badge-yellow" title="${a.expiration}">${a.expiration.substring(0,10)}</span>`
+      : `<span class="badge badge-purple">Permanent</span>`;
+    const prod = a.product_name
+      ? `<span class="badge badge-pink">${escapeHtml(a.product_name)}</span>`
+      : `<span style="color:var(--muted);font-size:11px;">—</span>`;
+    return `<tr>
+      <td style="color:var(--accent2);font-size:12px;">@${escapeHtml(a.username)}</td>
+      <td><span class="key-val" onclick="navigator.clipboard.writeText('${a.key}');toast('Copied!','info')">${a.key}</span></td>
+      <td>${prod}</td>
+      <td>${exp}</td>
+      <td><div class="actions">
+        <button class="btn btn-sm btn-secondary" onclick="resetAccountHwid('${escapeHtml(a.username)}')">Reset HWID</button>
+        <button class="btn btn-sm btn-danger"    onclick="removeAccount('${escapeHtml(a.username)}')">Remove</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function removeAccount(username) {
+  if (!confirm(`Remove account: @${username}?`)) return;
+  const data = await api('/remove_account', 'POST', { username });
+  if (data.error) return toast(data.error, 'error');
+  toast('Account removed', 'success');
+  loadAccounts(); refreshAll();
+}
+
+async function resetAccountHwid(username) {
+  const data = await api('/reset_account_hwid', 'POST', { username });
+  if (data.error) return toast(data.error, 'error');
+  toast('HWID reset for account', 'success');
+  loadAccounts();
+}
+
+// ─── Generator ────────────────────────────────────────────────────────────────
+
+function makeKey() {
+  const groups = parseInt(document.getElementById('genGroups').value) || 3;
+  const chars  = parseInt(document.getElementById('genChars').value)  || 5;
+  const prefix = (document.getElementById('genPrefix').value.trim() || 'TLINE').toUpperCase();
+  const seg    = () => Array.from({length: chars}, () => SAFE_CHARS[Math.floor(Math.random() * SAFE_CHARS.length)]).join('');
+  return `${prefix}-${Array.from({length: groups}, seg).join('-')}`;
+}
+
+function updateGenPreview() {
+  const el = document.getElementById('genPreview');
+  if (el) el.textContent = makeKey();
+}
+
+function toggleExpiryDuration() {
+  const unit = document.getElementById('genExpiryUnit').value;
+  document.getElementById('genExpiryDurationWrapper').style.display = unit === 'lifetime' ? 'none' : '';
+}
+
+function buildExpiryISO() {
+  return buildExpiryISOFrom('genExpiryUnit', 'genExpiryDuration');
+}
+
+function runGenerator() {
+  const n = Math.min(parseInt(document.getElementById('genQty').value) || 1, 1000);
+  document.getElementById('generatedKeys').value = Array.from({length: n}, makeKey).join('\n');
+  toast(`Generated ${n} key(s)`, 'success');
+}
+
+async function copyGeneratedKeys() {
+  const val = document.getElementById('generatedKeys').value;
+  if (!val) return;
+  await navigator.clipboard.writeText(val);
+  toast('Copied to clipboard!', 'success');
+}
+
+async function addGeneratedToSystem() {
+  const val = document.getElementById('generatedKeys').value.trim();
+  if (!val) return toast('No keys to add', 'error');
+  const exp  = buildExpiryISO();
+  const keys = val.split('\n').map(k => k.trim()).filter(Boolean);
+  let ok = 0, fail = 0;
+  for (const key of keys) {
+    const body = { key };
+    if (exp) body.expiration = exp;
+    const d = await api('/add_key', 'POST', body);
+    d.error ? fail++ : ok++;
+  }
+  toast(`Added ${ok} key(s).${fail ? ` ${fail} failed.` : ''}`, ok ? 'success' : 'error');
+  document.getElementById('generatedKeys').value = '';
+  showTab('keys'); refreshAll();
+}
+
+// ─── Validate ─────────────────────────────────────────────────────────────────
+
+function setValidateMode(mode) {
+  const isKey = mode === 'key';
+  document.getElementById('validateModeKey').style.display     = isKey ? '' : 'none';
+  document.getElementById('validateModeAccount').style.display = isKey ? 'none' : '';
+  document.getElementById('modeKeyBtn').className     = isKey ? 'btn btn-sm' : 'btn btn-sm btn-secondary';
+  document.getElementById('modeAccountBtn').className = isKey ? 'btn btn-sm btn-secondary' : 'btn btn-sm';
+  document.getElementById('validateResult').style.display = 'none';
+}
+
+function showValidateResult(data) {
+  const el = document.getElementById('validateResult');
+  el.style.display = 'block';
+  if (data.valid) {
+    el.innerHTML = `<div style="padding:16px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;font-size:12px;">
+      <div style="color:var(--green);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">✓ Valid</div>
+      <pre style="color:var(--muted);font-size:11px;">${JSON.stringify(data, null, 2)}</pre>
+    </div>`;
+  } else {
+    el.innerHTML = `<div style="padding:16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:12px;">
+      <div style="color:var(--red);font-family:'Syne',sans-serif;font-weight:700;margin-bottom:6px;">✕ Failed</div>
+      <pre style="color:var(--muted);font-size:11px;">${JSON.stringify(data, null, 2)}</pre>
+    </div>`;
+  }
+}
+
+async function doValidateKey() {
+  const key  = document.getElementById('validateKey').value.trim();
+  const hwid = document.getElementById('validateHwid').value.trim();
+  if (!key || !hwid) return toast('Key and HWID required', 'error');
+  const res = await fetch(`${API_BASE}/validate?key=${encodeURIComponent(key)}&hwid=${encodeURIComponent(hwid)}`);
+  showValidateResult(await res.json());
+}
+
+async function doValidateAccount() {
+  const username = document.getElementById('validateUsername').value.trim();
+  const password = document.getElementById('validatePassword').value.trim();
+  const hwid     = document.getElementById('validateAccountHwid').value.trim();
+  if (!username || !password) return toast('Username and password required', 'error');
+  const body = new URLSearchParams({ username, password });
+  if (hwid) body.append('hwid', hwid);
+  const res = await fetch(`${API_BASE}/login`, { method: 'POST', body });
+  showValidateResult(await res.json());
+}
+
+// ─── Util ─────────────────────────────────────────────────────────────────────
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
