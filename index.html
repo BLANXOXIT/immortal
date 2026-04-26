@@ -32,7 +32,6 @@
             justify-content: center;
         }
 
-        /* --- THE PRO BACKGROUND --- */
         #particleCanvas {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -59,7 +58,6 @@
             opacity: 0.04; z-index: 3; pointer-events: none;
         }
 
-        /* --- TOP HEADER TEXT --- */
         .top-system-title {
             position: relative;
             z-index: 10;
@@ -87,7 +85,6 @@
             100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
 
-        /* --- SMOOTH GLASS WIDGETS --- */
         .glass-widget {
             background: var(--glass-bg);
             backdrop-filter: blur(30px) saturate(180%);
@@ -107,7 +104,6 @@
             transform: translateY(-5px);
         }
 
-        /* --- AUTH CARD --- */
         .auth-card {
             max-width: 500px;
             margin: auto;
@@ -173,7 +169,6 @@
             box-shadow: 0 15px 35px var(--accent-glow);
         }
 
-        /* --- DASHBOARD LAYOUT --- */
         .dashboard { display: none; }
         .dash-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; }
 
@@ -302,8 +297,8 @@
 
     <script>
         const API_BASE = 'https://immortal1234.pythonanywhere.com';
-        // --- ADD YOUR DISCORD WEBHOOK URL HERE ---
-        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1497739662914093198/HH2Fg4MRqyBSHNUUPRUUiDiTMCAJruLZ0Prd76UdXDDECZLobQu4E7_q2n0XzixxM2d5'; 
+        // ADD YOUR DISCORD WEBHOOK URL HERE
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/your_webhook_id/your_webhook_token'; 
         
         function getHWID() {
             let id = localStorage.getItem('immortal_hwid');
@@ -318,6 +313,47 @@
         let currentUser = null;
         let activeProducts = [];
         let activationHistory = [];
+
+        // --- LOCAL STORAGE DATA MANAGEMENT (RESTORED) ---
+        function saveUserData() {
+            if (!currentUser) return;
+            localStorage.setItem(`immortal_subs_${currentUser.username}`, JSON.stringify(activeProducts));
+            localStorage.setItem(`immortal_history_${currentUser.username}`, JSON.stringify(activationHistory));
+        }
+
+        function loadUserData() {
+            if (!currentUser) return;
+            const storedSubs = localStorage.getItem(`immortal_subs_${currentUser.username}`);
+            const storedHist = localStorage.getItem(`immortal_history_${currentUser.username}`);
+            activeProducts = storedSubs ? JSON.parse(storedSubs) : [];
+            activationHistory = storedHist ? JSON.parse(storedHist) : [];
+            refreshUI();
+        }
+
+        // --- UI REFRESH LOGIC (RESTORED) ---
+        function refreshUI() {
+            const subsContainer = document.getElementById('subscriptionsList');
+            const downloadBtnDash = document.getElementById('downloadLoaderBtnDash');
+            
+            if (activeProducts.length > 0) {
+                let html = '';
+                activeProducts.forEach(prod => {
+                    html += `<div style="background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--accent); padding: 1.2rem; border-radius: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-family:'JetBrains Mono'; color:#fff; font-size:0.9rem;">${prod.name}</span>
+                                <span style="font-size:0.6rem; background:rgba(0, 242, 255, 0.1); color:var(--accent); padding:4px 10px; border-radius:20px;">LIFETIME</span>
+                            </div>`;
+                });
+                subsContainer.innerHTML = html;
+                downloadBtnDash.disabled = false;
+                downloadBtnDash.style.opacity = "1";
+            } else {
+                subsContainer.innerHTML = `<i class="fas fa-ghost" style="font-size:2.5rem; opacity:0.1; color:var(--accent); margin-bottom:15px;"></i>
+                                           <p style="color:#666; font-size:0.8rem; letter-spacing:1px;">NO EXTERNAL CORES DETECTED</p>`;
+                downloadBtnDash.disabled = true;
+                downloadBtnDash.style.opacity = "0.5";
+            }
+            saveUserData();
+        }
 
         // Avatar Upload Logic
         const avatarTrigger = document.getElementById('avatarUploadTrigger');
@@ -348,9 +384,7 @@
             }
         });
 
-        // ----------------------------------------------------
-        // --- REGISTRATION LOGIC REBUILT (NO HTML ALTERED) ---
-        // ----------------------------------------------------
+        // REGISTRATION
         document.getElementById('doSignupBtn').onclick = async () => {
             const u = document.getElementById('regUsername').value.trim();
             const e = document.getElementById('regEmail').value.trim();
@@ -367,7 +401,7 @@
             fd.append('username', u); 
             fd.append('password', p); 
             fd.append('email', e);
-            fd.append('key', ''); // Fulfills backend requirement
+            fd.append('key', '');
 
             try {
                 const res = await fetch(`${API_BASE}/create_account`, { method: 'POST', body: fd });
@@ -387,9 +421,7 @@
             }
         };
 
-        // ----------------------------------------------------
-        // --- LOGIN LOGIC ---
-        // ----------------------------------------------------
+        // LOGIN
         document.getElementById('doLoginBtn').onclick = async () => {
             const u = document.getElementById('loginUsername').value;
             const p = document.getElementById('loginPassword').value;
@@ -407,31 +439,15 @@
                     document.getElementById('accountUsername').innerText = u;
                     document.getElementById('hwidDisplay').innerText = currentHwid;
                     fetch('https://api.ipify.org?format=json').then(r => r.json()).then(j => document.getElementById('accountIp').innerText = j.ip);
+                    
+                    // LOAD DATA ON SUCCESSFUL LOGIN
+                    loadUserData();
+
                 } else { err.innerText = d.error || "AUTHORIZATION_FAILED"; }
             } catch(e) { err.innerText = "SERVER_OFFLINE"; }
         };
 
-        // ----------------------------------------------------
-        // --- DASHBOARD: LICENSE, DOWNLOAD, HWID LOGIC ---
-        // ----------------------------------------------------
-        function refreshUI() {
-            const subsContainer = document.getElementById('subscriptionsList');
-            const downloadBtnDash = document.getElementById('downloadLoaderBtnDash');
-            
-            if (activeProducts.length > 0) {
-                let html = '';
-                activeProducts.forEach(prod => {
-                    html += `<div style="background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--accent); padding: 1.2rem; border-radius: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-family:'JetBrains Mono'; color:#fff; font-size:0.9rem;">${prod.name}</span>
-                                <span style="font-size:0.6rem; background:rgba(0, 242, 255, 0.1); color:var(--accent); padding:4px 10px; border-radius:20px;">LIFETIME</span>
-                            </div>`;
-                });
-                subsContainer.innerHTML = html;
-                downloadBtnDash.disabled = false;
-                downloadBtnDash.style.opacity = "1";
-            }
-        }
-
+        // REDEEM LICENSE
         document.getElementById('activateKeyBtn').onclick = async () => {
             const key = document.getElementById('licenseKeyInput').value.trim();
             if (!key) { alert("ENTER LICENSE KEY FIRST"); return; }
@@ -444,8 +460,10 @@
                 if (data.valid === true) {
                     let productName = data.product || "Immortal Core";
                     const newSub = { name: productName, tier: "LIFETIME" };
+                    
                     if (!activeProducts.some(p => p.name === productName)) activeProducts.push(newSub);
                     if (!activationHistory.includes(key)) activationHistory.push(key);
+                    
                     refreshUI();
                     document.getElementById('licenseKeyInput').value = "";
                     alert(`ACCESS GRANTED: ${productName}`);
@@ -455,14 +473,14 @@
             } catch(err) { alert("CONNECTION ERROR"); }
         };
 
-        // HWID Webhook Implementation
+        // HWID RESET WEBHOOK
         document.getElementById('requestHwidResetBtn').onclick = async () => {
             const reason = document.getElementById('hwidResetReason').value;
             if (!currentUser) return;
             if (!reason.trim()) { alert("PROVIDE A REASON FOR HWID RESET"); return; }
             
             if (!DISCORD_WEBHOOK_URL.includes("discord.com")) {
-                alert("Please add your Discord Webhook URL inside the code to receive this request.");
+                alert("WEBHOOK NOT CONFIGURED IN CODE. PLEASE ADD URL.");
                 return;
             }
 
@@ -483,6 +501,7 @@
             } catch(e) { alert("WEBHOOK CONNECTION ERROR"); }
         };
 
+        // DOWNLOAD
         document.getElementById('downloadLoaderBtnDash').onclick = () => {
             if (activationHistory.length === 0) return;
             const firstLic = activationHistory[0];
