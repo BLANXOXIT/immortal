@@ -407,14 +407,16 @@
     <div class="glow-overlay"></div>
 
     <div class="main-container">
-        <!-- AUTH CARD - FULLY OPTIONAL LICENSE -->
+        <!-- AUTH CARD - FULLY OPTIONAL LICENSE (fixed structure) -->
         <div id="authPanel" class="auth-card">
             <div class="auth-header">
                 <div class="auth-avatar" id="authAvatarBtn">
                     <img id="avatarImg" class="auth-avatar-inner" src="https://cdn.discordapp.com/attachments/1464691833694064675/1497762093804421171/Use_AI_Image_Apr_23_2026_01_27_35.png" alt="avatar">
                 </div>
-         
-             
+                <div class="image-url-row">
+                    <input type="text" id="avatarUrlInput" class="image-url-input" placeholder="Image URL (jpg/png)">
+                    <button id="setAvatarUrlBtn" class="set-image-btn"><i class="fas fa-link"></i> Set</button>
+                </div>
                 <div class="auth-title">IMMORTAL</div>
                 <div class="auth-sub">AUTHENTICATION CORE • THE STANDARD</div>
             </div>
@@ -515,7 +517,7 @@
     <script>
         // ---------- CONFIG ----------
         const API_BASE = 'https://immortal1234.pythonanywhere.com';
-        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1497739662914093198/HH2Fg4MRqyBSHNUUPRUUiDiTMCAJruLZ0Prd76UdXDDECZLobQu4E7_q2n0XzixxM2d5'; // REPLACE
+        const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1497739662914093198/HH2Fg4MRqyBSHNUUPRUUiDiTMCAJruLZ0Prd76UdXDDECZLobQu4E7_q2n0XzixxM2d5';
 
         function getOrCreateHWID() {
             let hwid = localStorage.getItem('immortal_hwid');
@@ -556,7 +558,7 @@
         const hwidReason = document.getElementById('hwidResetReason');
         const openWebBtn = document.getElementById('openWebMenuBtn');
 
-        // Avatar URL
+        // Avatar URL elements (now exist)
         const avatarImg = document.getElementById('avatarImg');
         const avatarUrlInput = document.getElementById('avatarUrlInput');
         const setAvatarBtn = document.getElementById('setAvatarUrlBtn');
@@ -568,14 +570,18 @@
                 localStorage.setItem('user_avatar_url', url.trim());
             }
         }
-        setAvatarBtn.addEventListener('click', () => {
-            const url = avatarUrlInput.value.trim();
-            if (url) setAvatarFromUrl(url);
-        });
-        authAvatarBtn.addEventListener('click', () => {
-            const newUrl = prompt('Enter image URL for your avatar:');
-            if (newUrl) setAvatarFromUrl(newUrl);
-        });
+        if (setAvatarBtn) {
+            setAvatarBtn.addEventListener('click', () => {
+                const url = avatarUrlInput.value.trim();
+                if (url) setAvatarFromUrl(url);
+            });
+        }
+        if (authAvatarBtn) {
+            authAvatarBtn.addEventListener('click', () => {
+                const newUrl = prompt('Enter image URL for your avatar:');
+                if (newUrl) setAvatarFromUrl(newUrl);
+            });
+        }
         const savedAvatar = localStorage.getItem('user_avatar_url');
         if (savedAvatar) setAvatarFromUrl(savedAvatar);
 
@@ -718,7 +724,7 @@
             const formData = new FormData();
             formData.append('username', username);
             formData.append('password', password);
-            formData.append('key', licenseKey || '');   // empty string = optional
+            formData.append('key', licenseKey || '');
             formData.append('email', email);
             try {
                 const response = await fetch(`${API_BASE}/create_account`, { method: 'POST', body: formData });
@@ -790,7 +796,7 @@
         downloadBtnDash.addEventListener('click', downloadLoader);
         openWebBtn.addEventListener('click', () => alert("Web menu: external panel (simulated)"));
 
-        // Enhanced particle system with more glow
+        // Enhanced particle system
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [], mouseX = 0, mouseY = 0;
@@ -805,7 +811,6 @@
                 baseOpacity: Math.random() * 0.6 + 0.2,
                 pulseSpeed: 0.006 + Math.random() * 0.028,
                 angle: Math.random() * Math.PI * 2,
-                colorHue: 340 + Math.random() * 30
             };
         }
         for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(createParticle());
@@ -833,7 +838,6 @@
                 ctx.arc(p.x, p.y, finalSize * 1.8, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(255, 70, 100, ${finalOpacity * 0.45})`;
                 ctx.fill();
-                // extra glow
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, finalSize * 2.5, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(255, 50, 80, ${finalOpacity * 0.2})`;
