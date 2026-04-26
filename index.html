@@ -26,7 +26,6 @@
             position: relative;
         }
 
-        /* Glow & particles */
         #particleCanvas {
             position: fixed;
             top: 0;
@@ -109,42 +108,6 @@
             border-radius: 50%;
             object-fit: cover;
             background: #1a1e2c;
-        }
-        .image-url-row {
-            display: flex;
-            gap: 0.5rem;
-            margin: 0.8rem 0 1rem 0;
-            background: rgba(0,0,0,0.5);
-            border-radius: 2rem;
-            padding: 0.3rem 0.3rem 0.3rem 1rem;
-            align-items: center;
-            border: 1px solid rgba(255,80,120,0.2);
-        }
-        .image-url-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #ffb7c4;
-            font-size: 0.7rem;
-            outline: none;
-            font-family: monospace;
-        }
-        .image-url-input::placeholder {
-            color: #6a6f8a;
-        }
-        .set-image-btn {
-            background: #ff4d6d30;
-            border: none;
-            padding: 0.3rem 1rem;
-            border-radius: 2rem;
-            color: white;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .set-image-btn:hover {
-            background: #ff4d6d;
-            box-shadow: 0 0 8px #ff4d6d;
         }
         .auth-title {
             font-size: 2rem;
@@ -407,15 +370,11 @@
     <div class="glow-overlay"></div>
 
     <div class="main-container">
-        <!-- AUTH CARD - FULLY OPTIONAL LICENSE (fixed structure) -->
+        <!-- AUTH CARD - NO IMAGE URL BOX, AVATAR CLICKABLE -->
         <div id="authPanel" class="auth-card">
             <div class="auth-header">
                 <div class="auth-avatar" id="authAvatarBtn">
                     <img id="avatarImg" class="auth-avatar-inner" src="https://i.pinimg.com/736x/30/a1/42/30a1424813afff55cfd4f25d4beab31b.jpg" alt="avatar">
-                </div>
-                <div class="image-url-row">
-                    <input type="text" id="avatarUrlInput" class="image-url-input" placeholder="Image URL (jpg/png)">
-                    <button id="setAvatarUrlBtn" class="set-image-btn"><i class="fas fa-link"></i> Set</button>
                 </div>
                 <div class="auth-title">IMMORTAL</div>
                 <div class="auth-sub">AUTHENTICATION CORE • THE STANDARD</div>
@@ -558,10 +517,8 @@
         const hwidReason = document.getElementById('hwidResetReason');
         const openWebBtn = document.getElementById('openWebMenuBtn');
 
-        // Avatar URL elements (now exist)
+        // Avatar (click to set via prompt, no URL input box)
         const avatarImg = document.getElementById('avatarImg');
-        const avatarUrlInput = document.getElementById('avatarUrlInput');
-        const setAvatarBtn = document.getElementById('setAvatarUrlBtn');
         const authAvatarBtn = document.getElementById('authAvatarBtn');
 
         function setAvatarFromUrl(url) {
@@ -569,12 +526,6 @@
                 avatarImg.src = url.trim();
                 localStorage.setItem('user_avatar_url', url.trim());
             }
-        }
-        if (setAvatarBtn) {
-            setAvatarBtn.addEventListener('click', () => {
-                const url = avatarUrlInput.value.trim();
-                if (url) setAvatarFromUrl(url);
-            });
         }
         if (authAvatarBtn) {
             authAvatarBtn.addEventListener('click', () => {
@@ -796,7 +747,7 @@
         downloadBtnDash.addEventListener('click', downloadLoader);
         openWebBtn.addEventListener('click', () => alert("Web menu: external panel (simulated)"));
 
-        // Enhanced particle system
+        // Particle system
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [], mouseX = 0, mouseY = 0;
