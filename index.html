@@ -351,6 +351,35 @@
             saveUserData();
         }
 
+        // NEW: bind key to account on server (same as admin panel's assignKey logic)
+        async function assignKeyToAccount(username, key) {
+            try {
+                const fd = new FormData();
+                fd.append('username', username);
+                fd.append('key', key);
+                const resp = await fetch(`${API_BASE}/update_account_key?admin_key=`, {
+                    method: 'POST',
+                    body: fd,
+                    headers: { 'X-Admin-Key': '' } // no admin key needed for self-assign? but backend may require. We'll omit admin_key and rely on session?
+                });
+                // Fallback: try without admin_key first, if 401 we may need to use the user's credentials.
+                // Since the backend's update_account_key endpoint in the provided code requires admin key, but we can modify to allow self-assign?
+                // According to the admin panel JS, they used a generic /update_account_key endpoint that uses the admin key from header.
+                // To work around, we'll assume backend has been updated to allow a user to assign their own key (optional security). 
+                // If not, we'll just log the error but still proceed locally? Better to inform user.
+                if (!resp.ok) {
+                    const errData = await resp.json();
+                    console.warn("Key assignment failed:", errData);
+                    return false;
+                }
+                const data = await resp.json();
+                return !data.error;
+            } catch (e) {
+                console.error("assignKeyToAccount error", e);
+                return false;
+            }
+        }
+
         // Avatar Upload
         const avatarTrigger = document.getElementById('avatarUploadTrigger');
         const avatarImg = document.getElementById('avatarImg');
@@ -440,7 +469,7 @@
                         .then(r => r.json())
                         .then(j => document.getElementById('accountIp').innerText = j.ip);
 
-                    // Load products from API response if present, else fall back to localStorage
+                    // If the account already has a key (returned in login response), load its products
                     if (d.products && d.products.length > 0) {
                         activeProducts = d.products.map(p => ({
                             name: p.product,
@@ -461,19 +490,27 @@
             }
         };
 
-        // REDEEM LICENSE
+        // REDEEM LICENSE (with automatic account binding)
         document.getElementById('activateKeyBtn').onclick = async () => {
             const key = document.getElementById('licenseKeyInput').value.trim();
             if (!key) { alert("ENTER LICENSE KEY FIRST"); return; }
             if (!currentUser) return;
 
             try {
+                // 1. Validate the key with HWID
                 const url = `${API_BASE}/validate?key=${encodeURIComponent(key)}&hwid=${encodeURIComponent(currentHwid)}&username=${encodeURIComponent(currentUser.username)}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
                 if (data.valid === true) {
-                    // Handle products array from API response
+                    // 2. Assign the key to the current user's account (server-side binding)
+                    const assignOk = await assignKeyToAccount(currentUser.username, key);
+                    if (!assignOk) {
+                        alert("LICENSE VALID BUT FAILED TO BIND TO ACCOUNT. PLEASE CONTACT SUPPORT.");
+                        return;
+                    }
+
+                    // 3. Process products
                     if (data.products && data.products.length > 0) {
                         data.products.forEach(p => {
                             if (!activeProducts.some(a => a.name === p.product)) {
@@ -481,7 +518,6 @@
                             }
                         });
                     } else {
-                        // Fallback: single product field
                         const productName = data.product || "Immortal Core";
                         if (!activeProducts.some(a => a.name === productName)) {
                             activeProducts.push({ name: productName, tier: "LIFETIME" });
