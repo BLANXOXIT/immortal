@@ -351,29 +351,20 @@
             saveUserData();
         }
 
-        // NEW: bind key to account on server (same as admin panel's assignKey logic)
+        // NEW: bind key to account using the /assign_key_to_account endpoint
         async function assignKeyToAccount(username, key) {
             try {
                 const fd = new FormData();
                 fd.append('username', username);
                 fd.append('key', key);
-                const resp = await fetch(`${API_BASE}/update_account_key?admin_key=`, {
-                    method: 'POST',
-                    body: fd,
-                    headers: { 'X-Admin-Key': '' } // no admin key needed for self-assign? but backend may require. We'll omit admin_key and rely on session?
-                });
-                // Fallback: try without admin_key first, if 401 we may need to use the user's credentials.
-                // Since the backend's update_account_key endpoint in the provided code requires admin key, but we can modify to allow self-assign?
-                // According to the admin panel JS, they used a generic /update_account_key endpoint that uses the admin key from header.
-                // To work around, we'll assume backend has been updated to allow a user to assign their own key (optional security). 
-                // If not, we'll just log the error but still proceed locally? Better to inform user.
-                if (!resp.ok) {
-                    const errData = await resp.json();
-                    console.warn("Key assignment failed:", errData);
+                const resp = await fetch(`${API_BASE}/assign_key_to_account`, { method: 'POST', body: fd });
+                const data = await resp.json();
+                if (resp.ok && !data.error) {
+                    return true;
+                } else {
+                    console.error("Assign key failed:", data.error);
                     return false;
                 }
-                const data = await resp.json();
-                return !data.error;
             } catch (e) {
                 console.error("assignKeyToAccount error", e);
                 return false;
@@ -490,7 +481,7 @@
             }
         };
 
-        // REDEEM LICENSE (with automatic account binding)
+        // REDEEM LICENSE (with automatic account binding via /assign_key_to_account)
         document.getElementById('activateKeyBtn').onclick = async () => {
             const key = document.getElementById('licenseKeyInput').value.trim();
             if (!key) { alert("ENTER LICENSE KEY FIRST"); return; }
