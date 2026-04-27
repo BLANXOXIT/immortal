@@ -454,19 +454,17 @@
                         .then(r => r.json())
                         .then(j => document.getElementById('accountIp').innerText = j.ip);
 
-                    // FIRST load from localStorage (preserves previously activated keys)
+                    // Load saved local data FIRST
                     loadUserData();
-                    
-                    // THEN merge server data if available (prevents overwriting)
+
+                    // Merge any server data without overwriting
                     if (d.products && d.products.length > 0) {
-                        // Merge server products into activeProducts (avoid duplicates)
                         d.products.forEach(p => {
                             const exists = activeProducts.some(ap => ap.name === p.product);
                             if (!exists) {
                                 activeProducts.push({ name: p.product, tier: p.product_id });
                             }
                         });
-                        // Also merge keys
                         if (d.keys && d.keys.length > 0) {
                             d.keys.forEach(k => {
                                 if (!activationHistory.includes(k)) activationHistory.push(k);
@@ -526,7 +524,7 @@
             }
         };
 
-        // DOWNLOAD LOADER (robust fetch)
+        // DOWNLOAD LOADER – respects original filename from server
         document.getElementById('downloadLoaderBtnDash').onclick = async () => {
             if (!currentUser) {
                 alert("Not logged in.");
@@ -538,7 +536,7 @@
             }
             const firstLic = activationHistory[0];
             const url = `${API_BASE}/download?key=${encodeURIComponent(firstLic)}&hwid=${encodeURIComponent(currentHwid)}`;
-            
+
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
@@ -546,18 +544,24 @@
                     alert("Download failed: " + (errorData.error || `HTTP ${response.status}`));
                     return;
                 }
+
+                // Extract filename from Content-Disposition header
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'loader'; // fallback
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (match && match[1]) {
+                        filename = match[1].replace(/['"]/g, '');
+                    }
+                } else {
+                    // If no header, try to get from URL? Not possible, so fallback to 'loader.rar' or 'loader.exe' guessing? We'll keep as 'loader'
+                    filename = 'loader';
+                }
+
                 const blob = await response.blob();
                 const downloadUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = downloadUrl;
-                const contentDisposition = response.headers.get('Content-Disposition');
-                let filename = 'loader';
-                if (contentDisposition) {
-                    const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-                    if (match && match[1]) filename = match[1].replace(/['"]/g, '');
-                } else {
-                    filename = firstLic + '.exe';
-                }
                 a.download = filename;
                 document.body.appendChild(a);
                 a.click();
