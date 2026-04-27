@@ -351,7 +351,6 @@
             saveUserData();
         }
 
-        // NEW: bind key to account using the /assign_key_to_account endpoint
         async function assignKeyToAccount(username, key) {
             try {
                 const fd = new FormData();
@@ -460,7 +459,6 @@
                         .then(r => r.json())
                         .then(j => document.getElementById('accountIp').innerText = j.ip);
 
-                    // If the account already has a key (returned in login response), load its products
                     if (d.products && d.products.length > 0) {
                         activeProducts = d.products.map(p => ({
                             name: p.product,
@@ -481,27 +479,24 @@
             }
         };
 
-        // REDEEM LICENSE (with automatic account binding via /assign_key_to_account)
+        // REDEEM LICENSE
         document.getElementById('activateKeyBtn').onclick = async () => {
             const key = document.getElementById('licenseKeyInput').value.trim();
             if (!key) { alert("ENTER LICENSE KEY FIRST"); return; }
             if (!currentUser) return;
 
             try {
-                // 1. Validate the key with HWID
                 const url = `${API_BASE}/validate?key=${encodeURIComponent(key)}&hwid=${encodeURIComponent(currentHwid)}&username=${encodeURIComponent(currentUser.username)}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
                 if (data.valid === true) {
-                    // 2. Assign the key to the current user's account (server-side binding)
                     const assignOk = await assignKeyToAccount(currentUser.username, key);
                     if (!assignOk) {
                         alert("LICENSE VALID BUT FAILED TO BIND TO ACCOUNT. PLEASE CONTACT SUPPORT.");
                         return;
                     }
 
-                    // 3. Process products
                     if (data.products && data.products.length > 0) {
                         data.products.forEach(p => {
                             if (!activeProducts.some(a => a.name === p.product)) {
@@ -525,6 +520,51 @@
                 }
             } catch (err) {
                 alert("CONNECTION ERROR");
+            }
+        };
+
+        // FIXED DOWNLOAD HANDLER with error checking
+        document.getElementById('downloadLoaderBtnDash').onclick = async () => {
+            if (!currentUser) {
+                alert("Not logged in.");
+                return;
+            }
+            if (activationHistory.length === 0 || activeProducts.length === 0) {
+                alert("No active license. Please redeem a key first.");
+                return;
+            }
+            const firstLic = activationHistory[0];
+            const url = `${API_BASE}/download?key=${encodeURIComponent(firstLic)}&hwid=${encodeURIComponent(currentHwid)}`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    // Try to parse error JSON
+                    const errorData = await response.json().catch(() => ({}));
+                    alert("Download failed: " + (errorData.error || `HTTP ${response.status}`));
+                    return;
+                }
+                // If response is OK, it's a file – trigger download
+                const blob = await response.blob();
+                const downloadUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                // Try to get filename from Content-Disposition header
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'loader';
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (match && match[1]) filename = match[1].replace(/['"]/g, '');
+                } else {
+                    filename = firstLic + '.exe';
+                }
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+            } catch (err) {
+                alert("Network error: " + err.message);
             }
         };
 
@@ -560,16 +600,9 @@
             }
         };
 
-        // DOWNLOAD
-        document.getElementById('downloadLoaderBtnDash').onclick = () => {
-            if (activationHistory.length === 0) return;
-            const firstLic = activationHistory[0];
-            window.open(`${API_BASE}/download?key=${encodeURIComponent(firstLic)}&hwid=${encodeURIComponent(currentHwid)}`, '_blank');
-        };
-
         document.getElementById('dashboardLogoutBtn').onclick = () => location.reload();
 
-        // PLEXUS ENGINE
+        // PLEXUS ENGINE (unchanged)
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
         let pts = [];
