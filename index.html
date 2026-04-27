@@ -322,8 +322,8 @@
             if (!currentUser) return;
             const storedSubs = localStorage.getItem(`immortal_subs_${currentUser.username}`);
             const storedHist = localStorage.getItem(`immortal_history_${currentUser.username}`);
-            activeProducts = storedSubs ? JSON.parse(storedSubs) : [];
-            activationHistory = storedHist ? JSON.parse(storedHist) : [];
+            if (storedSubs) activeProducts = JSON.parse(storedSubs);
+            if (storedHist) activationHistory = JSON.parse(storedHist);
             refreshUI();
         }
 
@@ -358,14 +358,9 @@
                 fd.append('key', key);
                 const resp = await fetch(`${API_BASE}/assign_key_to_account`, { method: 'POST', body: fd });
                 const data = await resp.json();
-                if (resp.ok && !data.error) {
-                    return true;
-                } else {
-                    console.error("Assign key failed:", data.error);
-                    return false;
-                }
+                return resp.ok && !data.error;
             } catch (e) {
-                console.error("assignKeyToAccount error", e);
+                console.error(e);
                 return false;
             }
         }
@@ -435,7 +430,7 @@
             }
         };
 
-        // LOGIN
+        // LOGIN with persistence fix
         document.getElementById('doLoginBtn').onclick = async () => {
             const u = document.getElementById('loginUsername').value;
             const p = document.getElementById('loginPassword').value;
@@ -459,17 +454,25 @@
                         .then(r => r.json())
                         .then(j => document.getElementById('accountIp').innerText = j.ip);
 
+                    // FIRST load from localStorage (preserves previously activated keys)
+                    loadUserData();
+                    
+                    // THEN merge server data if available (prevents overwriting)
                     if (d.products && d.products.length > 0) {
-                        activeProducts = d.products.map(p => ({
-                            name: p.product,
-                            tier: p.product_id
-                        }));
-                        if (d.key && !activationHistory.includes(d.key)) {
-                            activationHistory = [d.key];
+                        // Merge server products into activeProducts (avoid duplicates)
+                        d.products.forEach(p => {
+                            const exists = activeProducts.some(ap => ap.name === p.product);
+                            if (!exists) {
+                                activeProducts.push({ name: p.product, tier: p.product_id });
+                            }
+                        });
+                        // Also merge keys
+                        if (d.keys && d.keys.length > 0) {
+                            d.keys.forEach(k => {
+                                if (!activationHistory.includes(k)) activationHistory.push(k);
+                            });
                         }
                         refreshUI();
-                    } else {
-                        loadUserData();
                     }
                 } else {
                     err.innerText = d.error || "AUTHORIZATION_FAILED";
@@ -479,7 +482,7 @@
             }
         };
 
-        // REDEEM LICENSE
+        // REDEEM LICENSE (with auto-binding)
         document.getElementById('activateKeyBtn').onclick = async () => {
             const key = document.getElementById('licenseKeyInput').value.trim();
             if (!key) { alert("ENTER LICENSE KEY FIRST"); return; }
@@ -523,7 +526,7 @@
             }
         };
 
-        // FIXED DOWNLOAD HANDLER with error checking
+        // DOWNLOAD LOADER (robust fetch)
         document.getElementById('downloadLoaderBtnDash').onclick = async () => {
             if (!currentUser) {
                 alert("Not logged in.");
@@ -539,17 +542,14 @@
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
-                    // Try to parse error JSON
                     const errorData = await response.json().catch(() => ({}));
                     alert("Download failed: " + (errorData.error || `HTTP ${response.status}`));
                     return;
                 }
-                // If response is OK, it's a file – trigger download
                 const blob = await response.blob();
                 const downloadUrl = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = downloadUrl;
-                // Try to get filename from Content-Disposition header
                 const contentDisposition = response.headers.get('Content-Disposition');
                 let filename = 'loader';
                 if (contentDisposition) {
@@ -602,7 +602,7 @@
 
         document.getElementById('dashboardLogoutBtn').onclick = () => location.reload();
 
-        // PLEXUS ENGINE (unchanged)
+        // Particle engine
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
         let pts = [];
