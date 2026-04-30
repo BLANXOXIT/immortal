@@ -1,6 +1,6 @@
 // ===== CONFIGURATION =====
 const API_BASE = 'https://immortal1234.pythonanywhere.com';
-const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1497739662914093198/HH2Fg4MRqyBSHNUUPRUUiDiTMCAJruLZ0Prd76UdXDDECZLobQu4E7_q2n0XzixxM2d5';
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1499518465596325918/hPuVIJ-9ikSm4GilR3vltvDcc2f_7UgwrAQCbylH2IISXt9tTEKjB6T6NZNQv0na7Z3d';
 
 // ===== HWID MANAGEMENT =====
 function getHWID() {
@@ -22,6 +22,7 @@ function saveSession() {
     if (!currentUser) return;
     const sessionData = {
         username: currentUser.username,
+        password: currentUser.password,
         products: activeProducts,
         keys: activationHistory,
         timestamp: Date.now()
@@ -41,7 +42,10 @@ function loadSession() {
             return false;
         }
         
-        currentUser = { username: data.username };
+        currentUser = { 
+            username: data.username,
+            password: data.password 
+        };
         activeProducts = data.products || [];
         activationHistory = data.keys || [];
         return true;
@@ -57,31 +61,37 @@ function clearSession() {
     activationHistory = [];
 }
 
-// ===== API KEY VALIDATION =====
-async function checkUserKeysFromAPI(username) {
+// ===== SECURE API - NO ADMIN KEY EXPOSED =====
+async function checkUserKeysFromAPI(username, password) {
     try {
-        const response = await fetch(`${API_BASE}/list_accounts?admin_key=HSkTJvob7LDC6u`);
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('password', password);
+        
+        const response = await fetch(`${API_BASE}/my_keys`, {
+            method: 'POST',
+            body: formData
+        });
+        
         const data = await response.json();
         
-        if (data.accounts) {
-            const userAccount = data.accounts.find(acc => acc.username === username);
-            if (userAccount && userAccount.keys && userAccount.keys.length > 0) {
-                return {
-                    hasKeys: true,
-                    keys: userAccount.keys,
-                    products: userAccount.products || []
-                };
-            }
+        if (data.error) {
+            return { hasKeys: false, keys: [], products: [] };
         }
-        return { hasKeys: false, keys: [], products: [] };
+        
+        return {
+            hasKeys: data.has_keys || false,
+            keys: data.keys ? data.keys.map(k => k.key) : [],
+            products: data.products || []
+        };
     } catch (e) {
         console.error('Error checking user keys:', e);
         return { hasKeys: false, keys: [], products: [] };
     }
 }
 
-async function validateUserLicense(username) {
-    const apiCheck = await checkUserKeysFromAPI(username);
+async function validateUserLicense(username, password) {
+    const apiCheck = await checkUserKeysFromAPI(username, password);
     
     if (apiCheck.hasKeys) {
         activationHistory = apiCheck.keys;
@@ -127,7 +137,7 @@ async function refreshUI() {
     const subsContainer = document.getElementById('subscriptionsList');
     const downloadBtnDash = document.getElementById('downloadLoaderBtnDash');
 
-    const hasLicense = currentUser ? await validateUserLicense(currentUser.username) : false;
+    const hasLicense = currentUser ? await validateUserLicense(currentUser.username, currentUser.password) : false;
 
     if (activeProducts.length > 0) {
         let html = '';
@@ -299,7 +309,10 @@ async function handleLogin() {
         const d = await res.json();
 
         if (d.valid) {
-            currentUser = { username: d.username || u };
+            currentUser = { 
+                username: d.username || u,
+                password: p
+            };
             
             loadUserData();
 
@@ -389,7 +402,7 @@ async function handleDownloadLoader() {
         return;
     }
     
-    const hasLicense = await validateUserLicense(currentUser.username);
+    const hasLicense = await validateUserLicense(currentUser.username, currentUser.password);
     if (!hasLicense) {
         alert("No active license found. Please redeem a key first.");
         return;
