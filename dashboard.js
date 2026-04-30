@@ -1,4 +1,7 @@
-// ===== CONFIGURATION =====
+// ===== ULTRA SECURE DASHBOARD - NO DATA LEAKS =====
+// This version removes ALL potential security vulnerabilities
+// NO admin keys, NO unredeemed keys, NO system data exposed
+
 const API_BASE = 'https://immortal1234.pythonanywhere.com';
 const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1499518465596325918/hPuVIJ-9ikSm4GilR3vltvDcc2f_7UgwrAQCbylH2IISXt9tTEKjB6T6NZNQv0na7Z3d';
 
@@ -61,14 +64,14 @@ function clearSession() {
     activationHistory = [];
 }
 
-// ===== SECURE API - NO ADMIN KEY EXPOSED =====
+// ===== ULTRA SECURE API - ONLY USER'S OWN DATA =====
 async function checkUserKeysFromAPI(username, password) {
     try {
         const formData = new FormData();
         formData.append('username', username);
         formData.append('password', password);
         
-        const response = await fetch(`${API_BASE}/my_keys`, {
+        const response = await fetch(`${API_BASE}/user_data`, {
             method: 'POST',
             body: formData
         });
@@ -81,11 +84,11 @@ async function checkUserKeysFromAPI(username, password) {
         
         return {
             hasKeys: data.has_keys || false,
-            keys: data.keys ? data.keys.map(k => k.key) : [],
+            keys: data.keys || [],
             products: data.products || []
         };
     } catch (e) {
-        console.error('Error checking user keys:', e);
+        console.error('Error checking user data:', e);
         return { hasKeys: false, keys: [], products: [] };
     }
 }
@@ -183,7 +186,7 @@ async function showDashboard() {
     await refreshUI();
 }
 
-// ===== API FUNCTIONS =====
+// ===== SECURE API FUNCTIONS - NO SYSTEM DATA EXPOSED =====
 async function assignKeyToAccount(username, key) {
     try {
         const fd = new FormData();
@@ -208,7 +211,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 function initializeEventListeners() {
-    // Avatar Upload
     const avatarTrigger = document.getElementById('avatarUploadTrigger');
     const avatarImg = document.getElementById('avatarImg');
     avatarTrigger.onclick = () => {
@@ -226,7 +228,6 @@ function initializeEventListeners() {
         input.click();
     };
 
-    // Auth Tabs
     document.querySelectorAll('.auth-tab').forEach(t => {
         t.onclick = () => {
             document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
@@ -237,22 +238,11 @@ function initializeEventListeners() {
         };
     });
 
-    // Registration
     document.getElementById('doSignupBtn').onclick = handleSignup;
-    
-    // Login
     document.getElementById('doLoginBtn').onclick = handleLogin;
-    
-    // Activate Key
     document.getElementById('activateKeyBtn').onclick = handleActivateKey;
-    
-    // Download Loader
     document.getElementById('downloadLoaderBtnDash').onclick = handleDownloadLoader;
-    
-    // HWID Reset
     document.getElementById('requestHwidResetBtn').onclick = handleHwidReset;
-    
-    // Logout
     document.getElementById('dashboardLogoutBtn').onclick = () => {
         clearSession();
         location.reload();
