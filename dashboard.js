@@ -5,17 +5,8 @@
 const API_BASE = 'https://immortal1234.pythonanywhere.com';
 const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1499518465596325918/hPuVIJ-9ikSm4GilR3vltvDcc2f_7UgwrAQCbylH2IISXt9tTEKjB6T6NZNQv0na7Z3d';
 
-// ===== HWID MANAGEMENT =====
-function getHWID() {
-    let id = localStorage.getItem('immortal_hwid');
-    if (!id) {
-        id = 'IMM-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        localStorage.setItem('immortal_hwid', id);
-    }
-    return id;
-}
-
-const currentHwid = getHWID();
+// ===== HWID — set by server after first loader login, never generated locally =====
+let currentHwid = 'NOT REGISTERED';
 let currentUser = null;
 let activeProducts = [];
 let activationHistory = [];
@@ -26,6 +17,7 @@ function saveSession() {
     const sessionData = {
         username: currentUser.username,
         password: currentUser.password,
+        hwid: currentHwid,
         products: activeProducts,
         keys: activationHistory,
         timestamp: Date.now()
@@ -39,16 +31,12 @@ function loadSession() {
     
     try {
         const data = JSON.parse(sessionData);
-        // Session expires after 24 hours
         if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) {
             sessionStorage.removeItem('immortal_session');
             return false;
         }
-        
-        currentUser = { 
-            username: data.username,
-            password: data.password 
-        };
+        currentUser    = { username: data.username, password: data.password };
+        currentHwid    = data.hwid || 'NOT REGISTERED YET';
         activeProducts = data.products || [];
         activationHistory = data.keys || [];
         return true;
@@ -303,6 +291,13 @@ async function handleLogin() {
                 username: d.username || u,
                 password: p
             };
+
+            // Show the HWID that was registered by the loader (read-only, not used for auth)
+            if (d.hwid) {
+                currentHwid = d.hwid;
+            } else {
+                currentHwid = 'NOT REGISTERED YET';
+            }
             
             loadUserData();
 
