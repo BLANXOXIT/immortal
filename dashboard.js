@@ -3,7 +3,7 @@
 // NO admin keys, NO unredeemed keys, NO system data exposed
 
 const API_BASE = 'https://immortal1234.pythonanywhere.com';
-const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1499518465596325918/hPuVIJ-9ikSm4GilR3vltvDcc2f_7UgwrAQCbylH2IISXt9tTEKjB6T6NZNQv0na7Z3d';
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1500885777171873795/L6T19Lmxkw1rMqeXiQW62yminUszkOML5cmP1N9b3eFlaODGWzMniNLTIzE5Ony2RFO_';
 
 // ===== HWID — set by server after first loader login, never generated locally =====
 let currentHwid = 'NOT REGISTERED';
