@@ -3,7 +3,6 @@
 // NO admin keys, NO unredeemed keys, NO system data exposed
 
 const API_BASE = 'https://immortal1234.pythonanywhere.com';
-const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1499518465596325918/hPuVIJ-9ikSm4GilR3vltvDcc2f_7UgwrAQCbylH2IISXt9tTEKjB6T6NZNQv0na7Z3d';
 
 // ===== HWID — set by server after first loader login, never generated locally =====
 let currentHwid = 'NOT REGISTERED';
@@ -439,28 +438,21 @@ async function handleHwidReset() {
         return; 
     }
 
-    if (!DISCORD_WEBHOOK_URL.includes("discord.com")) {
-        alert("WEBHOOK NOT CONFIGURED IN CODE. PLEASE ADD URL.");
-        return;
-    }
-
-    const payload = {
-        content: `**🔁 HWID RESET REQUEST**\n**User:** ${currentUser.username}\n**HWID:** \`${currentHwid}\`\n**Reason:** ${reason}\n**Time:** ${new Date().toISOString()}`
-    };
+    const fd = new FormData();
+    fd.append('username', currentUser.username);
+    fd.append('hwid', currentHwid);
+    fd.append('reason', reason);
 
     try {
-        const res = await fetch(DISCORD_WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
+        const res = await fetch(`${API_BASE}/request_hwid_reset`, { method: 'POST', body: fd });
+        const d = await res.json();
         if (res.ok) {
-            alert("HWID RESET REQUEST SENT TO STAFF.");
+            alert(`RESET REQUEST SUBMITTED. YOUR REQUEST ID: ${d.request_id}\nStaff will review it shortly.`);
             document.getElementById('hwidResetReason').value = "";
         } else {
-            alert("WEBHOOK FAILED TO DELIVER");
+            alert("ERROR: " + (d.error || "Failed to submit request"));
         }
     } catch (e) {
-        alert("WEBHOOK CONNECTION ERROR");
+        alert("CONNECTION ERROR");
     }
 }
