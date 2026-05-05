@@ -1,17 +1,6 @@
 // ===== CONFIGURATION =====
 const API_BASE = 'https://immortal1234.pythonanywhere.com';
 
-// ===== HWID MANAGEMENT =====
-function getHWID() {
-    let id = localStorage.getItem('immortal_hwid');
-    if (!id) {
-        id = 'IMM-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        localStorage.setItem('immortal_hwid', id);
-    }
-    return id;
-}
-
-const currentHwid = getHWID();
 let currentUser = null;
 let activeProducts = [];
 let activationHistory = [];
@@ -171,7 +160,7 @@ async function showDashboard() {
     document.getElementById('authPanel').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('accountUsername').innerText = currentUser.username;
-    document.getElementById('hwidDisplay').innerText = currentHwid;
+    document.getElementById('hwidDisplay').innerText = 'Set on first loader launch';
     
     fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
@@ -301,7 +290,6 @@ async function handleLogin() {
     const fd = new FormData();
     fd.append('username', u);
     fd.append('password', p);
-    fd.append('hwid', currentHwid);
 
     try {
         const res = await fetch(`${API_BASE}/login`, { method: 'POST', body: fd });
@@ -353,7 +341,7 @@ async function handleActivateKey() {
     if (!currentUser) return;
 
     try {
-        const url = `${API_BASE}/validate?key=${encodeURIComponent(key)}&hwid=${encodeURIComponent(currentHwid)}&username=${encodeURIComponent(currentUser.username)}`;
+        const url = `${API_BASE}/validate?key=${encodeURIComponent(key)}&username=${encodeURIComponent(currentUser.username)}`;
         const response = await fetch(url);
         const data = await response.json();
 
@@ -413,7 +401,7 @@ async function handleDownloadLoader() {
     }
     
     const firstLic = activationHistory[0];
-    const url = `${API_BASE}/download?key=${encodeURIComponent(firstLic)}&hwid=${encodeURIComponent(currentHwid)}`;
+    const url = `${API_BASE}/download_web?key=${encodeURIComponent(firstLic)}`;
 
     try {
         const response = await fetch(url);
@@ -460,7 +448,6 @@ async function handleHwidReset() {
     const fd = new FormData();
     fd.append('username', currentUser.username);
     fd.append('password', currentUser.password);
-    fd.append('hwid', currentHwid);
     fd.append('reason', reason);
 
     try {
