@@ -1,11 +1,17 @@
-// ===== ULTRA SECURE DASHBOARD - NO DATA LEAKS =====
-// This version removes ALL potential security vulnerabilities
-// NO admin keys, NO unredeemed keys, NO system data exposed
-
+// ===== CONFIGURATION =====
 const API_BASE = 'https://immortal1234.pythonanywhere.com';
 
-// ===== HWID — set by server after first loader login, never generated locally =====
-let currentHwid = 'NOT REGISTERED';
+// ===== HWID MANAGEMENT =====
+function getHWID() {
+    let id = localStorage.getItem('immortal_hwid');
+    if (!id) {
+        id = 'IMM-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        localStorage.setItem('immortal_hwid', id);
+    }
+    return id;
+}
+
+const currentHwid = getHWID();
 let currentUser = null;
 let activeProducts = [];
 let activationHistory = [];
@@ -16,7 +22,6 @@ function saveSession() {
     const sessionData = {
         username: currentUser.username,
         password: currentUser.password,
-        hwid: currentHwid,
         products: activeProducts,
         keys: activationHistory,
         timestamp: Date.now()
@@ -30,12 +35,16 @@ function loadSession() {
     
     try {
         const data = JSON.parse(sessionData);
+        // Session expires after 24 hours
         if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) {
             sessionStorage.removeItem('immortal_session');
             return false;
         }
-        currentUser    = { username: data.username, password: data.password };
-        currentHwid    = data.hwid || 'NOT REGISTERED YET';
+        
+        currentUser = { 
+            username: data.username,
+            password: data.password 
+        };
         activeProducts = data.products || [];
         activationHistory = data.keys || [];
         return true;
@@ -51,14 +60,14 @@ function clearSession() {
     activationHistory = [];
 }
 
-// ===== ULTRA SECURE API - ONLY USER'S OWN DATA =====
+// ===== SECURE API - NO ADMIN KEY EXPOSED =====
 async function checkUserKeysFromAPI(username, password) {
     try {
         const formData = new FormData();
         formData.append('username', username);
         formData.append('password', password);
         
-        const response = await fetch(`${API_BASE}/user_data`, {
+        const response = await fetch(`${API_BASE}/my_keys`, {
             method: 'POST',
             body: formData
         });
@@ -71,11 +80,11 @@ async function checkUserKeysFromAPI(username, password) {
         
         return {
             hasKeys: data.has_keys || false,
-            keys: data.keys || [],
+            keys: data.keys ? data.keys.map(k => k.key) : [],
             products: data.products || []
         };
     } catch (e) {
-        console.error('Error checking user data:', e);
+        console.error('Error checking user keys:', e);
         return { hasKeys: false, keys: [], products: [] };
     }
 }
@@ -92,7 +101,7 @@ async function validateUserLicense(username, password) {
                 if (!activeProducts.some(ap => ap.name === productName)) {
                     activeProducts.push({ 
                         name: productName, 
-                        tier: p.product_id
+                        tier: p.product_id || 'LIFETIME' 
                     });
                 }
             });
@@ -173,7 +182,7 @@ async function showDashboard() {
     await refreshUI();
 }
 
-// ===== SECURE API FUNCTIONS - NO SYSTEM DATA EXPOSED =====
+// ===== API FUNCTIONS =====
 async function assignKeyToAccount(username, key) {
     try {
         const fd = new FormData();
@@ -198,6 +207,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 function initializeEventListeners() {
+    // Avatar Upload
     const avatarTrigger = document.getElementById('avatarUploadTrigger');
     const avatarImg = document.getElementById('avatarImg');
     avatarTrigger.onclick = () => {
@@ -215,6 +225,7 @@ function initializeEventListeners() {
         input.click();
     };
 
+    // Auth Tabs
     document.querySelectorAll('.auth-tab').forEach(t => {
         t.onclick = () => {
             document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
@@ -225,11 +236,22 @@ function initializeEventListeners() {
         };
     });
 
+    // Registration
     document.getElementById('doSignupBtn').onclick = handleSignup;
+    
+    // Login
     document.getElementById('doLoginBtn').onclick = handleLogin;
+    
+    // Activate Key
     document.getElementById('activateKeyBtn').onclick = handleActivateKey;
+    
+    // Download Loader
     document.getElementById('downloadLoaderBtnDash').onclick = handleDownloadLoader;
+    
+    // HWID Reset
     document.getElementById('requestHwidResetBtn').onclick = handleHwidReset;
+    
+    // Logout
     document.getElementById('dashboardLogoutBtn').onclick = () => {
         clearSession();
         location.reload();
@@ -279,7 +301,7 @@ async function handleLogin() {
     const fd = new FormData();
     fd.append('username', u);
     fd.append('password', p);
-    // Do NOT send a browser-generated HWID — HWID lock is enforced by the loader only
+    fd.append('hwid', currentHwid);
 
     try {
         const res = await fetch(`${API_BASE}/login`, { method: 'POST', body: fd });
@@ -290,9 +312,6 @@ async function handleLogin() {
                 username: d.username || u,
                 password: p
             };
-
-            // Show the HWID that was registered by the loader (read-only, not used for auth)
-            currentHwid = d.hwid || 'NOT REGISTERED YET - Login with loader first';
             
             loadUserData();
 
@@ -303,7 +322,7 @@ async function handleLogin() {
                     if (!exists) {
                         activeProducts.push({ 
                             name: productName, 
-                            tier: p.product_id
+                            tier: p.product_id || 'LIFETIME' 
                         });
                     }
                 });
@@ -351,7 +370,7 @@ async function handleActivateKey() {
                     if (!activeProducts.some(a => a.name === productName)) {
                         activeProducts.push({ 
                             name: productName, 
-                            tier: p.product_id
+                            tier: p.product_id || 'LIFETIME' 
                         });
                     }
                 });
@@ -394,7 +413,7 @@ async function handleDownloadLoader() {
     }
     
     const firstLic = activationHistory[0];
-    const url = `${API_BASE}/download?key=${encodeURIComponent(firstLic)}`;
+    const url = `${API_BASE}/download?key=${encodeURIComponent(firstLic)}&hwid=${encodeURIComponent(currentHwid)}`;
 
     try {
         const response = await fetch(url);
@@ -440,17 +459,21 @@ async function handleHwidReset() {
 
     const fd = new FormData();
     fd.append('username', currentUser.username);
+    fd.append('password', currentUser.password);
     fd.append('hwid', currentHwid);
     fd.append('reason', reason);
 
     try {
-        const res = await fetch(`${API_BASE}/request_hwid_reset`, { method: 'POST', body: fd });
-        const d = await res.json();
+        const res = await fetch(`${API_BASE}/submit_reset_request`, {
+            method: "POST",
+            body: fd
+        });
+        const data = await res.json();
         if (res.ok) {
-            alert(`RESET REQUEST SUBMITTED. YOUR REQUEST ID: ${d.request_id}\nStaff will review it shortly.`);
+            alert("HWID RESET REQUEST SENT TO STAFF.");
             document.getElementById('hwidResetReason').value = "";
         } else {
-            alert("ERROR: " + (d.error || "Failed to submit request"));
+            alert(data.error || "FAILED TO SUBMIT REQUEST");
         }
     } catch (e) {
         alert("CONNECTION ERROR");
