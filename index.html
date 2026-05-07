@@ -831,4 +831,14 @@
                         ctx.lineWidth = 0.5;
                         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
                     }
-               
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+        
+        window.onresize = resize;
+        resize();
+        animate();
+    </script>
+</body>
+</html>
