@@ -235,6 +235,9 @@ function initializeEventListeners() {
             const isL = t.dataset.auth === 'login';
             document.getElementById('loginForm').style.display = isL ? 'block' : 'none';
             document.getElementById('signupForm').style.display = isL ? 'none' : 'block';
+            document.getElementById('verifyPanel').style.display = 'none';
+            document.getElementById('avatarHint').style.display = '';
+            document.querySelectorAll('.auth-tab').forEach(b => b.style.display = '');
         };
     });
 
@@ -262,38 +265,9 @@ function initializeEventListeners() {
 
 // ===== EVENT HANDLERS =====
 async function handleSignup() {
-    const u = document.getElementById('regUsername').value.trim();
-    const e = document.getElementById('regEmail').value.trim();
-    const p = document.getElementById('regPassword').value;
-    const err = document.getElementById('regError');
-
-    if (!u || !e || !p) {
-        err.style.color = "#ff3c3c";
-        err.innerText = "ALL FIELDS ARE REQUIRED";
-        return;
-    }
-
-    const fd = new FormData();
-    fd.append('username', u);
-    fd.append('password', p);
-    fd.append('email', e);
-    fd.append('key', '');
-
-    try {
-        const res = await fetch(`${API_BASE}/create_account`, { method: 'POST', body: fd });
-        const d = await res.json();
-        if (res.ok) {
-            err.style.color = "var(--accent)";
-            err.innerText = "IDENTITY CREATED. PLEASE LOGIN.";
-            setTimeout(() => document.querySelector('[data-auth="login"]').click(), 1500);
-        } else {
-            err.style.color = "#ff3c3c";
-            err.innerText = d.error || "REGISTRATION FAILED";
-        }
-    } catch (error) {
-        err.style.color = "#ff3c3c";
-        err.innerText = "SERVER CONNECTION TIMEOUT";
-    }
+    // Signup is handled by the verification flow in index.html
+    // This just triggers the button click on the verification-aware handler
+    document.getElementById('doSignupBtn').click();
 }
 
 async function handleLogin() {
