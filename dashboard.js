@@ -131,8 +131,8 @@ async function refreshUI() {
         let html = '';
         activeProducts.forEach(prod => {
             html += `<div style="background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--accent); padding: 1.2rem; border-radius: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-family:'JetBrains Mono'; color:#fff; font-size:0.9rem;">${prod.name}</span>
-                        <span style="font-size:0.6rem; background:rgba(0, 242, 255, 0.1); color:var(--accent); padding:4px 10px; border-radius:20px;">${prod.tier || 'LIFETIME'}</span>
+                        <span style="font-family:'JetBrains Mono'; color:#fff; font-size:0.9rem;">${escapeHtml(prod.name)}</span>
+                        <span style="font-size:0.6rem; background:rgba(0, 242, 255, 0.1); color:var(--accent); padding:4px 10px; border-radius:20px;">${escapeHtml(prod.tier || 'LIFETIME')}</span>
                     </div>`;
         });
         subsContainer.innerHTML = html;
@@ -156,29 +156,26 @@ async function refreshUI() {
     saveUserData();
 }
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
 async function showDashboard() {
     document.getElementById('authPanel').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('accountUsername').innerText = currentUser.username;
-    document.getElementById('hwidDisplay').innerText = 'Fetching...';
+    document.getElementById('hwidDisplay').innerHTML = '<span style="color: #888;">HWID is handled by the loader, not stored on server</span>';
 
     fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
         .then(j => document.getElementById('accountIp').innerText = j.ip)
         .catch(() => document.getElementById('accountIp').innerText = 'Unknown');
-
-    // Show the real HWID the loader bound to this account
-    document.getElementById('hwidDisplay').innerText = 'Fetching...';
-    try {
-        const fd = new FormData();
-        fd.append('username', currentUser.username);
-        fd.append('password', currentUser.password);
-        const hwidRes = await fetch(`${API_BASE}/get_my_hwid`, { method: 'POST', body: fd });
-        const hwidData = await hwidRes.json();
-        document.getElementById('hwidDisplay').innerText = hwidData.hwid || 'Set on first loader launch';
-    } catch {
-        document.getElementById('hwidDisplay').innerText = 'Set on first loader launch';
-    }
 
     loadUserData();
     await refreshUI();
@@ -212,20 +209,22 @@ function initializeEventListeners() {
     // Avatar Upload
     const avatarTrigger = document.getElementById('avatarUploadTrigger');
     const avatarImg = document.getElementById('avatarImg');
-    avatarTrigger.onclick = () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => avatarImg.src = ev.target.result;
-                reader.readAsDataURL(file);
-            }
+    if (avatarTrigger) {
+        avatarTrigger.onclick = () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => avatarImg.src = ev.target.result;
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
         };
-        input.click();
-    };
+    }
 
     // Auth Tabs
     document.querySelectorAll('.auth-tab').forEach(t => {
@@ -242,32 +241,40 @@ function initializeEventListeners() {
     });
 
     // Registration
-    document.getElementById('doSignupBtn').onclick = handleSignup;
+    const signupBtn = document.getElementById('doSignupBtn');
+    if (signupBtn) signupBtn.onclick = handleSignup;
     
     // Login
-    document.getElementById('doLoginBtn').onclick = handleLogin;
+    const loginBtn = document.getElementById('doLoginBtn');
+    if (loginBtn) loginBtn.onclick = handleLogin;
     
     // Activate Key
-    document.getElementById('activateKeyBtn').onclick = handleActivateKey;
+    const activateBtn = document.getElementById('activateKeyBtn');
+    if (activateBtn) activateBtn.onclick = handleActivateKey;
     
     // Download Loader
-    document.getElementById('downloadLoaderBtnDash').onclick = handleDownloadLoader;
+    const downloadBtn = document.getElementById('downloadLoaderBtnDash');
+    if (downloadBtn) downloadBtn.onclick = handleDownloadLoader;
     
     // HWID Reset
-    document.getElementById('requestHwidResetBtn').onclick = handleHwidReset;
+    const resetBtn = document.getElementById('requestHwidResetBtn');
+    if (resetBtn) resetBtn.onclick = handleHwidReset;
     
     // Logout
-    document.getElementById('dashboardLogoutBtn').onclick = () => {
-        clearSession();
-        location.reload();
-    };
+    const logoutBtn = document.getElementById('dashboardLogoutBtn');
+    if (logoutBtn) {
+        logoutBtn.onclick = () => {
+            clearSession();
+            location.reload();
+        };
+    }
 }
 
 // ===== EVENT HANDLERS =====
 async function handleSignup() {
     // Signup is handled by the verification flow in index.html
-    // This just triggers the button click on the verification-aware handler
-    document.getElementById('doSignupBtn').click();
+    const signupBtn = document.getElementById('doSignupBtn');
+    if (signupBtn) signupBtn.click();
 }
 
 async function handleLogin() {
@@ -320,24 +327,41 @@ async function handleLogin() {
 }
 
 async function handleActivateKey() {
-    const key = document.getElementById('licenseKeyInput').value.trim();
+    const key = document.getElementById('licenseKeyInput').value.trim().toUpperCase();
     if (!key) { alert("ENTER LICENSE KEY FIRST"); return; }
     if (!currentUser) return;
 
     try {
-        // Send hwid=WEBSITE so old server versions don't reject with "Key or HWID missing"
-        const url = `${API_BASE}/validate?key=${encodeURIComponent(key)}&hwid=WEBSITE&username=${encodeURIComponent(currentUser.username)}`;
+        // First validate the key
+        const url = `${API_BASE}/validate?key=${encodeURIComponent(key)}`;
         const response = await fetch(url);
         const data = await response.json();
 
         if (data.valid === true) {
-            const assignOk = await assignKeyToAccount(currentUser.username, key);
-            if (!assignOk) {
-                alert("LICENSE VALID BUT FAILED TO BIND TO ACCOUNT. PLEASE CONTACT SUPPORT.");
+            // Redeem/consume the key
+            const fd = new FormData();
+            fd.append('username', currentUser.username);
+            fd.append('password', currentUser.password);
+            fd.append('key', key);
+            
+            const redeemRes = await fetch(`${API_BASE}/redeem_key`, { method: 'POST', body: fd });
+            const redeemData = await redeemRes.json();
+            
+            if (!redeemData.valid) {
+                alert(redeemData.error || "FAILED TO REDEEM KEY");
                 return;
             }
+            
+            // Also assign to account for display
+            await assignKeyToAccount(currentUser.username, key);
 
-            if (data.products && data.products.length > 0) {
+            if (redeemData.products && redeemData.products.length > 0) {
+                redeemData.products.forEach(p => {
+                    const productName = p.product_name || p.product;
+                    if (!activeProducts.some(a => a.name === productName))
+                        activeProducts.push({ name: productName, tier: p.product_id || 'LIFETIME' });
+                });
+            } else if (data.products && data.products.length > 0) {
                 data.products.forEach(p => {
                     const productName = p.product_name || p.product;
                     if (!activeProducts.some(a => a.name === productName))
@@ -359,6 +383,7 @@ async function handleActivateKey() {
             alert(data.error || "INVALID KEY");
         }
     } catch (err) {
+        console.error(err);
         alert("CONNECTION ERROR");
     }
 }
@@ -369,14 +394,8 @@ async function handleDownloadLoader() {
         return;
     }
     
-    const hasLicense = await validateUserLicense(currentUser.username, currentUser.password);
-    if (!hasLicense) {
-        alert("No active license found. Please redeem a key first.");
-        return;
-    }
-    
     if (activationHistory.length === 0) {
-        alert("No keys found. Please redeem a license key first.");
+        alert("No active license found. Please redeem a key first.");
         return;
     }
     
@@ -426,7 +445,6 @@ async function handleHwidReset() {
     fd.append('username', currentUser.username);
     fd.append('password', currentUser.password);
     fd.append('reason', reason);
-    fd.append('hwid', 'N/A');  // no HWID system
 
     try {
         const res = await fetch(`${API_BASE}/submit_reset_request`, { method: 'POST', body: fd });
