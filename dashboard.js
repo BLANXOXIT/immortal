@@ -56,7 +56,7 @@ async function checkUserKeysFromAPI(username, password) {
         formData.append('username', username);
         formData.append('password', password);
         
-        const response = await fetch(`${API_BASE}/user_data`, {
+        const response = await fetch(`${API_BASE}/my_keys`, {
             method: 'POST',
             body: formData
         });
@@ -69,8 +69,8 @@ async function checkUserKeysFromAPI(username, password) {
         
         return {
             hasKeys: data.has_keys || false,
-            keys: Array.isArray(data.keys) ? data.keys : [],
-            products: Array.isArray(data.products) ? data.products : []
+            keys: data.keys ? data.keys.map(k => k.key) : [],
+            products: data.products || []
         };
     } catch (e) {
         console.error('Error checking user keys:', e);
@@ -131,8 +131,8 @@ async function refreshUI() {
         let html = '';
         activeProducts.forEach(prod => {
             html += `<div style="background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--accent); padding: 1.2rem; border-radius: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-family:'JetBrains Mono'; color:#fff; font-size:0.9rem;">${escapeHtml(prod.name)}</span>
-                        <span style="font-size:0.6rem; background:rgba(0, 242, 255, 0.1); color:var(--accent); padding:4px 10px; border-radius:20px;">${escapeHtml(prod.tier || 'LIFETIME')}</span>
+                        <span style="font-family:'JetBrains Mono'; color:#fff; font-size:0.9rem;">${prod.name}</span>
+                        <span style="font-size:0.6rem; background:rgba(0, 242, 255, 0.1); color:var(--accent); padding:4px 10px; border-radius:20px;">${prod.tier || 'LIFETIME'}</span>
                     </div>`;
         });
         subsContainer.innerHTML = html;
@@ -156,22 +156,12 @@ async function refreshUI() {
     saveUserData();
 }
 
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
 async function showDashboard() {
     document.getElementById('authPanel').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     document.getElementById('accountUsername').innerText = currentUser.username;
-    document.getElementById('hwidDisplay').innerHTML = '<span style="color: #888;">HWID is handled by the loader, not stored on server</span>';
-
+    document.getElementById('hwidDisplay').innerText = 'Set on first loader launch';
+    
     fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
         .then(j => document.getElementById('accountIp').innerText = j.ip)
@@ -209,22 +199,20 @@ function initializeEventListeners() {
     // Avatar Upload
     const avatarTrigger = document.getElementById('avatarUploadTrigger');
     const avatarImg = document.getElementById('avatarImg');
-    if (avatarTrigger) {
-        avatarTrigger.onclick = () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => avatarImg.src = ev.target.result;
-                    reader.readAsDataURL(file);
-                }
-            };
-            input.click();
+    avatarTrigger.onclick = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => avatarImg.src = ev.target.result;
+                reader.readAsDataURL(file);
+            }
         };
-    }
+        input.click();
+    };
 
     // Auth Tabs
     document.querySelectorAll('.auth-tab').forEach(t => {
@@ -234,47 +222,65 @@ function initializeEventListeners() {
             const isL = t.dataset.auth === 'login';
             document.getElementById('loginForm').style.display = isL ? 'block' : 'none';
             document.getElementById('signupForm').style.display = isL ? 'none' : 'block';
-            document.getElementById('verifyPanel').style.display = 'none';
-            document.getElementById('avatarHint').style.display = '';
-            document.querySelectorAll('.auth-tab').forEach(b => b.style.display = '');
         };
     });
 
     // Registration
-    const signupBtn = document.getElementById('doSignupBtn');
-    if (signupBtn) signupBtn.onclick = handleSignup;
+    document.getElementById('doSignupBtn').onclick = handleSignup;
     
     // Login
-    const loginBtn = document.getElementById('doLoginBtn');
-    if (loginBtn) loginBtn.onclick = handleLogin;
+    document.getElementById('doLoginBtn').onclick = handleLogin;
     
     // Activate Key
-    const activateBtn = document.getElementById('activateKeyBtn');
-    if (activateBtn) activateBtn.onclick = handleActivateKey;
+    document.getElementById('activateKeyBtn').onclick = handleActivateKey;
     
     // Download Loader
-    const downloadBtn = document.getElementById('downloadLoaderBtnDash');
-    if (downloadBtn) downloadBtn.onclick = handleDownloadLoader;
+    document.getElementById('downloadLoaderBtnDash').onclick = handleDownloadLoader;
     
     // HWID Reset
-    const resetBtn = document.getElementById('requestHwidResetBtn');
-    if (resetBtn) resetBtn.onclick = handleHwidReset;
+    document.getElementById('requestHwidResetBtn').onclick = handleHwidReset;
     
     // Logout
-    const logoutBtn = document.getElementById('dashboardLogoutBtn');
-    if (logoutBtn) {
-        logoutBtn.onclick = () => {
-            clearSession();
-            location.reload();
-        };
-    }
+    document.getElementById('dashboardLogoutBtn').onclick = () => {
+        clearSession();
+        location.reload();
+    };
 }
 
 // ===== EVENT HANDLERS =====
 async function handleSignup() {
-    // Signup is handled by the verification flow in index.html
-    const signupBtn = document.getElementById('doSignupBtn');
-    if (signupBtn) signupBtn.click();
+    const u = document.getElementById('regUsername').value.trim();
+    const e = document.getElementById('regEmail').value.trim();
+    const p = document.getElementById('regPassword').value;
+    const err = document.getElementById('regError');
+
+    if (!u || !e || !p) {
+        err.style.color = "#ff3c3c";
+        err.innerText = "ALL FIELDS ARE REQUIRED";
+        return;
+    }
+
+    const fd = new FormData();
+    fd.append('username', u);
+    fd.append('password', p);
+    fd.append('email', e);
+    fd.append('key', '');
+
+    try {
+        const res = await fetch(`${API_BASE}/create_account`, { method: 'POST', body: fd });
+        const d = await res.json();
+        if (res.ok) {
+            err.style.color = "var(--accent)";
+            err.innerText = "IDENTITY CREATED. PLEASE LOGIN.";
+            setTimeout(() => document.querySelector('[data-auth="login"]').click(), 1500);
+        } else {
+            err.style.color = "#ff3c3c";
+            err.innerText = d.error || "REGISTRATION FAILED";
+        }
+    } catch (error) {
+        err.style.color = "#ff3c3c";
+        err.innerText = "SERVER CONNECTION TIMEOUT";
+    }
 }
 
 async function handleLogin() {
@@ -327,50 +333,40 @@ async function handleLogin() {
 }
 
 async function handleActivateKey() {
-    const key = document.getElementById('licenseKeyInput').value.trim().toUpperCase();
-    if (!key) { alert("ENTER LICENSE KEY FIRST"); return; }
+    const key = document.getElementById('licenseKeyInput').value.trim();
+    if (!key) { 
+        alert("ENTER LICENSE KEY FIRST"); 
+        return; 
+    }
     if (!currentUser) return;
 
     try {
-        // First validate the key
-        const url = `${API_BASE}/validate?key=${encodeURIComponent(key)}`;
+        const url = `${API_BASE}/validate?key=${encodeURIComponent(key)}&username=${encodeURIComponent(currentUser.username)}`;
         const response = await fetch(url);
         const data = await response.json();
 
         if (data.valid === true) {
-            // Redeem/consume the key
-            const fd = new FormData();
-            fd.append('username', currentUser.username);
-            fd.append('password', currentUser.password);
-            fd.append('key', key);
-            
-            const redeemRes = await fetch(`${API_BASE}/redeem_key`, { method: 'POST', body: fd });
-            const redeemData = await redeemRes.json();
-            
-            if (!redeemData.valid) {
-                alert(redeemData.error || "FAILED TO REDEEM KEY");
+            const assignOk = await assignKeyToAccount(currentUser.username, key);
+            if (!assignOk) {
+                alert("LICENSE VALID BUT FAILED TO BIND TO ACCOUNT. PLEASE CONTACT SUPPORT.");
                 return;
             }
-            
-            // Also assign to account for display
-            await assignKeyToAccount(currentUser.username, key);
 
-            if (redeemData.products && redeemData.products.length > 0) {
-                redeemData.products.forEach(p => {
-                    const productName = p.product_name || p.product;
-                    if (!activeProducts.some(a => a.name === productName))
-                        activeProducts.push({ name: productName, tier: p.product_id || 'LIFETIME' });
-                });
-            } else if (data.products && data.products.length > 0) {
+            if (data.products && data.products.length > 0) {
                 data.products.forEach(p => {
                     const productName = p.product_name || p.product;
-                    if (!activeProducts.some(a => a.name === productName))
-                        activeProducts.push({ name: productName, tier: p.product_id || 'LIFETIME' });
+                    if (!activeProducts.some(a => a.name === productName)) {
+                        activeProducts.push({ 
+                            name: productName, 
+                            tier: p.product_id || 'LIFETIME' 
+                        });
+                    }
                 });
             } else {
-                const productName = "Immortal Core";
-                if (!activeProducts.some(a => a.name === productName))
+                const productName = data.product || "Immortal Core";
+                if (!activeProducts.some(a => a.name === productName)) {
                     activeProducts.push({ name: productName, tier: "LIFETIME" });
+                }
             }
 
             if (!activationHistory.includes(key)) activationHistory.push(key);
@@ -380,10 +376,9 @@ async function handleActivateKey() {
             document.getElementById('licenseKeyInput').value = "";
             alert(`ACCESS GRANTED: ${activeProducts.map(p => p.name).join(', ')}`);
         } else {
-            alert(data.error || "INVALID KEY");
+            alert(data.error || "INVALID KEY OR HWID MISMATCH");
         }
     } catch (err) {
-        console.error(err);
         alert("CONNECTION ERROR");
     }
 }
@@ -394,8 +389,14 @@ async function handleDownloadLoader() {
         return;
     }
     
-    if (activationHistory.length === 0) {
+    const hasLicense = await validateUserLicense(currentUser.username, currentUser.password);
+    if (!hasLicense) {
         alert("No active license found. Please redeem a key first.");
+        return;
+    }
+    
+    if (activationHistory.length === 0) {
+        alert("No keys found. Please redeem a license key first.");
         return;
     }
     
@@ -437,9 +438,12 @@ async function handleDownloadLoader() {
 }
 
 async function handleHwidReset() {
-    const reason = document.getElementById('hwidResetReason').value.trim();
+    const reason = document.getElementById('hwidResetReason').value;
     if (!currentUser) return;
-    if (!reason) { alert("PROVIDE A REASON FOR YOUR REQUEST"); return; }
+    if (!reason.trim()) { 
+        alert("PROVIDE A REASON FOR HWID RESET"); 
+        return; 
+    }
 
     const fd = new FormData();
     fd.append('username', currentUser.username);
@@ -447,10 +451,13 @@ async function handleHwidReset() {
     fd.append('reason', reason);
 
     try {
-        const res = await fetch(`${API_BASE}/submit_reset_request`, { method: 'POST', body: fd });
+        const res = await fetch(`${API_BASE}/submit_reset_request`, {
+            method: "POST",
+            body: fd
+        });
         const data = await res.json();
-        if (res.ok && !data.error) {
-            alert("REQUEST SENT TO STAFF.");
+        if (res.ok) {
+            alert("HWID RESET REQUEST SENT TO STAFF.");
             document.getElementById('hwidResetReason').value = "";
         } else {
             alert(data.error || "FAILED TO SUBMIT REQUEST");
