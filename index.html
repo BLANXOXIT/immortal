@@ -167,6 +167,10 @@
             transform: scale(1.02);
             box-shadow: 0 15px 35px var(--accent-glow);
         }
+        .btn-fancy:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
         .dashboard { display: none; }
         .dash-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 30px; }
@@ -201,6 +205,30 @@
             font-weight: 800; cursor: pointer; transition: 0.3s;
         }
 
+        .code-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        .code-box {
+            width: 55px;
+            height: 65px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono';
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            color: var(--accent);
+        }
+        .code-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
         @media (max-width: 950px) { .dash-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -225,6 +253,7 @@
                 <button class="auth-tab" data-auth="signup">REGISTER_ID</button>
             </div>
 
+            <!-- LOGIN FORM -->
             <div id="loginForm">
                 <input type="text" id="loginUsername" class="input-glass" placeholder="USERNAME">
                 <input type="password" id="loginPassword" class="input-glass" placeholder="PASSKEY">
@@ -232,44 +261,46 @@
                 <div id="loginError" style="color:#ff3c3c; font-size:0.75rem; margin-top:15px; font-family:'JetBrains Mono'"></div>
             </div>
 
-            <div id="signupForm" style="display:none;">
-                <input type="text" id="regUsername" class="input-glass" placeholder="NEW_USER">
-                <input type="email" id="regEmail" class="input-glass" placeholder="EMAIL_SYNC">
-                <input type="password" id="regPassword" class="input-glass" placeholder="SECURE_PASS">
-                <button id="doSignupBtn" class="btn-fancy">CREATE ACCOUNT</button>
+            <!-- SIGNUP FORM -->
+            <div id="signupForm">
+                <input type="text" id="regUsername" class="input-glass" placeholder="USERNAME">
+                <input type="email" id="regEmail" class="input-glass" placeholder="EMAIL">
+                <input type="password" id="regPassword" class="input-glass" placeholder="PASSWORD">
+                <button id="doSignupBtn" class="btn-fancy">SEND VERIFICATION CODE</button>
                 <div id="regError" style="font-size:0.75rem; margin-top:15px; font-family:'JetBrains Mono'"></div>
             </div>
 
-            <!-- Email verification step (shown after signup) -->
-            <div id="verifyPanel" style="display:none;">
-                <p style="font-size:0.65rem; letter-spacing:4px; color:var(--accent); margin-bottom:8px; font-family:'JetBrains Mono';">EMAIL_VERIFICATION</p>
-                <p style="font-size:0.8rem; color:#888; margin-bottom:25px;" id="verifyEmailHint">Enter the 6-digit code sent to your email</p>
-                <div style="display:flex; justify-content:center; gap:8px; margin-bottom:25px;" id="codeInputs">
-                    <input type="text" maxlength="1" inputmode="numeric" class="code-box input-glass" style="width:52px;height:60px;padding:0;text-align:center;font-size:1.4rem;font-weight:800;border-radius:1rem;margin-bottom:0;">
-                    <input type="text" maxlength="1" inputmode="numeric" class="code-box input-glass" style="width:52px;height:60px;padding:0;text-align:center;font-size:1.4rem;font-weight:800;border-radius:1rem;margin-bottom:0;">
-                    <input type="text" maxlength="1" inputmode="numeric" class="code-box input-glass" style="width:52px;height:60px;padding:0;text-align:center;font-size:1.4rem;font-weight:800;border-radius:1rem;margin-bottom:0;">
-                    <input type="text" maxlength="1" inputmode="numeric" class="code-box input-glass" style="width:52px;height:60px;padding:0;text-align:center;font-size:1.4rem;font-weight:800;border-radius:1rem;margin-bottom:0;">
-                    <input type="text" maxlength="1" inputmode="numeric" class="code-box input-glass" style="width:52px;height:60px;padding:0;text-align:center;font-size:1.4rem;font-weight:800;border-radius:1rem;margin-bottom:0;">
-                    <input type="text" maxlength="1" inputmode="numeric" class="code-box input-glass" style="width:52px;height:60px;padding:0;text-align:center;font-size:1.4rem;font-weight:800;border-radius:1rem;margin-bottom:0;">
+            <!-- VERIFICATION PANEL -->
+            <div id="verifyPanel" style="display: none;">
+                <p style="font-size:0.65rem; letter-spacing:4px; color:var(--accent); margin-bottom:8px; font-family:'JetBrains Mono';">EMAIL VERIFICATION</p>
+                <p style="font-size:0.8rem; color:#888; margin-bottom:15px;" id="verifyEmailHint"></p>
+                <div class="code-boxes" id="codeInputs">
+                    <input type="text" maxlength="1" class="code-box" id="code1">
+                    <input type="text" maxlength="1" class="code-box" id="code2">
+                    <input type="text" maxlength="1" class="code-box" id="code3">
+                    <input type="text" maxlength="1" class="code-box" id="code4">
+                    <input type="text" maxlength="1" class="code-box" id="code5">
+                    <input type="text" maxlength="1" class="code-box" id="code6">
                 </div>
-                <button id="doVerifyBtn" class="btn-fancy" disabled>VERIFY_CODE</button>
+                <button id="doVerifyBtn" class="btn-fancy" disabled>VERIFY & CREATE ACCOUNT</button>
                 <div style="margin-top:15px; font-size:0.7rem; color:#555; font-family:'JetBrains Mono';">
-                    DIDN'T RECEIVE IT?
+                    Didn't receive code?
                     <button id="resendCodeBtn" style="background:none;border:none;color:var(--accent);font-family:'JetBrains Mono';font-size:0.7rem;font-weight:800;cursor:pointer;margin-left:4px;">RESEND</button>
                 </div>
                 <div id="verifyError" style="font-size:0.75rem; margin-top:15px; font-family:'JetBrains Mono'"></div>
             </div>
 
-            <p style="font-size:0.6rem; margin-top:20px; opacity:0.4;" id="avatarHint">CLICK AVATAR TO UPLOAD IDENTITY PHOTO</p>
+            <p style="font-size:0.6rem; margin-top:20px; opacity:0.4;">CLICK AVATAR TO UPLOAD PHOTO</p>
         </div>
 
+        <!-- DASHBOARD -->
         <div id="dashboard" class="dashboard">
             <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:40px; padding:0 20px;">
                 <div>
                     <h1 style="font-size:3.2rem; font-weight:800; letter-spacing:15px; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; color: transparent;">IMMORTAL</h1>
-                    <p style="font-size:0.7rem; letter-spacing:5px; color:#666;">DASHBOARD CONTROL MODULE // v5.0.1</p>
+                    <p style="font-size:0.7rem; letter-spacing:5px; color:#666;">DASHBOARD CONTROL MODULE</p>
                 </div>
-                <button id="dashboardLogoutBtn" class="logout-btn">TERMINATE_SESSION</button>
+                <button id="dashboardLogoutBtn" class="logout-btn">TERMINATE SESSION</button>
             </div>
 
             <div class="dash-grid">
@@ -315,175 +346,489 @@
         </div>
     </div>
 
-    <!-- External JavaScript Files -->
-    <script src="dashboard.js"></script>
-    <script src="particles.js"></script>
-
     <script>
-    // ── Email Verification Flow ──────────────────────────────────────────────
-    const API = 'https://immortal1234.pythonanywhere.com';
-    let pendingSignup = {};
+        const API_BASE = 'https://immortal1234.pythonanywhere.com';
+        
+        // ===== SESSION MANAGEMENT =====
+        let currentUser = null;
+        let activeProducts = [];
+        let activationHistory = [];
+        let pendingSignup = null;
 
-    // Signup → send verification code
-    document.getElementById('doSignupBtn').addEventListener('click', async () => {
-        const username = document.getElementById('regUsername').value.trim();
-        const email    = document.getElementById('regEmail').value.trim();
-        const password = document.getElementById('regPassword').value.trim();
-        const errEl    = document.getElementById('regError');
-
-        if (!username || !email || !password) {
-            errEl.style.color = '#ff3c3c';
-            errEl.textContent = 'ALL FIELDS REQUIRED';
-            return;
+        // ===== DASHBOARD FUNCTIONS =====
+        function saveSession() {
+            if (!currentUser) return;
+            sessionStorage.setItem('immortal_session', JSON.stringify({
+                username: currentUser.username,
+                password: currentUser.password,
+                products: activeProducts,
+                keys: activationHistory,
+                timestamp: Date.now()
+            }));
         }
 
-        const btn = document.getElementById('doSignupBtn');
-        btn.textContent = 'SENDING CODE...';
-        btn.disabled = true;
-        errEl.textContent = '';
+        function loadSession() {
+            const data = sessionStorage.getItem('immortal_session');
+            if (!data) return false;
+            try {
+                const parsed = JSON.parse(data);
+                if (Date.now() - parsed.timestamp > 86400000) {
+                    sessionStorage.removeItem('immortal_session');
+                    return false;
+                }
+                currentUser = { username: parsed.username, password: parsed.password };
+                activeProducts = parsed.products || [];
+                activationHistory = parsed.keys || [];
+                return true;
+            } catch { return false; }
+        }
 
-        try {
-            const res  = await fetch(`${API}/send_verification_email`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `email=${encodeURIComponent(email)}`
-            });
-            const data = await res.json();
+        function clearSession() {
+            sessionStorage.removeItem('immortal_session');
+            currentUser = null;
+            activeProducts = [];
+            activationHistory = [];
+        }
 
-            if (res.ok) {
-                pendingSignup = { username, email, password };
-                document.getElementById('signupForm').style.display = 'none';
-                document.getElementById('verifyPanel').style.display = '';
-                document.getElementById('verifyEmailHint').textContent = `Code sent to ${email}`;
-                document.getElementById('avatarHint').style.display = 'none';
-                document.querySelectorAll('.auth-tab').forEach(t => t.style.display = 'none');
-                document.querySelectorAll('.code-box')[0].focus();
+        function saveUserData() {
+            if (!currentUser) return;
+            localStorage.setItem(`immortal_subs_${currentUser.username}`, JSON.stringify(activeProducts));
+            localStorage.setItem(`immortal_history_${currentUser.username}`, JSON.stringify(activationHistory));
+            saveSession();
+        }
+
+        function loadUserData() {
+            if (!currentUser) return;
+            const subs = localStorage.getItem(`immortal_subs_${currentUser.username}`);
+            const hist = localStorage.getItem(`immortal_history_${currentUser.username}`);
+            if (subs) activeProducts = JSON.parse(subs);
+            if (hist) activationHistory = JSON.parse(hist);
+            refreshUI();
+        }
+
+        function refreshUI() {
+            const subsContainer = document.getElementById('subscriptionsList');
+            const downloadBtn = document.getElementById('downloadLoaderBtnDash');
+            
+            if (activeProducts.length > 0) {
+                subsContainer.innerHTML = activeProducts.map(prod => `
+                    <div style="background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--accent); padding: 1.2rem; border-radius: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-family:'JetBrains Mono'; color:#fff; font-size:0.9rem;">${prod.name}</span>
+                        <span style="font-size:0.6rem; background:rgba(0, 242, 255, 0.1); color:var(--accent); padding:4px 10px; border-radius:20px;">${prod.tier || 'LIFETIME'}</span>
+                    </div>
+                `).join('');
+                downloadBtn.disabled = false;
+                downloadBtn.style.opacity = "1";
             } else {
-                errEl.style.color = '#ff3c3c';
-                errEl.textContent = data.error || 'FAILED TO SEND CODE';
+                subsContainer.innerHTML = `<i class="fas fa-ghost" style="font-size:2.5rem; opacity:0.1; color:var(--accent); margin-bottom:15px;"></i>
+                                           <p style="color:#666; font-size:0.8rem; letter-spacing:1px;">NO EXTERNAL CORES DETECTED</p>`;
+                downloadBtn.disabled = true;
+                downloadBtn.style.opacity = "0.5";
             }
-        } catch {
-            errEl.style.color = '#ff3c3c';
-            errEl.textContent = 'NETWORK ERROR';
+            saveUserData();
         }
 
-        btn.textContent = 'CREATE ACCOUNT';
-        btn.disabled = false;
-    });
+        async function showDashboard() {
+            document.getElementById('authPanel').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('accountUsername').innerText = currentUser.username;
+            document.getElementById('hwidDisplay').innerText = 'Set on first loader launch';
+            
+            fetch('https://api.ipify.org?format=json')
+                .then(r => r.json())
+                .then(j => document.getElementById('accountIp').innerText = j.ip)
+                .catch(() => document.getElementById('accountIp').innerText = 'Unknown');
+            
+            loadUserData();
+        }
 
-    // Code box auto-advance
-    document.querySelectorAll('.code-box').forEach((box, i, boxes) => {
-        box.addEventListener('input', () => {
-            box.value = box.value.replace(/[^0-9]/g, '');
-            if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
-            checkVerifyReady();
-        });
-        box.addEventListener('keydown', e => {
-            if (e.key === 'Backspace' && !box.value && i > 0) {
-                boxes[i - 1].focus();
-                boxes[i - 1].value = '';
-                checkVerifyReady();
+        // ===== AUTH FUNCTIONS =====
+        async function handleLogin() {
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value;
+            const err = document.getElementById('loginError');
+            
+            const fd = new FormData();
+            fd.append('username', u);
+            fd.append('password', p);
+            
+            try {
+                const res = await fetch(`${API_BASE}/login`, { method: 'POST', body: fd });
+                const data = await res.json();
+                
+                if (data.valid) {
+                    currentUser = { username: u, password: p };
+                    await showDashboard();
+                } else {
+                    err.innerText = data.error || "AUTHORIZATION FAILED";
+                }
+            } catch (e) {
+                err.innerText = "SERVER OFFLINE";
             }
-        });
-        box.addEventListener('paste', e => {
-            e.preventDefault();
-            const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-            digits.split('').forEach((d, idx) => { if (boxes[idx]) boxes[idx].value = d; });
-            if (boxes[digits.length - 1]) boxes[digits.length - 1].focus();
-            checkVerifyReady();
-        });
-    });
+        }
 
-    function checkVerifyReady() {
-        const code = [...document.querySelectorAll('.code-box')].map(b => b.value).join('');
-        document.getElementById('doVerifyBtn').disabled = code.length !== 6;
-    }
+        async function assignKeyToAccount(username, key) {
+            try {
+                const fd = new FormData();
+                fd.append('username', username);
+                fd.append('key', key);
+                const res = await fetch(`${API_BASE}/assign_key_to_account`, { method: 'POST', body: fd });
+                const data = await res.json();
+                return res.ok && !data.error;
+            } catch { return false; }
+        }
 
-    function getCode() {
-        return [...document.querySelectorAll('.code-box')].map(b => b.value).join('');
-    }
+        async function handleActivateKey() {
+            const key = document.getElementById('licenseKeyInput').value.trim();
+            if (!key) { alert("ENTER LICENSE KEY FIRST"); return; }
+            if (!currentUser) return;
+            
+            try {
+                const url = `${API_BASE}/validate?key=${encodeURIComponent(key)}&hwid=WEBSITE`;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (data.valid === true) {
+                    const assignOk = await assignKeyToAccount(currentUser.username, key);
+                    if (!assignOk) {
+                        alert("LICENSE VALID BUT FAILED TO BIND TO ACCOUNT");
+                        return;
+                    }
+                    
+                    const productName = (data.products && data.products[0]) ? data.products[0].product || data.products[0].product_name : "Immortal Core";
+                    if (!activeProducts.some(p => p.name === productName))
+                        activeProducts.push({ name: productName, tier: "LIFETIME" });
+                    
+                    if (!activationHistory.includes(key)) activationHistory.push(key);
+                    refreshUI();
+                    document.getElementById('licenseKeyInput').value = "";
+                    alert(`ACCESS GRANTED: ${productName}`);
+                } else {
+                    alert(data.error || "INVALID KEY");
+                }
+            } catch { alert("CONNECTION ERROR"); }
+        }
 
-    // Verify code → create account → login
-    document.getElementById('doVerifyBtn').addEventListener('click', async () => {
-        const code   = getCode();
-        const errEl  = document.getElementById('verifyError');
-        const btn    = document.getElementById('doVerifyBtn');
+        async function handleDownloadLoader() {
+            if (!currentUser) { alert("Not logged in."); return; }
+            if (activationHistory.length === 0) { alert("No active license found."); return; }
+            
+            const key = activationHistory[0];
+            const url = `${API_BASE}/download_web?key=${encodeURIComponent(key)}`;
+            
+            try {
+                const res = await fetch(url);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    alert("Download failed: " + (err.error || `HTTP ${res.status}`));
+                    return;
+                }
+                
+                const blob = await res.blob();
+                const cd = res.headers.get('Content-Disposition');
+                let filename = 'loader.rar';
+                if (cd) {
+                    const match = cd.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (match && match[1]) filename = match[1].replace(/['"]/g, '');
+                }
+                
+                const url2 = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url2;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url2);
+            } catch { alert("Network error"); }
+        }
 
-        btn.textContent = 'VERIFYING...';
-        btn.disabled = true;
-        errEl.textContent = '';
+        async function handleHwidReset() {
+            const reason = document.getElementById('hwidResetReason').value.trim();
+            if (!reason) { alert("PROVIDE A REASON"); return; }
+            
+            const fd = new FormData();
+            fd.append('username', currentUser.username);
+            fd.append('password', currentUser.password);
+            fd.append('reason', reason);
+            
+            try {
+                const res = await fetch(`${API_BASE}/submit_reset_request`, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (res.ok) {
+                    alert("REQUEST SENT TO STAFF");
+                    document.getElementById('hwidResetReason').value = "";
+                } else {
+                    alert(data.error || "FAILED");
+                }
+            } catch { alert("CONNECTION ERROR"); }
+        }
 
-        try {
-            // Step 1: verify the code
-            const vRes  = await fetch(`${API}/verify_email_code`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `email=${encodeURIComponent(pendingSignup.email)}&code=${code}`
-            });
-            const vData = await vRes.json();
+        // ===== VERIFICATION CODE HELPERS =====
+        function getVerificationCode() {
+            let code = '';
+            for (let i = 1; i <= 6; i++) {
+                code += document.getElementById(`code${i}`).value;
+            }
+            return code;
+        }
 
-            if (!vRes.ok) {
-                errEl.style.color = '#ff3c3c';
-                errEl.textContent = vData.error || 'INVALID CODE';
-                btn.textContent = 'VERIFY_CODE';
-                btn.disabled = false;
+        function checkVerifyReady() {
+            let full = true;
+            for (let i = 1; i <= 6; i++) {
+                if (!document.getElementById(`code${i}`).value) full = false;
+            }
+            document.getElementById('doVerifyBtn').disabled = !full;
+        }
+
+        function setupCodeBoxes() {
+            for (let i = 1; i <= 6; i++) {
+                const box = document.getElementById(`code${i}`);
+                box.addEventListener('input', (e) => {
+                    box.value = box.value.replace(/[^0-9]/g, '');
+                    if (box.value && i < 6) document.getElementById(`code${i+1}`).focus();
+                    checkVerifyReady();
+                });
+                box.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !box.value && i > 1) {
+                        document.getElementById(`code${i-1}`).focus();
+                        document.getElementById(`code${i-1}`).value = '';
+                        checkVerifyReady();
+                    }
+                });
+            }
+        }
+
+        // ===== SIGNUP FLOW =====
+        async function startSignup() {
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const err = document.getElementById('regError');
+            
+            if (!username || !email || !password) {
+                err.style.color = '#ff3c3c';
+                err.textContent = 'ALL FIELDS REQUIRED';
                 return;
             }
-
-            // Step 2: create the account
-            const cRes  = await fetch(`${API}/create_account`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `username=${encodeURIComponent(pendingSignup.username)}&password=${encodeURIComponent(pendingSignup.password)}&key=`
-            });
-            const cData = await cRes.json();
-
-            if (!cRes.ok && cRes.status !== 200) {
-                errEl.style.color = '#ff3c3c';
-                errEl.textContent = cData.error || 'ACCOUNT CREATION FAILED';
-                btn.textContent = 'VERIFY_CODE';
-                btn.disabled = false;
-                return;
+            
+            const btn = document.getElementById('doSignupBtn');
+            btn.textContent = 'SENDING CODE...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch(`${API_BASE}/send_verification_email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `email=${encodeURIComponent(email)}`
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    pendingSignup = { username, email, password };
+                    document.getElementById('signupForm').style.display = 'none';
+                    document.getElementById('verifyPanel').style.display = 'block';
+                    document.getElementById('verifyEmailHint').textContent = `Code sent to ${email}`;
+                    document.getElementById('code1').focus();
+                    setupCodeBoxes();
+                    err.textContent = '';
+                } else {
+                    err.style.color = '#ff3c3c';
+                    err.textContent = data.error || 'FAILED TO SEND CODE';
+                }
+            } catch {
+                err.style.color = '#ff3c3c';
+                err.textContent = 'NETWORK ERROR';
             }
-
-            // Step 3: auto-login
-            errEl.style.color = '#00f2ff';
-            errEl.textContent = 'IDENTITY VERIFIED — INITIALIZING...';
-
-            document.getElementById('loginUsername').value = pendingSignup.username;
-            document.getElementById('loginPassword').value = pendingSignup.password;
-            setTimeout(() => document.getElementById('doLoginBtn').click(), 800);
-
-        } catch {
-            errEl.style.color = '#ff3c3c';
-            errEl.textContent = 'NETWORK ERROR';
-            btn.textContent = 'VERIFY_CODE';
+            
+            btn.textContent = 'SEND VERIFICATION CODE';
             btn.disabled = false;
         }
-    });
 
-    // Resend code
-    document.getElementById('resendCodeBtn').addEventListener('click', async () => {
-        const btn   = document.getElementById('resendCodeBtn');
-        const errEl = document.getElementById('verifyError');
-        btn.disabled = true;
-        btn.textContent = 'SENDING...';
-
-        try {
-            const res = await fetch(`${API}/resend_verification_email`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `email=${encodeURIComponent(pendingSignup.email)}`
-            });
-            const data = await res.json();
-            errEl.style.color = res.ok ? '#00f2ff' : '#ff3c3c';
-            errEl.textContent = res.ok ? 'NEW CODE SENT' : (data.error || 'FAILED TO RESEND');
-        } catch {
-            errEl.style.color = '#ff3c3c';
-            errEl.textContent = 'NETWORK ERROR';
+        async function verifyAndCreateAccount() {
+            const code = getVerificationCode();
+            const err = document.getElementById('verifyError');
+            const btn = document.getElementById('doVerifyBtn');
+            
+            if (code.length !== 6) return;
+            
+            btn.textContent = 'VERIFYING...';
+            btn.disabled = true;
+            
+            try {
+                // Verify code
+                const vRes = await fetch(`${API_BASE}/verify_email_code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `email=${encodeURIComponent(pendingSignup.email)}&code=${code}`
+                });
+                const vData = await vRes.json();
+                
+                if (!vRes.ok) {
+                    err.style.color = '#ff3c3c';
+                    err.textContent = vData.error || 'INVALID CODE';
+                    btn.textContent = 'VERIFY & CREATE ACCOUNT';
+                    btn.disabled = false;
+                    return;
+                }
+                
+                // Create account
+                const cRes = await fetch(`${API_BASE}/create_account`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `username=${encodeURIComponent(pendingSignup.username)}&password=${encodeURIComponent(pendingSignup.password)}&key=`
+                });
+                const cData = await cRes.json();
+                
+                if (!cRes.ok) {
+                    err.style.color = '#ff3c3c';
+                    err.textContent = cData.error || 'ACCOUNT CREATION FAILED';
+                    btn.textContent = 'VERIFY & CREATE ACCOUNT';
+                    btn.disabled = false;
+                    return;
+                }
+                
+                // Auto login
+                document.getElementById('loginUsername').value = pendingSignup.username;
+                document.getElementById('loginPassword').value = pendingSignup.password;
+                document.querySelector('[data-auth="login"]').click();
+                handleLogin();
+                
+            } catch {
+                err.style.color = '#ff3c3c';
+                err.textContent = 'NETWORK ERROR';
+                btn.textContent = 'VERIFY & CREATE ACCOUNT';
+                btn.disabled = false;
+            }
         }
 
-        setTimeout(() => { btn.disabled = false; btn.textContent = 'RESEND'; }, 30000);
-    });
-    </script>
-</html>
+        async function resendCode() {
+            if (!pendingSignup) return;
+            const btn = document.getElementById('resendCodeBtn');
+            btn.disabled = true;
+            btn.textContent = 'SENDING...';
+            
+            try {
+                const res = await fetch(`${API_BASE}/resend_verification_email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `email=${encodeURIComponent(pendingSignup.email)}`
+                });
+                const data = await res.json();
+                const err = document.getElementById('verifyError');
+                err.style.color = res.ok ? '#00f2ff' : '#ff3c3c';
+                err.textContent = res.ok ? 'NEW CODE SENT' : (data.error || 'FAILED');
+                
+                // Clear code boxes
+                for (let i = 1; i <= 6; i++) {
+                    document.getElementById(`code${i}`).value = '';
+                }
+                document.getElementById('code1').focus();
+            } catch {
+                document.getElementById('verifyError').style.color = '#ff3c3c';
+                document.getElementById('verifyError').textContent = 'NETWORK ERROR';
+            }
+            
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = 'RESEND';
+            }, 30000);
+        }
+
+        // ===== TAB SWITCHING =====
+        function switchAuthTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const verifyPanel = document.getElementById('verifyPanel');
+            
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                verifyPanel.style.display = 'none';
+                pendingSignup = null;
+            } else {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+                verifyPanel.style.display = 'none';
+                pendingSignup = null;
+            }
+        }
+
+        // ===== INITIALIZATION =====
+        document.querySelectorAll('.auth-tab').forEach(t => {
+            t.onclick = () => {
+                document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+                t.classList.add('active');
+                switchAuthTab(t.dataset.auth);
+            };
+        });
+
+        document.getElementById('doLoginBtn').onclick = handleLogin;
+        document.getElementById('doSignupBtn').onclick = startSignup;
+        document.getElementById('doVerifyBtn').onclick = verifyAndCreateAccount;
+        document.getElementById('resendCodeBtn').onclick = resendCode;
+        document.getElementById('activateKeyBtn').onclick = handleActivateKey;
+        document.getElementById('downloadLoaderBtnDash').onclick = handleDownloadLoader;
+        document.getElementById('requestHwidResetBtn').onclick = handleHwidReset;
+        document.getElementById('dashboardLogoutBtn').onclick = () => { clearSession(); location.reload(); };
+
+        // Avatar upload
+        document.getElementById('avatarUploadTrigger').onclick = () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => document.getElementById('avatarImg').src = ev.target.result;
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        };
+
+        // Check for existing session
+        if (loadSession()) {
+            showDashboard();
+        }
+
+        // Particles
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        
+        class Pt {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+                ctx.fillStyle = '#00f2ff';
+                ctx.beginPath(); ctx.arc(this.x, this.y, 1.2, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        
+        for (let i = 0; i < 95; i++) particles.push(new Pt());
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                p.update();
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = p.x - particles[j].x;
+                    const dy = p.y - particles[j].y;
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d < 140) {
+                        ctx.strokeStyle = `rgba(0, 242, 255, ${0.8 * (1 - d / 140)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke();
+                    }
+               
