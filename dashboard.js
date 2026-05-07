@@ -56,7 +56,7 @@ async function checkUserKeysFromAPI(username, password) {
         formData.append('username', username);
         formData.append('password', password);
         
-        const response = await fetch(`${API_BASE}/my_keys`, {
+        const response = await fetch(`${API_BASE}/user_data`, {
             method: 'POST',
             body: formData
         });
@@ -69,8 +69,8 @@ async function checkUserKeysFromAPI(username, password) {
         
         return {
             hasKeys: data.has_keys || false,
-            keys: data.keys ? data.keys.map(k => k.key) : [],
-            products: data.products || []
+            keys: Array.isArray(data.keys) ? data.keys : [],
+            products: Array.isArray(data.products) ? data.products : []
         };
     } catch (e) {
         console.error('Error checking user keys:', e);
