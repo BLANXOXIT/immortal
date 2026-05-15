@@ -1371,11 +1371,13 @@ async function immCheckKeys(u, p) {
 async function immValidateLicense(u, p) {
   const api = await immCheckKeys(u, p);
   if (api.hasKeys) {
+    // Replace keys with only the active (non-expired) ones from the server
     immKeys = api.keys;
+    immProducts = [];
     (api.products||[]).forEach(p => { const n=p.product_name||p.product_id; if (!immProducts.some(a=>a.name===n)) immProducts.push({name:n, tier:p.product_id||'LIFETIME'}); });
     immSaveSession(); return true;
   }
-  return immKeys.length > 0 && immProducts.length > 0;
+  return false;
 }
 async function immAssignKey(u, key) {
   try {
@@ -1389,12 +1391,13 @@ async function immAssignKey(u, key) {
 async function immRefreshUI() {
   const cont = document.getElementById('immSubsList');
   const dl = document.getElementById('immDownloadBtn');
+  // Always re-validate from server to get fresh active keys/products
   const hasLic = immUser ? await immValidateLicense(immUser.username, immUser.password) : false;
-  if (immProducts.length > 0) {
+  if (hasLic && immProducts.length > 0) {
     cont.innerHTML = immProducts.map(p=>`<div class="imm-sub-item"><span class="imm-sub-name">${p.name}</span><span class="imm-sub-tier">${p.tier||'LIFETIME'}</span></div>`).join('');
-    dl.disabled = !hasLic; dl.style.opacity = hasLic ? '1' : '0.3';
+    dl.disabled = false; dl.style.opacity = '1';
   } else {
-    cont.innerHTML = `<div class="imm-empty"><i class="fas fa-ghost"></i><p>NO EXTERNAL CORES DETECTED</p></div>`;
+    cont.innerHTML = `<div class="imm-empty"><i class="fas fa-ghost"></i><p>NO ACTIVE LICENSE — REDEEM A KEY TO DOWNLOAD</p></div>`;
     dl.disabled = true; dl.style.opacity = '0.3';
   }
   immSaveLocalData();
