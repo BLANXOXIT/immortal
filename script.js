@@ -810,25 +810,23 @@ class ImmortalEngine {
         this.showToast('Validating signature...', 'info');
 
         try {
-            const url = `${this.apiEndpoint}/validate?key=${encodeURIComponent(key)}&hwid=WEBSITE&username=${encodeURIComponent(this.sessionUser.username)}`;
-            const res = await fetch(url);
+            const fd = new FormData();
+            fd.append('username', this.sessionUser.username);
+            fd.append('password', this.sessionUser.password);
+            fd.append('key', key);
+            fd.append('hwid', 'WEBSITE');
+            
+            const res = await fetch(`${this.apiEndpoint}/redeem_key`, { method: 'POST', body: fd });
             const data = await res.json();
             
             if (data.valid === true) {
-                // Bind key to account on backend
-                const bound = await this.bindKeyToAccount(key);
-                if (!bound) {
-                    this.showToast('License valid but account sync failed. Contact support.', 'error');
-                    return;
-                }
-                
                 // Add key to local
                 if (!this.redeemedKeys.includes(key)) this.redeemedKeys.push(key);
                 
                 // Add products
                 const incomingProds = data.products || [];
                 incomingProds.forEach(p => {
-                    const pName = p.product_name || p.product;
+                    const pName = p.product_name || p.product || p;
                     if (!this.subscriptions.some(s => s.name === pName)) {
                         this.subscriptions.push({ name: pName, tier: p.product_id || 'LIFETIME' });
                     }
@@ -848,19 +846,6 @@ class ImmortalEngine {
             }
         } catch (e) {
             this.showToast('Connection handshake failed.', 'error');
-        }
-    }
-
-    async bindKeyToAccount(key) {
-        try {
-            const fd = new FormData();
-            fd.append('username', this.sessionUser.username);
-            fd.append('key', key);
-            const res = await fetch(`${this.apiEndpoint}/assign_key_to_account`, { method: 'POST', body: fd });
-            const data = await res.json();
-            return res.ok && !data.error;
-        } catch (e) {
-            return false;
         }
     }
 
