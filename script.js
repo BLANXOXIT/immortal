@@ -858,7 +858,7 @@ class ImmortalEngine {
         }
 
         this.showToast('Downloading encrypted archive...', 'info');
-        const dlUrl = `${this.apiEndpoint}/download_web?key=${encodeURIComponent(this.redeemedKeys[0])}`;
+        const dlUrl = `${this.apiEndpoint}/download?key=${encodeURIComponent(this.redeemedKeys[0])}&hwid=WEBSITE`;
         
         try {
             const res = await fetch(dlUrl);
