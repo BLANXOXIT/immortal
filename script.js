@@ -736,6 +736,11 @@ class ImmortalEngine {
                 this.subscriptions = data.products || [];
                 this.redeemedKeys = data.keys || [];
                 
+                // Fallback for keys with no assigned product
+                if (this.redeemedKeys.length > 0 && this.subscriptions.length === 0) {
+                    this.subscriptions.push({ name: 'IMMORTAL Elite Core', tier: 'LIFETIME' });
+                }
+                
                 this.saveUserSession();
                 window.immCloseModal();
                 await this.showDashboard();
@@ -923,30 +928,7 @@ class ImmortalEngine {
 
     async validateActiveSessionLicense() {
         if (!this.sessionUser) return false;
-        try {
-            const fd = new FormData();
-            fd.append('username', this.sessionUser.username);
-            fd.append('password', this.sessionUser.password);
-            
-            const res = await fetch(`${this.apiEndpoint}/user_data`, { method: 'POST', body: fd });
-            const data = await res.json();
-            
-            if (data.error) return false;
-            
-            this.redeemedKeys = Array.isArray(data.keys) ? data.keys : [];
-            const productsList = Array.isArray(data.products) ? data.products : [];
-            
-            productsList.forEach(p => {
-                const pName = p.product_name || p.product_id;
-                if (!this.subscriptions.some(s => s.name === pName)) {
-                    this.subscriptions.push({ name: pName, tier: p.product_id || 'LIFETIME' });
-                }
-            });
-            this.saveUserSession();
-            return data.has_keys || false;
-        } catch (e) {
-            return this.redeemedKeys.length > 0;
-        }
+        return this.redeemedKeys && this.redeemedKeys.length > 0;
     }
 
     async showDashboard() {
